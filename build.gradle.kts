@@ -16,18 +16,33 @@ repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    maven {
+        url = uri("http://maven.huygens.knaw.nl/repository")
+    }
+
 }
 
 dependencies {
+    val lsp_version = "0.8.1"
+    compileOnly("javax.servlet:javax.servlet-api:3.1.0")
+    compileOnly("javax.servlet.jsp:javax.servlet.jsp-api:2.3.1")
+
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    // HTTP-RPC: https://github.com/gk-brown/HTTP-RPC
-    implementation("org.httprpc:httprpc-client:6.6.2")
-    implementation("org.httprpc:httprpc-server:6.6.2")
+    // https://github.com/eclipse/lsp4j
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:${lsp_version}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:${lsp_version}")
+//    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.generator:${lsp_version}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:${lsp_version}")
+//    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc.debug:${lsp_version}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lsp_version}")
+
+//    implementation("javax.servlet:javax.servlet-api:4.0.1")
+    implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3")
 
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")

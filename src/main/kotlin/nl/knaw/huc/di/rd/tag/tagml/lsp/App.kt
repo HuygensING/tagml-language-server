@@ -4,6 +4,8 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 class App {
+
+
     val greeting: String
         get() {
             return "Hello world."
@@ -11,5 +13,11 @@ class App {
 }
 
 fun main(args: Array<String>) {
+//    val rpcServer = JsonRpcServer()
+//    val tagmlService = LSPService()
+//    val request = "{}"
+//    var response = rpcServer.handle(request,tagmlService);
+//    println(response)
+
     println(App().greeting)
 }
