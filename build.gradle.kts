@@ -23,7 +23,6 @@ repositories {
 }
 
 dependencies {
-    val lsp_version = "0.8.1"
     compileOnly("javax.servlet:javax.servlet-api:3.1.0")
     compileOnly("javax.servlet.jsp:javax.servlet.jsp-api:2.3.1")
 
@@ -33,13 +32,22 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
+    // Use parsec.
+    implementation("lambdada:parsec:1.0")
+
+    // Use Arrow for fp
+    val arrowVersion = "0.10.2"
+    implementation("io.arrow-kt:arrow-core:${arrowVersion}")
+    implementation("io.arrow-kt:arrow-core-data:${arrowVersion}")
+
     // https://github.com/eclipse/lsp4j
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:${lsp_version}")
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:${lsp_version}")
+    val lspVersion = "0.8.1"
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:${lspVersion}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.generator:${lsp_version}")
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:${lsp_version}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc.debug:${lsp_version}")
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lsp_version}")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lspVersion}")
 
 //    implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3")
