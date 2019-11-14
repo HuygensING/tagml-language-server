@@ -9,7 +9,8 @@ import java.util.concurrent.CompletableFuture
 
 class TAGMLLanguageServer : LanguageServer {
     override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val result = InitializeResult()
+        return CompletableFuture.completedFuture(result)
     }
 
     override fun getWorkspaceService(): WorkspaceService {
@@ -21,12 +22,16 @@ class TAGMLLanguageServer : LanguageServer {
     }
 
     override fun shutdown(): CompletableFuture<Any> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO()
     }
+//    override fun shutdown(): CompletableFuture<Any>? {}
 
+    val exited = CompletableFuture<String>()
     override fun exit() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        exited.complete(null)
     }
-
-
+// https://github.com/eclipse/eclipse.jdt.ls/blob/bff2b303f3e6bae05c2ca9d0f592f38ccb9e6985/org.eclipse.jdt.ls.core/src/org/eclipse/jdt/ls/core/internal/handlers/JDTLanguageServer.java
+    // https://langserver.org/
+    // https://github.com/eclipse/lsp4j/tree/master/documentation
+// https://github.com/LucasBullen/LSP4J_Tutorial
 }

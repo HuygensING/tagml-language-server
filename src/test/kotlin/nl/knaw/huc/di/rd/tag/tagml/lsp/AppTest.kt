@@ -3,7 +3,11 @@
  */
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
+import org.eclipse.lsp4j.MessageParams
+import org.eclipse.lsp4j.MessageType
+import org.eclipse.lsp4j.jsonrpc.Endpoint
 import org.eclipse.lsp4j.launch.LSPLauncher
+import java.util.concurrent.CompletableFuture
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -21,6 +25,23 @@ class AppTest {
         val outputStream = System.out
         val launcher = LSPLauncher.createServerLauncher(server, inputStream, outputStream)
         launcher.startListening()
+        var mp = MessageParams().also { it.message = "Hello World!";it.type = MessageType.Info }
+        val serve = AssertingEndpoint
+    }
+
+    class AssertingEndpoint: Endpoint {
+        companion object{
+            var expectedRequests: LinkedHashMap<String, Pair<Any, Any>>
+                get() = LinkedHashMap<String,Pair<Any,Any>>()
+                set(value) = TODO()
+        }
+        override fun notify(method: String?, parameter: Any?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun request(method: String?, parameter: Any?): CompletableFuture<*> {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
 
     }
 }
