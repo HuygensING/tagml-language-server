@@ -6,6 +6,7 @@ import java.io.PrintStream
 
 
 fun main(args: Array<String>) {
+    println("starting tagml language server...")
     startServer(System.`in`, System.out)
 }
 
@@ -15,6 +16,5 @@ fun startServer(inputStream: InputStream?, out: PrintStream?) {
     val l = LSPLauncher.createServerLauncher(server, inputStream, out)
     val startListening = l.startListening()
     server.setRemoteProxy(l.remoteProxy);
-
 }
 

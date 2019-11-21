@@ -5,25 +5,31 @@ import org.eclipse.lsp4j.services.LanguageClient
 import org.eclipse.lsp4j.services.LanguageServer
 import org.eclipse.lsp4j.services.TextDocumentService
 import org.eclipse.lsp4j.services.WorkspaceService
+import org.slf4j.LoggerFactory
 import java.lang.Boolean.TRUE
 import java.util.concurrent.CompletableFuture
 
 
 class TAGMLLanguageServer : LanguageServer {
 
+    private val logger = LoggerFactory.getLogger(this.javaClass)!!
+
     private val textDocumentService = TAGMLTextDocumentService(this)
     private val workspaceService = TAGMLWorkspaceService()
     var client: LanguageClient? = null
 
     override fun initialize(params: InitializeParams?): CompletableFuture<InitializeResult> {
-        val res = InitializeResult(ServerCapabilities())
-        res.capabilities.setCodeActionProvider(TRUE)
-        res.capabilities.completionProvider = CompletionOptions()
-        res.capabilities.definitionProvider = TRUE
-        res.capabilities.hoverProvider = TRUE
-        res.capabilities.referencesProvider = TRUE
-        res.capabilities.setTextDocumentSync(TextDocumentSyncKind.Full)
-        res.capabilities.documentSymbolProvider = TRUE
+        logger.info("initialize($params)")
+        val serverCapabilities = ServerCapabilities().also {
+            it.setCodeActionProvider(TRUE)
+            it.completionProvider = CompletionOptions()
+            it.definitionProvider = TRUE
+            it.hoverProvider = TRUE
+            it.referencesProvider = TRUE
+            it.setTextDocumentSync(TextDocumentSyncKind.Full)
+            it.documentSymbolProvider = TRUE
+        }
+        val res = InitializeResult(serverCapabilities)
 
         return CompletableFuture.supplyAsync { res }
     }
@@ -37,7 +43,7 @@ class TAGMLLanguageServer : LanguageServer {
     }
 
     override fun shutdown(): CompletableFuture<Any> {
-        return CompletableFuture.supplyAsync<Boolean> { TRUE } as CompletableFuture<Any>
+        return CompletableFuture.supplyAsync { TRUE }
     }
 
     //    val exited = CompletableFuture<String>()
