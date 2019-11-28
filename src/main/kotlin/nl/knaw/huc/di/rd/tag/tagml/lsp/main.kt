@@ -10,11 +10,13 @@ fun main(args: Array<String>) {
     startServer(System.`in`, System.out)
 }
 
-fun startServer(inputStream: InputStream?, out: PrintStream?) {
+fun startServer(inputStream: InputStream, out: PrintStream) {
 //    https://github.com/LucasBullen/LSP4J_Tutorial/blob/master/Exercises/1/1-README.md
     val server = TAGMLLanguageServer()
     val l = LSPLauncher.createServerLauncher(server, inputStream, out)
     val startListening = l.startListening()
-    server.setRemoteProxy(l.remoteProxy);
+    server.connect(l.remoteProxy);
 }
 
+// add schemalocation setting to tagml to enhance the autocomplete
+// https://github.com/angelozerr/lsp4xml
