@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 class DocumentLinkTest : RequestTest() {
     private val LOG = LoggerFactory.getLogger(this::class.java)
 
-
     @Test
     fun testDocumentLinkTest() {
         val tagml = "[tagml>Hello World<tagml]"
