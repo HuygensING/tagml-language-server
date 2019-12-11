@@ -66,13 +66,16 @@ dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lspVersion}")
 
 //    implementation("javax.servlet:javax.servlet-api:4.0.1")
-    implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3")
+//    implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3")
+    implementation("org.slf4j:slf4j-api:1.8.0-beta4")
 
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.assertj:assertj-core:3.12.2")
+
 }
 
 tasks {
