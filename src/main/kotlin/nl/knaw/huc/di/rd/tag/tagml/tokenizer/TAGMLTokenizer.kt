@@ -8,19 +8,9 @@ import java.net.URL
 
 object TAGMLTokenizer {
 
-    private fun <A> Pair<A?, List<A>>.flatten(): List<A> {
-        return (if (first != null) {
-            mutableListOf(first!!)
-        } else {
-            mutableListOf()
-        }).also {
-            it.addAll(second)
-        }.toList()
-    }
-
     private val specialChar = charIn("""[]<>\""")
 
-    private val url = ((string("http://") or string("https://") or string("file://")) then (charIn(CharRange('a', 'z')) or charIn("/.")).rep).map { it.flatten() }
+    private val url = ((string("http://") or string("https://") or string("file://")) then (charIn(CharRange('a', 'z')) or charIn("/.")).rep).map { listOfNotNull(it.first) + it.second }
 
     private val escapedSpecialChar = (char('\\') then specialChar)
             .map { "${it.first}${it.second}" }
@@ -42,17 +32,15 @@ object TAGMLTokenizer {
             .map { TextToken(it.joinToString(separator = "")) }
 
     val tagmlParser = (schemaLocation.opt then (startTag or text or endTag).rep thenLeft eos())
-            .map { it.flatten() }
+            .map { listOfNotNull(it.first) + it.second }
 
     fun tokenize(tagml: String): Either<Response.Reject<Char, List<TAGMLToken>>, List<TAGMLToken>> {
         val tagmlReader = Reader.string(tagml)
-
-        val result = tagmlParser(tagmlReader)
+        return tagmlParser(tagmlReader)
                 .fold(
                         { Either.Right(it.value) },
                         { Either.Left(it) }
                 )
-        return result
     }
 
 }
