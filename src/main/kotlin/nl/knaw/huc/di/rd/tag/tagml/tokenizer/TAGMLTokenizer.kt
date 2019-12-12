@@ -8,10 +8,14 @@ import java.net.URL
 
 object TAGMLTokenizer {
 
-    private fun <A> Pair<A, List<A>>.flatten(): List<A> {
-        val l = mutableListOf<A>(this.first).apply {}
-        l.addAll(this.second)
-        return l.toList()
+    private fun <A> Pair<A?, List<A>>.flatten(): List<A> {
+        return (if (first != null) {
+            mutableListOf(first!!)
+        } else {
+            mutableListOf()
+        }).also {
+            it.addAll(second)
+        }.toList()
     }
 
     private val specialChar = charIn("""[]<>\""")
@@ -24,10 +28,11 @@ object TAGMLTokenizer {
     private val tagName = charIn(CharRange('a', 'z')).rep
             .map { it.charsToString() }
 
-    private val schemaLocation = (string("[!schema ") thenRight url thenLeft char(']'))
+    // use `try` because schemaLocation and startTag both start with '['
+    private val schemaLocation = `try`(string("[!schema ") thenRight url thenLeft char(']'))
             .map { SchemaLocationToken(URL(it.toList().joinToString(separator = ""))) }
 
-    private val startTag = (char('[') thenRight tagName thenLeft char('>'))
+    private val startTag = `try`(char('[') thenRight tagName thenLeft char('>'))
             .map { StartTagToken(it) }
 
     private val endTag = (char('<') thenRight tagName thenLeft char(']'))
@@ -36,17 +41,18 @@ object TAGMLTokenizer {
     private val text = (not(specialChar).map { it.toString() } or escapedSpecialChar).rep
             .map { TextToken(it.joinToString(separator = "")) }
 
-    val tagmlParser = (schemaLocation.opt then (startTag or text or endTag).rep thenLeft eos()).map { it.flatten() }
+    val tagmlParser = (schemaLocation.opt then (startTag or text or endTag).rep thenLeft eos())
+            .map { it.flatten() }
 
     fun tokenize(tagml: String): Either<Response.Reject<Char, List<TAGMLToken>>, List<TAGMLToken>> {
         val tagmlReader = Reader.string(tagml)
-        return tagmlParser(tagmlReader)
-                .fold(
-                        { Either.right(it.value) },
-                        { Either.left(it) }
-                )
-    }
 
-//    fun tokenize(tagml:/\ String) = println(tagml)
+        val result = tagmlParser(tagmlReader)
+                .fold(
+                        { Either.Right(it.value) },
+                        { Either.Left(it) }
+                )
+        return result
+    }
 
 }
