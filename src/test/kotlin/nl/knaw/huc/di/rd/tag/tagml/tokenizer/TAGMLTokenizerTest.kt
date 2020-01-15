@@ -44,6 +44,24 @@ class TAGMLTokenizerTest() {
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
 
+    @Test
+    fun tokenizeTest3() {
+        val tagml = "[tag>[part1>Cookie Monster [part2>likes<part1] cookies<part2]<tag]"
+
+        val startTag = StartTagToken("tag")
+        val startPart1 = StartTagToken("part1")
+        val startPart2 = StartTagToken("part2")
+        val textCookieMonster = TextToken("Cookie Monster ")
+        val textLikes = TextToken("likes")
+        val textCookies = TextToken(" cookies")
+        val endTag = EndTagToken("tag")
+        val endPart1 = EndTagToken("part1")
+        val endPart2 = EndTagToken("part2")
+        val expectedTokens = listOf(startTag, startPart1, textCookieMonster, startPart2, textLikes, endPart1, textCookies, endPart2, endTag)
+
+        assertTokenizingSucceeds(tagml, expectedTokens)
+    }
+
     private fun assertTokenizingSucceeds(tagml: String, expectedTokens: List<TAGMLToken>) {
         when (val result = tokenize(tagml).also { print(it) }) {
             is Either.Left -> fail("Parsing failed: ${result.a}")

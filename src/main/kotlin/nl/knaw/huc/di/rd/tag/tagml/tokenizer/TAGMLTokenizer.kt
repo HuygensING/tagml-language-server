@@ -15,8 +15,10 @@ object TAGMLTokenizer {
     private val escapedSpecialChar = (char('\\') then specialChar)
             .map { "${it.first}${it.second}" }
 
-    private val tagName = charIn(CharRange('a', 'z')).rep
-            .map { it.charsToString() }
+    private val tagName = (
+            charIn(CharRange('a', 'z')) then
+                    charIn("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_").rep
+            ).map { (listOfNotNull(it.first) + it.second).charsToString() }
 
     // use `try` because schemaLocation and startTag both start with '['
     private val schemaLocation = `try`(string("[!schema ") thenRight url thenLeft char(']'))
