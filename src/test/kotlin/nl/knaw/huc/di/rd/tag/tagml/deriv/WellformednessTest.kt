@@ -66,4 +66,12 @@ class WellformednessTest() {
         return true
     }
 
+//    De validatie in creole is altijd op basis van een schema.
+//    Voor dit isssue willen we derivatives gebruiken om well-formedness te checken.
+//    Ik zoek in de creole code naar een manier om een algemeen schema te maken die alleen de well-formedness van een lmnl tekst valideert.
+//    Daar moet in  ieder geval een Range in zitten, die open en close tags verbind.
+//    Het Range Pattern heeft 2 properties:
+//    - een NameClass voor de tagName, hiervoor is een optie AnyName, waardoor ranges kunt matchen zonder van te voren te weten welke tagnames er zijn.
+//    - een child Pattern. Door deze hierarchische vorm lijkt het me niet mogelijk om een creole schema te maken die zonder voorwaarde voor de tagnames alleen op well-formednes checkt.
+
 }
