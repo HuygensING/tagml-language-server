@@ -4,6 +4,7 @@ import arrow.core.Either
 import lambdada.parsec.extension.charsToString
 import lambdada.parsec.io.Reader
 import lambdada.parsec.parser.*
+import nl.knaw.huc.di.rd.parsec.ort
 import java.net.URL
 
 object TAGMLTokenizer {
@@ -12,7 +13,7 @@ object TAGMLTokenizer {
 
     private val whitespace = charIn(""" \n\t""").optrep
 
-    private val url = ((string("http://") or string("https://") or string("file://")) then (charIn(CharRange('a', 'z')) or charIn("/.")).rep).map { listOfNotNull(it.first) + it.second }
+    private val url = ((string("http://") ort string("https://") or string("file://")) then (charIn(CharRange('a', 'z')) or charIn("/.")).rep).map { listOfNotNull(it.first) + it.second }
 
     private val escapedSpecialChar = (char('\\') then specialChar)
             .map { "${it.first}${it.second}" }
@@ -30,10 +31,10 @@ object TAGMLTokenizer {
     private val schemaLocation = `try`(string("[!schema ") thenRight url thenLeft char(']'))
             .map { SchemaLocationToken(URL(it.toList().joinToString(separator = ""))) }
 
-    private val namespaceDefinition = `try`(string("[!ns ") then whitespace thenRight namespaceIdentifier then whitespace then url thenLeft char(']'))
+    private val namespaceDefinition = (string("[!ns ") then whitespace thenRight namespaceIdentifier then whitespace then url thenLeft char(']'))
             .map { NameSpaceIdentifierToken(it.first.first, URL(it.second.toList().joinToString(separator = ""))) }
 
-    private val startTag = `try`(char('[') thenRight tagName thenLeft char('>'))
+    private val startTag = (char('[') thenRight tagName thenLeft char('>'))
             .map { StartTagToken(it) }
 
     val endTag = (char('<') thenRight tagName thenLeft char(']'))
@@ -47,7 +48,7 @@ object TAGMLTokenizer {
     private val endTextVariation = string("|>").map { EndTextVariationToken() }
 
     val tagmlParser = (schemaLocation.opt then
-            (`try`(startTag) or `try`(text) or `try`(endTag) or `try`(startTextVariation) or `try`(endTextVariation) or `try`(textVariationSeparator)).rep
+            (startTag ort text ort endTag ort startTextVariation ort endTextVariation ort textVariationSeparator).rep
             thenLeft eos())
             .map { listOfNotNull(it.first) + it.second }
 

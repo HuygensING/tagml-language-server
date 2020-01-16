@@ -3,8 +3,7 @@ package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 import arrow.core.Either
 import lambdada.parsec.io.Reader
 import lambdada.parsec.parser.Response
-import lambdada.parsec.parser.`try`
-import lambdada.parsec.parser.or
+import nl.knaw.huc.di.rd.parsec.ort
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.endTag
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.startTextVariation
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
@@ -15,7 +14,7 @@ import java.net.URL
 
 class TAGMLTokenizerTest() {
 
-//    @Test
+    //    @Test
     fun testNameSpaceDefinition() {
         val tagml = "[!ns ns1 http://example.org/namespace/ns1][hello>World!<hello]"
 
@@ -99,9 +98,8 @@ class TAGMLTokenizerTest() {
     fun tokenizeTest6() {
         val tagml = "<|"
         val tagmlReader = Reader.string(tagml)
-        val p = `try`(endTag) or startTextVariation
+        val p = endTag ort startTextVariation
         println(p(tagmlReader))
-
     }
 
     @Test
@@ -117,7 +115,7 @@ class TAGMLTokenizerTest() {
         val separator1 = TextVariationSeparatorToken()
         val separator2 = TextVariationSeparatorToken()
         val endTextVariation = EndTextVariationToken()
-        val expectedTokens = listOf(textBla, startTextVariation, textOne, separator1, textTwo, separator2, textThree, endTextVariation,  textBoe)
+        val expectedTokens = listOf(textBla, startTextVariation, textOne, separator1, textTwo, separator2, textThree, endTextVariation, textBoe)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
@@ -134,6 +132,6 @@ class TAGMLTokenizerTest() {
 
     private fun showErrorLocation(tagml: String, result: Either.Left<Response.Reject<Char, List<TAGMLToken>>>) {
         println(tagml)
-        println(" ".repeat(result.a.location.position) + "^")
+        println(" ".repeat(result.a.location.position - 1) + "^")
     }
 }
