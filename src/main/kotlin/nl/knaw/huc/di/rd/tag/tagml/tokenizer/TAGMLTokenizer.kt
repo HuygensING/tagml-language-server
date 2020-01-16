@@ -36,18 +36,18 @@ object TAGMLTokenizer {
     private val startTag = `try`(char('[') thenRight tagName thenLeft char('>'))
             .map { StartTagToken(it) }
 
-    private val endTag = (`try`(char('<')) thenRight tagName thenLeft char(']'))
+    val endTag = (char('<') thenRight tagName thenLeft char(']'))
             .map { EndTagToken(it) }
 
     private val text = (not(specialChar).map { it.toString() } or escapedSpecialChar).rep
             .map { TextToken(it.joinToString(separator = "")) }
 
-    private val startTextVariation = string("<|").map { StartTextVariationToken() }
-    private val textVariationSeparator = `try`(char('|')).map { TextVariationSeparatorToken() }
-    private val endTextVariation = `try`(string("|>")).map { EndTextVariationToken() }
+    val startTextVariation = string("<|").map { StartTextVariationToken() }
+    private val textVariationSeparator = char('|').map { TextVariationSeparatorToken() }
+    private val endTextVariation = string("|>").map { EndTextVariationToken() }
 
     val tagmlParser = (schemaLocation.opt then
-            (startTag or text or endTag or startTextVariation or textVariationSeparator or endTextVariation).rep
+            (`try`(startTag) or `try`(text) or `try`(endTag) or `try`(startTextVariation) or `try`(endTextVariation) or `try`(textVariationSeparator)).rep
             thenLeft eos())
             .map { listOfNotNull(it.first) + it.second }
 
