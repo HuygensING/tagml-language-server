@@ -2,11 +2,11 @@ package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import arrow.core.Either
 import lambdada.parsec.io.Reader
-import lambdada.parsec.parser.Response
 import nl.knaw.huc.di.rd.parsec.ort
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.endTag
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.startTextVariation
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
+import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.Test
@@ -130,8 +130,4 @@ class TAGMLTokenizerTest() {
         }
     }
 
-    private fun showErrorLocation(tagml: String, result: Either.Left<Response.Reject<Char, List<TAGMLToken>>>) {
-        println(tagml)
-        println(" ".repeat(result.a.location.position - 1) + "^")
-    }
 }
