@@ -3,15 +3,17 @@ package nl.knaw.huc.di.rd.tag.tagml.deriv
 import arrow.core.Either
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructor.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectation
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EOFExpectation
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EOF
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Not
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions
 import org.junit.Test
+import org.slf4j.LoggerFactory
 
-class WellFormednessTest() {
+class WellFormednessTest {
+    private val LOG = LoggerFactory.getLogger(this::class.java)
 
     @Test
     fun testWellFormedTAGML1() {
@@ -45,11 +47,11 @@ class WellFormednessTest() {
 
     private fun isWellFormed(tokens: List<TAGMLToken>): Boolean {
         val iterator = tokens.iterator()
-        var expectation: Expectation = after(Not(EOFExpectation()), EOFExpectation())
+        var expectation: Expectation = after(Not(EOF()), EOF())
         var goOn = iterator.hasNext()
         while (goOn) {
             val token = iterator.next()
-            println("expectation=${expectation.javaClass.simpleName}, token=$token")
+            LOG.info("expectation=${expectation.javaClass.simpleName}, token=$token")
             if (expectation.matches(token)) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
@@ -57,8 +59,8 @@ class WellFormednessTest() {
                 goOn = false
             }
         }
-        println("expectation=${expectation.javaClass.simpleName}")
-        return !iterator.hasNext() && (expectation is EOFExpectation)
+        LOG.info("expectation=${expectation.javaClass.simpleName}")
+        return !iterator.hasNext() && (expectation is EOF)
     }
 
 
