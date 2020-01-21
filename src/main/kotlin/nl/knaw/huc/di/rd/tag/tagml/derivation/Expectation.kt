@@ -1,0 +1,22 @@
+package nl.knaw.huc.di.rd.tag.tagml.derivation
+
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Unexpected
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
+
+interface Expectation {
+    fun matches(t: TAGMLToken): Boolean = false
+    fun startTokenDeriv(s: StartTagToken): Expectation = Unexpected()
+    fun endTokenDeriv(e: EndTagToken): Expectation = Unexpected()
+    fun textTokenDeriv(t: TextToken): Expectation = Unexpected()
+    fun deriv(token: TAGMLToken): Expectation {
+        return when (token) {
+            is StartTagToken -> startTokenDeriv(token)
+            is EndTagToken -> endTokenDeriv(token)
+            is TextToken -> textTokenDeriv(token)
+            else -> Unexpected()
+        }
+    }
+}
