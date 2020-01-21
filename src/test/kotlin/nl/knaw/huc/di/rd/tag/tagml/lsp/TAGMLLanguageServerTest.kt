@@ -13,8 +13,7 @@ class TAGMLLanguageServerTest {
 
     val TIMEOUT = 20000
 
-
-    @Test
+//    @Test
     @Throws(IOException::class)
     fun testNotification() {
         val client = AssertingEndpoint()

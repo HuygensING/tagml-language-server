@@ -2,7 +2,6 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.eclipse.lsp4j.Position
 import org.eclipse.lsp4j.TextDocumentPositionParams
-import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class DocumentHighlightTest : RequestTest() {
@@ -10,7 +9,7 @@ class DocumentHighlightTest : RequestTest() {
     private val LOG = LoggerFactory.getLogger(this::class.java)
     // when on a tag, highlight the range
 
-    @Test
+//    @Test
     fun testDocumentHighlight() {
         val tagml = "[tagml>Hello World<tagml]"
         val textDocumentIdentifier = openDocument(tagml)
