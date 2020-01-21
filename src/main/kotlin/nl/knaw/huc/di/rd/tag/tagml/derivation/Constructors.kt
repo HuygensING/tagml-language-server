@@ -6,7 +6,7 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NOT_ALLOWED
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NotAllowed
 
-object Constructor {
+object Constructors {
 
     fun notAllowed(): Expectation {
         return NOT_ALLOWED

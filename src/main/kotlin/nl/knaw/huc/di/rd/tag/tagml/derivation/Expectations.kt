@@ -1,8 +1,8 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructor.after
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructor.empty
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructor.notAllowed
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.notAllowed
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken

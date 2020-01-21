@@ -1,7 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.deriv
 
 import arrow.core.Either
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructor.after
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectation
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EOF
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Not
