@@ -9,9 +9,9 @@ import java.io.OutputStreamWriter
 
 
 class TAGMLLanguageServerTest {
-    private val LOG = LoggerFactory.getLogger(TAGMLLanguageServerTest::class.java)
+    private val _log = LoggerFactory.getLogger(TAGMLLanguageServerTest::class.java)
 
-    val TIMEOUT = 20000
+//    val TIMEOUT = 20000
 
 //    @Test
     @Throws(IOException::class)

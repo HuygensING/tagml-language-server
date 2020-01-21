@@ -13,7 +13,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class WellFormednessTest {
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
     @Test
     fun testWellFormedTAGML1() {
@@ -51,7 +51,7 @@ class WellFormednessTest {
         var goOn = iterator.hasNext()
         while (goOn) {
             val token = iterator.next()
-            LOG.info("expectation=${expectation.javaClass.simpleName}, token=$token")
+            _log.info("expectation=${expectation.javaClass.simpleName}, token=$token")
             if (expectation.matches(token)) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
@@ -59,7 +59,7 @@ class WellFormednessTest {
                 goOn = false
             }
         }
-        LOG.info("expectation=${expectation.javaClass.simpleName}")
+        _log.info("expectation=${expectation.javaClass.simpleName}")
         return !iterator.hasNext() && (expectation is EOF)
     }
 

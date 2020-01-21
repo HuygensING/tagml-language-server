@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 
 class DocumentSymbolTest : RequestTest() {
     //    https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentSymbol
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
 //    @Test
     fun testDocumentSymbol() {
@@ -15,7 +15,7 @@ class DocumentSymbolTest : RequestTest() {
         try {
             val documentSymbolParams = DocumentSymbolParams(textDocumentIdentifier)
             val result = server.textDocumentService.documentSymbol(documentSymbolParams).join()
-            LOG.info("result={}", result)
+            _log.info("result={}", result)
 
         } finally {
             closeDocument(textDocumentIdentifier)

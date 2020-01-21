@@ -8,15 +8,15 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class HoverTest {
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
     @Test
     fun testHover() {
-        var server = TAGMLLanguageServer()
+        val server = TAGMLLanguageServer()
         val textDocumentIdentifier = TextDocumentIdentifier("uri")
         val position = Position(0, 0)
         val positionParams = TextDocumentPositionParams(textDocumentIdentifier, position)
         val hover = server.textDocumentService.hover(positionParams).join()
-        LOG.info("hover={}", hover)
+        _log.info("hover={}", hover)
     }
 }

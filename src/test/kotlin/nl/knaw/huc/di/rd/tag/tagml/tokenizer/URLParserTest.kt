@@ -47,7 +47,7 @@ class URLParserTest {
     }
 
     private fun <A> assertParses(string: String, p: Parser<Char, A>) {
-        val response = parse<A>(string, p)
+        val response = parse(string, p)
         assertThat(response.isSuccess()).isTrue()
     }
 

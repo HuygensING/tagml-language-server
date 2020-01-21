@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 
 class DocumentHighlightTest : RequestTest() {
     // https://microsoft.github.io/language-server-protocol/specifications/specification-3-14/#textDocument_documentHighlight
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
     // when on a tag, highlight the range
 
 //    @Test
@@ -19,7 +19,7 @@ class DocumentHighlightTest : RequestTest() {
             val textDocumentPositionParams = TextDocumentPositionParams(textDocumentIdentifier, position)
 
             val result = server.textDocumentService.documentHighlight(textDocumentPositionParams).join()
-            LOG.info("result={}", result)
+            _log.info("result={}", result)
 
         } finally {
             closeDocument(textDocumentIdentifier)

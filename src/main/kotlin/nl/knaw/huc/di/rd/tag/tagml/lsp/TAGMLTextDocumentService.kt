@@ -16,7 +16,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     override fun didOpen(params: DidOpenTextDocumentParams) {
         logger.info("TAGMLTextDocumentService.didOpen($params)")
         val model = TAGMLDocumentModel(params.textDocument.uri, params.textDocument.text, params.textDocument.version)
-        this.docs[params.textDocument.uri] = model;
+        this.docs[params.textDocument.uri] = model
         CompletableFuture.runAsync {
             tagmlLanguageServer.client?.publishDiagnostics(
                     PublishDiagnosticsParams(params.textDocument.uri, validate(model))
@@ -68,7 +68,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     }
 
     override fun didClose(params: DidCloseTextDocumentParams) {
-        this.docs.remove(params.textDocument.uri);
+        this.docs.remove(params.textDocument.uri)
     }
 
     override fun completion(position: CompletionParams?): CompletableFuture<Either<MutableList<CompletionItem>, CompletionList>> {
@@ -82,7 +82,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             label = "Goodbye"
             kind = CompletionItemKind.Text
         }
-        val completionItemList = mutableListOf<CompletionItem>(completionItem1, completionItem2)
+        val completionItemList = mutableListOf(completionItem1, completionItem2)
         return CompletableFuture.completedFuture(forLeft(completionItemList))
     }
 }

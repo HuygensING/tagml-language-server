@@ -12,7 +12,7 @@ import org.assertj.core.api.Assertions.fail
 import org.junit.Test
 import java.net.URL
 
-class TAGMLTokenizerTest() {
+class TAGMLTokenizerTest {
 
     //    @Test
     fun testNameSpaceDefinition() {

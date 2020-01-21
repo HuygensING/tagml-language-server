@@ -7,7 +7,7 @@ object TagIdentifiers {
         }
     }
 
-    class AnyTagIdentifier() : TagIdentifier {
+    class AnyTagIdentifier : TagIdentifier {
         override fun matches(tagName: String): Boolean {
             return true
         }

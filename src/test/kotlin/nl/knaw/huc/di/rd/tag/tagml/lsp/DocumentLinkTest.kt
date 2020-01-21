@@ -5,7 +5,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class DocumentLinkTest : RequestTest() {
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
     @Test
     fun testDocumentLinkTest() {
@@ -15,7 +15,7 @@ class DocumentLinkTest : RequestTest() {
         try {
             val documentSymbolParams = DocumentSymbolParams(textDocumentIdentifier)
 //            val result = server.textDocumentService.documentLink()Symbol(documentSymbolParams).join()
-//            LOG.info("result={}", result)
+//            _log.info("result={}", result)
 
         } finally {
             closeDocument(textDocumentIdentifier)

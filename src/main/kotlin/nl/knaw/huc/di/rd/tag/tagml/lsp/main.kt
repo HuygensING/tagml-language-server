@@ -15,7 +15,7 @@ fun startServer(inputStream: InputStream, out: PrintStream) {
     val server = TAGMLLanguageServer()
     val l = LSPLauncher.createServerLauncher(server, inputStream, out)
     val startListening = l.startListening()
-    server.connect(l.remoteProxy);
+    server.connect(l.remoteProxy)
 }
 
 // add schemalocation setting to tagml to enhance the autocomplete

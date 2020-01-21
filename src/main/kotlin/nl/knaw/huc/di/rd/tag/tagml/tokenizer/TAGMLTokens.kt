@@ -2,7 +2,7 @@ package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import java.net.URL
 
-open class TAGMLToken {}
+open class TAGMLToken
 
 class SchemaLocationToken(val url: URL) : TAGMLToken() {
     override fun toString() = "SchemaLocation($url)"
@@ -24,14 +24,14 @@ class TextToken(val content: String) : TAGMLToken() {
     override fun toString() = "Text(${content.replace("\n", "\\n")})"
 }
 
-class StartTextVariationToken() : TAGMLToken() {
+class StartTextVariationToken : TAGMLToken() {
     override fun toString() = "StartTextVariation()"
 }
 
-class EndTextVariationToken() : TAGMLToken() {
+class EndTextVariationToken : TAGMLToken() {
     override fun toString() = "EndTextVariation()"
 }
 
-class TextVariationSeparatorToken() : TAGMLToken() {
+class TextVariationSeparatorToken : TAGMLToken() {
     override fun toString() = "TextVariationSeparator()"
 }

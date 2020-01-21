@@ -21,10 +21,9 @@ class ArrowTest {
         val item = not(char(',')).optrep.map { it.charsToString() }
         val csvLine = (item then (char(',') then item).optrep).map(this::flattenItems)
         val csvInput = asReader("axolotl,bear,cheetah,donkey,elephant,flamingo,giraffe,hyena,iguana")
-        val csvResult = csvLine(csvInput)
-//        val items = csvResult.fold({ it.value }, { null })
+        //        val items = csvResult.fold({ it.value }, { null })
 
-        when (csvResult) {
+        when (val csvResult = csvLine(csvInput)) {
             is Accept -> println("accept; value = " + csvResult.value)
             is Reject -> println("reject at " + csvResult.location)
         }

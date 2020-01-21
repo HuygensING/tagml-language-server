@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import kotlin.test.assertNotNull
 
 class CompletionTest {
-    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
 //    @Test
     fun testCompletion() {
@@ -18,9 +18,9 @@ class CompletionTest {
         val completion = server.textDocumentService.completion(completionParams)
         val join = completion.join()
         val left = join.left
-        LOG.info("left={}", left)
+    _log.info("left={}", left)
         val right = join.right
-        LOG.info("right={}", right)
+    _log.info("right={}", right)
         assertNotNull(right)
         assertNotNull(left)
     }
