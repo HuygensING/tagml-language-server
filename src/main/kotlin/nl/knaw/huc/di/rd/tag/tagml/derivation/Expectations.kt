@@ -1,6 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.notAllowed
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
@@ -15,6 +16,12 @@ object Expectations {
     val NOT_ALLOWED: Expectation = NotAllowed()
     val TEXT: Expectation = Text()
 
+    class Empty : Expectation
+
+    class NotAllowed : Expectation
+
+    class EOF : Expectation
+
     class RangeOpen(val id: TagIdentifier) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return (t is StartTagToken) && id.matches(t.tagName)
@@ -26,6 +33,15 @@ object Expectations {
                     RangeClose(FixedIdentifier(s.tagName))
             )
         }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            val tagName = when (id) {
+                is TagIdentifiers.AnyTagIdentifier -> "*"
+                is FixedIdentifier -> id.tagName
+                else -> "?"
+            }
+            return listOf(StartTagToken(tagName))
+        }
     }
 
     class RangeClose(val id: TagIdentifier) : Expectation {
@@ -36,8 +52,25 @@ object Expectations {
         override fun endTokenDeriv(e: EndTagToken): Expectation {
             return empty()
         }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return listOf()
+        }
+
     }
 
+    class Text : Expectation {
+        override fun matches(t: TAGMLToken): Boolean {
+            return (t is TextToken)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return empty()
+        }
+
+    }
+
+    // combinators
     class After(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return expectation1.matches(t)
@@ -53,6 +86,32 @@ object Expectations {
 
         override fun textTokenDeriv(t: TextToken): Expectation {
             return after(expectation1.textTokenDeriv(t), expectation2)
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation1.expectedTokens()
+        }
+    }
+
+    class Choice(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation1.matches(t) || expectation2.matches(t)
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            return choice(expectation1.startTokenDeriv(s), expectation2.startTokenDeriv(s))
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Expectation {
+            return choice(expectation1.endTokenDeriv(e), expectation2.endTokenDeriv(e))
+        }
+
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return choice(expectation1.textTokenDeriv(t), expectation2.textTokenDeriv(t))
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation1.expectedTokens() + expectation2.expectedTokens()
         }
     }
 
@@ -81,22 +140,12 @@ object Expectations {
             else
                 Text().textTokenDeriv(t)
         }
-    }
 
-    class Text : Expectation {
-        override fun matches(t: TAGMLToken): Boolean {
-            return (t is TextToken)
-        }
-
-        override fun textTokenDeriv(t: TextToken): Expectation {
-            return empty()
+        override fun expectedTokens(): List<TAGMLToken> {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
-    class Empty : Expectation
 
-    class NotAllowed : Expectation
-
-    class EOF : Expectation
 
 }

@@ -8,9 +8,13 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
 interface Expectation {
     fun matches(t: TAGMLToken): Boolean = false
+
     fun startTokenDeriv(s: StartTagToken): Expectation = NotAllowed()
+
     fun endTokenDeriv(e: EndTagToken): Expectation = NotAllowed()
+
     fun textTokenDeriv(t: TextToken): Expectation = NotAllowed()
+
     fun deriv(token: TAGMLToken): Expectation {
         return when (token) {
             is StartTagToken -> startTokenDeriv(token)
@@ -19,4 +23,9 @@ interface Expectation {
             else -> NotAllowed()
         }
     }
+
+    fun expectedTokens(): List<TAGMLToken> {
+        return emptyList()
+    }
+
 }
