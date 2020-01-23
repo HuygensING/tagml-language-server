@@ -20,7 +20,7 @@ object TAGMLTokenizer {
 
     private val variableName = (
             charIn(CharRange('a', 'z')) then
-                    charIn("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_").rep
+                    charIn("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_").optrep
             ).map { (listOfNotNull(it.first) + it.second).charsToString() }
 
     private val tagName = variableName
