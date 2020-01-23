@@ -1,5 +1,8 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Range
+import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import org.slf4j.LoggerFactory
 
@@ -8,7 +11,7 @@ object WelllFormedness {
 
     fun isWellFormed(tokens: List<TAGMLToken>): Boolean {
         val iterator = tokens.iterator()
-        var expectation: Expectation = Constructors.after(Expectations.Range(TagIdentifiers.AnyTagIdentifier(), Expectations.Text()), Expectations.EOF())
+        var expectation: Expectation = after(Range(AnyTagIdentifier(), Expectations.Text()), Expectations.EOF())
 
         var goOn = iterator.hasNext()
         while (goOn) {
