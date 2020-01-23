@@ -14,23 +14,37 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 object Expectations {
 
     val EMPTY: Expectation = Empty()
+
     val NOT_ALLOWED: Expectation = NotAllowed()
+
     val TEXT: Expectation = Text()
 
-    class Empty : Expectation
+    class Empty : Expectation {
+        override fun toString(): String {
+            return "<empty/>"
+        }
+    }
 
-    class NotAllowed : Expectation
+    class NotAllowed : Expectation {
+        override fun toString(): String {
+            return "<notAllowed/>"
+        }
+    }
 
-    class EOF : Expectation
+    class EOF : Expectation {
+        override fun toString(): String {
+            return "<eof/>"
+        }
+    }
 
-    class Range(val id: TagIdentifier, val expection: Expectation) : Expectation {
+    class Range(val id: TagIdentifier, val expectation: Expectation) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return (t is StartTagToken) && id.matches(t.tagName)
         }
 
         override fun startTokenDeriv(s: StartTagToken): Expectation {
             return after(
-                    expection,
+                    expectation,
                     RangeClose(FixedIdentifier(s.tagName))
             )
         }
@@ -42,6 +56,10 @@ object Expectations {
                 else -> "?"
             }
             return listOf(StartTagToken(tagName))
+        }
+
+        override fun toString(): String {
+            return """<range id="$id">$expectation</range>"""
         }
     }
 
@@ -65,6 +83,10 @@ object Expectations {
             }
             return listOf(StartTagToken(tagName))
         }
+
+        override fun toString(): String {
+            return """<rangeOpen id="$id">"""
+        }
     }
 
     class RangeClose(val id: TagIdentifier) : Expectation {
@@ -80,6 +102,10 @@ object Expectations {
             return listOf()
         }
 
+        override fun toString(): String {
+            return """<rangeClose id="$id"/>"""
+        }
+
     }
 
     class Text : Expectation {
@@ -91,12 +117,21 @@ object Expectations {
             return empty()
         }
 
+        override fun toString(): String {
+            return "<text/>"
+        }
+
     }
 
     // combinators
     class After(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return expectation1.matches(t)
+//            return if (expectation1.nullable)
+//                expectation2.matches(t)
+//            else
+//                expectation1.matches(t)
+
         }
 
         override fun startTokenDeriv(s: StartTagToken): Expectation {
@@ -114,6 +149,11 @@ object Expectations {
         override fun expectedTokens(): List<TAGMLToken> {
             return expectation1.expectedTokens()
         }
+
+        override fun toString(): String {
+            return "<after>$expectation1$expectation2</after>"
+        }
+
     }
 
     class Choice(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
@@ -136,9 +176,17 @@ object Expectations {
         override fun expectedTokens(): List<TAGMLToken> {
             return expectation1.expectedTokens() + expectation2.expectedTokens()
         }
+
+        override fun toString(): String {
+            return if (expectation1 is OneOrMore && expectation2 is Empty)
+                "<zeroOrMore>${expectation1.expectation}</zeroOrMore>"
+            else
+                "<choice>$expectation1$expectation2</choice>"
+        }
     }
 
     class OneOrMore(val expectation: Expectation) : Expectation {
+
         override fun matches(t: TAGMLToken): Boolean {
             return expectation.matches(t)
         }
@@ -162,12 +210,16 @@ object Expectations {
                     expectation.endTokenDeriv(e),
                     choice(OneOrMore(expectation), empty())
             )
+        }
 
+        override fun toString(): String {
+            return "<oneOrMore>$expectation</oneOrMore>"
         }
 
     }
 
     class Group(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+
         override fun matches(t: TAGMLToken): Boolean {
             return expectation1.matches(t)
         }
@@ -183,9 +235,15 @@ object Expectations {
         override fun endTokenDeriv(s: EndTagToken): Expectation {
             return expectation2
         }
+
+        override fun toString(): String {
+            return "<group>$expectation1$expectation2</group>"
+        }
+
     }
 
     class Not(val expectation: Expectation) : Expectation {
+
         override fun matches(t: TAGMLToken): Boolean {
             return !expectation.matches(t)
         }
@@ -214,6 +272,11 @@ object Expectations {
         override fun expectedTokens(): List<TAGMLToken> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
+
+        override fun toString(): String {
+            return "<not>$expectation</not>"
+        }
+
     }
 
 

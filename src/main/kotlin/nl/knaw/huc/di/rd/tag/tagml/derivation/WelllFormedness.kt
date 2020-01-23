@@ -1,6 +1,5 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.zeroOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Range
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Text
@@ -13,12 +12,12 @@ object WelllFormedness {
 
     fun isWellFormed(tokens: List<TAGMLToken>): Boolean {
         val iterator = tokens.iterator()
-        var expectation: Expectation = after(Range(AnyTagIdentifier(), zeroOrMore(Range(AnyTagIdentifier(), Text()))), Expectations.EOF())
+        var expectation: Expectation = Range(AnyTagIdentifier(), zeroOrMore(Range(AnyTagIdentifier(), Text())))
 
         var goOn = iterator.hasNext()
         while (goOn) {
             val token = iterator.next()
-            _log.info("expectation=${expectation.javaClass.simpleName}, token=$token")
+            _log.info("expectation=$expectation, token=$token")
             if (expectation.matches(token)) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
@@ -27,7 +26,7 @@ object WelllFormedness {
                 goOn = false
             }
         }
-        _log.info("expectation=${expectation.javaClass.simpleName}")
+        _log.info("expectation=${expectation}")
         return !iterator.hasNext() && (expectation is Expectations.EOF)
     }
 

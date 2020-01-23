@@ -5,11 +5,19 @@ object TagIdentifiers {
         override fun matches(tagName: String): Boolean {
             return this.tagName == tagName
         }
+
+        override fun toString(): String {
+            return tagName
+        }
     }
 
     class AnyTagIdentifier : TagIdentifier {
         override fun matches(tagName: String): Boolean {
             return true
+        }
+
+        override fun toString(): String {
+            return "*"
         }
     }
 
