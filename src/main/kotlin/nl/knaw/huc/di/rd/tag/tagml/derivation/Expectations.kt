@@ -150,6 +150,21 @@ object Expectations {
             )
         }
 
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            return group(
+                    expectation.startTokenDeriv(s),
+                    choice(OneOrMore(expectation), empty())
+            )
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Expectation {
+            return group(
+                    expectation.endTokenDeriv(e),
+                    choice(OneOrMore(expectation), empty())
+            )
+
+        }
+
     }
 
     class Group(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
@@ -157,6 +172,17 @@ object Expectations {
             return expectation1.matches(t)
         }
 
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return expectation2
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            return expectation2
+        }
+
+        override fun endTokenDeriv(s: EndTagToken): Expectation {
+            return expectation2
+        }
     }
 
     class Not(val expectation: Expectation) : Expectation {
