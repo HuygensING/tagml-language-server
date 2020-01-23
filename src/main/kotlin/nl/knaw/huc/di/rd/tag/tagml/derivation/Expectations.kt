@@ -22,6 +22,27 @@ object Expectations {
 
     class EOF : Expectation
 
+    class Range(val id: TagIdentifier, val expection: Expectation) : Expectation {
+        override fun matches(t: TAGMLToken): Boolean {
+            return (t is StartTagToken) && id.matches(t.tagName)
+        }
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            return after(
+                    expection,
+                    RangeClose(FixedIdentifier(s.tagName))
+            )
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            val tagName = when (id) {
+                is TagIdentifiers.AnyTagIdentifier -> "*"
+                is FixedIdentifier -> id.tagName
+                else -> "?"
+            }
+            return listOf(StartTagToken(tagName))
+        }
+    }
+
     class RangeOpen(val id: TagIdentifier) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return (t is StartTagToken) && id.matches(t.tagName)

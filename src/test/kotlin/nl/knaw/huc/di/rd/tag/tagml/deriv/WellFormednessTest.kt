@@ -3,8 +3,10 @@ package nl.knaw.huc.di.rd.tag.tagml.deriv
 import arrow.core.Either
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectation
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EOF
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Not
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Range
+import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
@@ -18,18 +20,29 @@ class WellFormednessTest {
 
     @Test
     fun testWellFormedTAGML1() {
+        // TagML: Expectation = After(Range("tag", Text("text)), EOF)
         val tagml = "[tag>text<tag]"
         assertTAGMLisWellFormed(tagml)
     }
 
     @Test
     fun testWellFormedTAGML_nested() {
+        // TagML: Expectation = Range("*", ZeroOrMore(Range("*", Text))
+        val tagml = "[tag>[color>Green<color][food>Eggs<food][food>Ham<food]<tag]"
+        assertTAGMLisWellFormed(tagml)
+    }
+
+    @Test
+    fun testWellFormedTAGML_Mixed() {
+        // TagML: Expectation = Range("*", Mixed((Range("*", Text())
         val tagml = "[tag>[color>Green<color] [food>Eggs<food] and [food>Ham<food]<tag]"
         assertTAGMLisWellFormed(tagml)
     }
 
     @Test
     fun testWellFormedTAGML_overlapping() {
+        // TagML: Expectation = Range("*", concur(Range("a", Text)), Range("b", Text())
+        //TagML: Expectation = Range("*", concur(Range("*", Layer A, Text)), Range("*", Layer B, Text())
         val tagml = "[tag>[a>Cookiemonster [b>likes<a] cookies<b]<tag]" // TODO: layer info
         assertTAGMLisWellFormed(tagml)
     }
@@ -67,7 +80,8 @@ class WellFormednessTest {
 
     private fun isWellFormed(tokens: List<TAGMLToken>): Boolean {
         val iterator = tokens.iterator()
-        var expectation: Expectation = after(Not(EOF()), EOF())
+        var expectation: Expectation =  after(Range(TagIdentifiers.AnyTagIdentifier(), Expectations.Text()), EOF())
+
         var goOn = iterator.hasNext()
         while (goOn) {
             val token = iterator.next()
