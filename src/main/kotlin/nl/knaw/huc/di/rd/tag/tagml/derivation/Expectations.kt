@@ -3,6 +3,7 @@ package nl.knaw.huc.di.rd.tag.tagml.derivation
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.notAllowed
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
@@ -26,6 +27,7 @@ object Expectations {
         override fun matches(t: TAGMLToken): Boolean {
             return (t is StartTagToken) && id.matches(t.tagName)
         }
+
         override fun startTokenDeriv(s: StartTagToken): Expectation {
             return after(
                     expection,
@@ -136,6 +138,27 @@ object Expectations {
         }
     }
 
+    class OneOrMore(val expectation: Expectation) : Expectation {
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return group(
+                    expectation.textTokenDeriv(t),
+                    choice(OneOrMore(expectation), empty())
+            )
+        }
+
+    }
+
+    class Group(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation1.matches(t)
+        }
+
+    }
+
     class Not(val expectation: Expectation) : Expectation {
         override fun matches(t: TAGMLToken): Boolean {
             return !expectation.matches(t)
@@ -166,7 +189,6 @@ object Expectations {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
-
 
 
 }

@@ -4,8 +4,10 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.After
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EMPTY
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Empty
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NOT_ALLOWED
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NotAllowed
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.OneOrMore
 
 object Constructors {
 
@@ -50,4 +52,41 @@ object Constructors {
         } else Choice(expectation1, expectation2)
         //  choice p1 p2 = Choice p1 p2
     }
+
+    fun zeroOrMore(expectation: Expectation): Expectation {
+        return choice(oneOrMore(expectation), empty())
+    }
+
+    fun oneOrMore(expectation: Expectation): Expectation {
+        return if (expectation is NotAllowed
+                || expectation is Empty) {
+            expectation
+        } else OneOrMore(expectation)
+    }
+
+    fun group(expectation1: Expectation, expectation2: Expectation): Expectation {
+        //  group p NotAllowed = NotAllowed
+        //  group NotAllowed p = NotAllowed
+        if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
+            return notAllowed()
+        }
+        //  group p Empty = p
+        if (expectation2 is Empty) {
+            return expectation1
+        }
+        //  group Empty p = p
+        if (expectation1 is Empty) {
+            return expectation2
+        }
+        //  group (After p1 p2) p3 = after p1 (group p2 p3)
+        if (expectation1 is After) {
+            return after(expectation1.expectation1, group(expectation1.expectation2, expectation2))
+        }
+        //  group p1 (After p2 p3) = after p2 (group p1 p3)
+        return if (expectation2 is After) {
+            after(expectation2.expectation1, group(expectation1, expectation2.expectation2))
+        } else Group(expectation1, expectation2)
+        //  group p1 p2 = Group p1 p2
+    }
+
 }
