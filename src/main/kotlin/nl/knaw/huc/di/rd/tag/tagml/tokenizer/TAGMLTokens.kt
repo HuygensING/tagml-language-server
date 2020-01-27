@@ -2,36 +2,55 @@ package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import java.net.URL
 
-open class TAGMLToken
+abstract class TAGMLToken {
+    abstract val content: String
+}
 
 class SchemaLocationToken(val url: URL) : TAGMLToken() {
     override fun toString() = "SchemaLocation($url)"
+    override val content: String
+        get() = "[!schema $url]"
 }
 
 class NameSpaceIdentifierToken(val id: String, val url: URL) : TAGMLToken() {
     override fun toString() = "NameSpace($id,$url)"
+    override val content: String
+        get() = "[!ns $id $url]"
 }
 
 class StartTagToken(val tagName: String) : TAGMLToken() {
     override fun toString() = "Start($tagName)"
+    override val content: String
+        get() = "[$tagName>"
+
 }
 
 class EndTagToken(val tagName: String) : TAGMLToken() {
     override fun toString() = "End($tagName)"
+    override val content: String
+        get() = "<$tagName]"
 }
 
-class TextToken(val content: String) : TAGMLToken() {
-    override fun toString() = "Text(${content.replace("\n", "\\n")})"
+class TextToken(val textContent: String) : TAGMLToken() {
+    override fun toString() = "Text(${textContent.replace("\n", "\\n")})"
+    override val content: String
+        get() = textContent
 }
 
 class StartTextVariationToken : TAGMLToken() {
     override fun toString() = "StartTextVariation()"
+    override val content: String
+        get() = "<|"
 }
 
 class EndTextVariationToken : TAGMLToken() {
     override fun toString() = "EndTextVariation()"
+    override val content: String
+        get() = "|>"
 }
 
 class TextVariationSeparatorToken : TAGMLToken() {
     override fun toString() = "TextVariationSeparator()"
+    override val content: String
+        get() = "|"
 }
