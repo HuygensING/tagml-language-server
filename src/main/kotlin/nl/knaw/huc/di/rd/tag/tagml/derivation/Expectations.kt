@@ -1,16 +1,21 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.anyContent
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concur
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
+import org.slf4j.LoggerFactory
 
 object Expectations {
+    private val _log = LoggerFactory.getLogger(this::class.java)
 
     val EMPTY: Expectation = Empty()
 
@@ -130,7 +135,7 @@ object Expectations {
         }
 
         override fun textTokenDeriv(t: TextToken): Expectation {
-            return empty()
+            return text()
         }
 
         override fun toString(): String {
@@ -244,11 +249,118 @@ object Expectations {
 
     }
 
+    class Concur(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+        override val nullable: Boolean
+            get() = expectation1.nullable && expectation2.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation1.matches(t) || expectation2.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return concur(
+                    expectation1.textTokenDeriv(t),
+                    expectation2.textTokenDeriv(t)
+            )
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            val d1 = expectation1.startTokenDeriv(s)
+            val d2 = expectation2.startTokenDeriv(s)
+            return choice(
+                    choice(
+                            concur(d1, expectation2),
+                            concur(expectation1, d2)
+                    ),
+                    concur(d1, d2)
+            )
+        }
+
+        override fun endTokenDeriv(t: EndTagToken): Expectation {
+            val d1 = expectation1.endTokenDeriv(t)
+            val d2 = expectation2.endTokenDeriv(t)
+            return choice(
+                    choice(
+                            concur(d1, expectation2),
+                            concur(expectation1, d2)
+                    ),
+                    concur(d1, d2)
+            )
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation1.expectedTokens() + expectation2.expectedTokens()
+        }
+
+        override fun toString(): String {
+            return "<concur>$expectation1$expectation2</concur>"
+        }
+
+    }
+
+    class All(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+        override val nullable: Boolean
+            get() = expectation1.nullable && expectation2.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation1.matches(t) && expectation2.matches(t)
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation1.expectedTokens() + expectation2.expectedTokens()
+        }
+
+        override fun toString(): String {
+            return "<all>$expectation1$expectation2</all>"
+        }
+    }
+
+    class ConcurOneOrMore(val expectation: Expectation) : Expectation {
+
+        override val nullable: Boolean
+            get() = expectation.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return expectation.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Expectation {
+            return concur(
+                    expectation.textTokenDeriv(t),
+                    choice(ConcurOneOrMore(expectation), empty())
+            )
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Expectation {
+            return concur(
+                    expectation.startTokenDeriv(s),
+                    choice(ConcurOneOrMore(expectation), anyContent())
+            )
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Expectation {
+            return concur(
+                    expectation.endTokenDeriv(e),
+                    choice(ConcurOneOrMore(expectation), anyContent())
+            )
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation.expectedTokens()
+        }
+
+        override fun toString(): String {
+            return "<concurOneOrMore>$expectation</concurOneOrMore>"
+        }
+
+    }
+
     class Group(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
         override val nullable: Boolean
             get() = expectation1.nullable && expectation2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
+//            _log.info("expectation1=$expectation1 ; expectation1.matches(t)=${expectation1.matches(t)}; expectation1.nullable = ${expectation1.nullable} ")
             return if (!expectation1.matches(t) && expectation1.nullable)
                 expectation2.matches(t)
             else
@@ -277,7 +389,10 @@ object Expectations {
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation1.expectedTokens()
+            return if (expectation1.nullable)
+                expectation1.expectedTokens() + expectation2.expectedTokens()
+            else
+                expectation1.expectedTokens()
         }
 
         override fun toString(): String {

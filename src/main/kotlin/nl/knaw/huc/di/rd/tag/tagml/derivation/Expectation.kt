@@ -12,12 +12,6 @@ interface Expectation {
 
     fun matches(t: TAGMLToken): Boolean = false
 
-    fun startTokenDeriv(s: StartTagToken): Expectation = NotAllowed()
-
-    fun endTokenDeriv(e: EndTagToken): Expectation = NotAllowed()
-
-    fun textTokenDeriv(t: TextToken): Expectation = NotAllowed()
-
     fun deriv(token: TAGMLToken): Expectation {
         return when (token) {
             is StartTagToken -> startTokenDeriv(token)
@@ -27,8 +21,12 @@ interface Expectation {
         }
     }
 
-    fun expectedTokens(): List<TAGMLToken> {
-        return emptyList()
-    }
+    fun startTokenDeriv(s: StartTagToken): Expectation = NotAllowed()
+
+    fun endTokenDeriv(e: EndTagToken): Expectation = NotAllowed()
+
+    fun textTokenDeriv(t: TextToken): Expectation = NotAllowed()
+
+    fun expectedTokens(): List<TAGMLToken> = emptyList()
 
 }

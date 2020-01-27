@@ -43,13 +43,13 @@ class WellFormednessTest {
     @Test
     fun testNotWellFormedTAGML1() {
         val tagml = "[tag>text"
-        assertTAGMLisNotWellFormed(tagml, "Out of tokens, but expected <tag]")
+        assertTAGMLisNotWellFormed(tagml, "Out of tokens, but expected any of [[*>, <tag]]")
     }
 
     @Test
     fun testNotWellFormedTAGML2() {
         val tagml = "[tag>text<gat]"
-        assertTAGMLisNotWellFormed(tagml, "Unexpected token: found <gat], but expected <tag]")
+        assertTAGMLisNotWellFormed(tagml, "Unexpected token: found <gat], but expected any of [[*>, <tag]]")
     }
 
     private fun assertTAGMLisWellFormed(tagml: String) {

@@ -1,6 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concurOneOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.zeroOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Range
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Text
@@ -15,13 +16,13 @@ object WellFormedness {
 
     fun checkWellFormedness(tokens: List<TAGMLToken>): WellFormednessResult {
         val iterator = tokens.iterator()
-        var expectation: Expectation = Range(AnyTagIdentifier(), choice(Text(), zeroOrMore(Range(AnyTagIdentifier(), Text()))))
+        var expectation: Expectation = Range(AnyTagIdentifier(), concurOneOrMore(choice(Text(), zeroOrMore(Range(AnyTagIdentifier(), Text())))))
         val errors = mutableListOf<String>()
 
         var goOn = iterator.hasNext()
         while (goOn) {
             val token = iterator.next()
-            _log.info("expectation=$expectation, token=${token.content}")
+            _log.info("expectation=$expectation, token=${token.content}, match=${expectation.matches(token)}")
             if (expectation.matches(token)) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
@@ -32,12 +33,13 @@ object WellFormedness {
                 goOn = false
             }
         }
-        _log.info("expectation=${expectation}")
+        _log.info("remaining expectation=${expectation}")
         if (errors.isEmpty() && !expectation.nullable) {
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
         return WellFormednessResult(!iterator.hasNext() && expectation.nullable, errors)
     }
+
 
     private fun expectationString(expectation: Expectation): String {
         val expectedTokens = expectation.expectedTokens().map { it.content }
