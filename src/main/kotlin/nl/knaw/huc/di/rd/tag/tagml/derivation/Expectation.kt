@@ -7,6 +7,8 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
 interface Expectation {
+    val nullable: Boolean
+
     fun matches(t: TAGMLToken): Boolean = false
 
     fun startTokenDeriv(s: StartTagToken): Expectation = NotAllowed()

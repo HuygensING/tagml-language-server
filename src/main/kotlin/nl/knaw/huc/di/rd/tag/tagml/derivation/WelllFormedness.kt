@@ -27,7 +27,7 @@ object WelllFormedness {
             }
         }
         _log.info("expectation=${expectation}")
-        return !iterator.hasNext() && (expectation is Expectations.EOF)
+        return !iterator.hasNext() && expectation.nullable
     }
 
 }
