@@ -205,6 +205,7 @@ object Expectations {
     }
 
     class OneOrMore(val expectation: Expectation) : Expectation {
+
         override val nullable: Boolean
             get() = expectation.nullable
 

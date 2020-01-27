@@ -57,7 +57,7 @@ object Constructors {
         return choice(oneOrMore(expectation), empty())
     }
 
-    fun oneOrMore(expectation: Expectation): Expectation {
+    private fun oneOrMore(expectation: Expectation): Expectation {
         return if (expectation is NotAllowed
                 || expectation is Empty) {
             expectation
