@@ -45,7 +45,7 @@ object Expectations {
         }
 
         override fun startTokenDeriv(s: StartTagToken): Expectation {
-            return after(
+            return group(
                     expectation,
                     RangeClose(FixedIdentifier(s.tagName))
             )
@@ -107,7 +107,12 @@ object Expectations {
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return listOf()
+            val tagName = when (id) {
+                is TagIdentifiers.AnyTagIdentifier -> "*"
+                is FixedIdentifier -> id.tagName
+                else -> "?"
+            }
+            return listOf(EndTagToken(tagName))
         }
 
         override fun toString(): String {
@@ -228,6 +233,10 @@ object Expectations {
             )
         }
 
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation.expectedTokens()
+        }
+
         override fun toString(): String {
             return "<oneOrMore>$expectation</oneOrMore>"
         }
@@ -239,19 +248,35 @@ object Expectations {
             get() = expectation1.nullable && expectation2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation1.matches(t)
+            return if (!expectation1.matches(t) && expectation1.nullable)
+                expectation2.matches(t)
+            else
+                expectation1.matches(t)
         }
 
         override fun textTokenDeriv(t: TextToken): Expectation {
-            return expectation2
+            val p = group(expectation1.textTokenDeriv(t), expectation2)
+            return if (expectation1.nullable)
+                choice(p, expectation2.textTokenDeriv(t))
+            else p
         }
 
         override fun startTokenDeriv(s: StartTagToken): Expectation {
-            return expectation2
+            val p = group(expectation1.startTokenDeriv(s), expectation2)
+            return if (expectation1.nullable)
+                choice(p, expectation2.startTokenDeriv(s))
+            else p
         }
 
         override fun endTokenDeriv(e: EndTagToken): Expectation {
-            return expectation2
+            val p = group(expectation1.endTokenDeriv(e), expectation2)
+            return if (expectation1.nullable)
+                choice(p, expectation2.endTokenDeriv(e))
+            else p
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return expectation1.expectedTokens()
         }
 
         override fun toString(): String {

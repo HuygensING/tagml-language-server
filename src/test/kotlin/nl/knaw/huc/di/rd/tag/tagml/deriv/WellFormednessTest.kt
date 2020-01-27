@@ -1,7 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.deriv
 
 import arrow.core.Either
-import nl.knaw.huc.di.rd.tag.tagml.derivation.WelllFormedness.isWellFormed
+import nl.knaw.huc.di.rd.tag.tagml.derivation.WellFormedness.checkWellFormedness
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
@@ -43,21 +43,25 @@ class WellFormednessTest {
     @Test
     fun testNotWellFormedTAGML1() {
         val tagml = "[tag>text"
-        assertTAGMLisNotWellFormed(tagml)
+        assertTAGMLisNotWellFormed(tagml, "Out of tokens, but expected <tag]")
     }
 
     @Test
     fun testNotWellFormedTAGML2() {
         val tagml = "[tag>text<gat]"
-        assertTAGMLisNotWellFormed(tagml)
+        assertTAGMLisNotWellFormed(tagml, "Unexpected token: found <gat], but expected <tag]")
     }
 
     private fun assertTAGMLisWellFormed(tagml: String) {
-        mapTokenizedTAGML(tagml) { assertThat(isWellFormed(it)).isTrue() }
+        mapTokenizedTAGML(tagml) { assertThat(checkWellFormedness(it).isWellFormed).isTrue() }
     }
 
-    private fun assertTAGMLisNotWellFormed(tagml: String) {
-        mapTokenizedTAGML(tagml) { assertThat(isWellFormed(it)).isFalse() }
+    private fun assertTAGMLisNotWellFormed(tagml: String, error: String) {
+        mapTokenizedTAGML(tagml) {
+            val checkWellFormedness = checkWellFormedness(it)
+            assertThat(checkWellFormedness.isWellFormed).isFalse()
+            assertThat(checkWellFormedness.errors).contains(error)
+        }
     }
 
     private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<TAGMLToken>) -> Unit) {
