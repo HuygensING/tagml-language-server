@@ -36,19 +36,17 @@ object WellFormedness {
         var goOn = iterator.hasNext()
         while (goOn) {
             stepsXML += """<step n="${stepCount.getAndIncrement()}">"""
-
-            val token = iterator.next()
-            stepsXML += """<token><![CDATA[${token.content}]]></token>"""
             stepsXML += """<expectation>${expectation.toString()}</expectation>"""
 
-            _log.info("expectation=$expectation, token=${token.content}, match=${expectation.matches(token)}")
-            if (expectation.matches(token)) {
-                stepsXML += "<matches>yes</matches>"
+            val token = iterator.next()
+            val matches = expectation.matches(token)
+            stepsXML += """<token matches="$matches"><![CDATA[${token.content}]]></token>"""
+            _log.info("expectation=$expectation, token=${token.content}, match=$matches")
+            if (matches) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
             } else {
 //                _log.error("Unexpected token: found $token, but expected ${expectation.expectedTokens()}")
-                stepsXML += "<matches>no</matches>"
                 expectedTokens.addAll(expectation.expectedTokens())
                 errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
                 goOn = false
