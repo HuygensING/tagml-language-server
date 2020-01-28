@@ -29,14 +29,14 @@ object WellFormedness {
                 goOn = iterator.hasNext()
             } else {
 //                _log.error("Unexpected token: found $token, but expected ${expectation.expectedTokens()}")
-                expectedTokens.add(expectation.expectedTokens())
+                expectedTokens.addAll(expectation.expectedTokens())
                 errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
                 goOn = false
             }
         }
         _log.info("remaining expectation=${expectation}")
         if (errors.isEmpty() && !expectation.nullable) {
-            expectedTokens.add(expectation.expectedTokens())
+            expectedTokens.addAll(expectation.expectedTokens())
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
         return WellFormednessResult(!iterator.hasNext() && expectation.nullable, errors, expectedTokens)
