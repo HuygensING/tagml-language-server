@@ -14,7 +14,7 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 import org.slf4j.LoggerFactory
 
-object Expectations {
+object Patterns {
     private val _log = LoggerFactory.getLogger(this::class.java)
 
     val EMPTY: Pattern = Empty()
@@ -41,7 +41,7 @@ object Expectations {
         }
     }
 
-    class Range(val id: TagIdentifier, val expectation: Pattern) : Pattern {
+    class Range(val id: TagIdentifier, val pattern: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -51,7 +51,7 @@ object Expectations {
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             return group(
-                    expectation,
+                    pattern,
                     RangeClose(FixedIdentifier(s.tagName))
             )
         }
@@ -66,7 +66,7 @@ object Expectations {
         }
 
         override fun toString(): String {
-            return """<range id="$id">$expectation</range>"""
+            return """<range id="$id">$pattern</range>"""
         }
     }
 
@@ -144,285 +144,285 @@ object Expectations {
     }
 
     // combinators
-    class After(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
+    class After(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
 
         override fun matches(t: TAGMLToken): Boolean {
-            return if (!expectation1.matches(t) && expectation1.nullable)
-                expectation2.matches(t)
+            return if (!pattern1.matches(t) && pattern1.nullable)
+                pattern2.matches(t)
             else
-                expectation1.matches(t)
+                pattern1.matches(t)
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
-            return after(expectation1.startTokenDeriv(s), expectation2)
+            return after(pattern1.startTokenDeriv(s), pattern2)
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
-            return after(expectation1.endTokenDeriv(e), expectation2)
+            return after(pattern1.endTokenDeriv(e), pattern2)
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
-            return after(expectation1.textTokenDeriv(t), expectation2)
+            return after(pattern1.textTokenDeriv(t), pattern2)
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation1.expectedTokens()
+            return pattern1.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<after>$expectation1$expectation2</after>"
+            return "<after>$pattern1$pattern2</after>"
         }
 
     }
 
-    class Choice(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
+    class Choice(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
-            get() = expectation1.nullable || expectation2.nullable
+            get() = pattern1.nullable || pattern2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation1.matches(t) || expectation2.matches(t)
+            return pattern1.matches(t) || pattern2.matches(t)
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
-            return choice(expectation1.startTokenDeriv(s), expectation2.startTokenDeriv(s))
+            return choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
-            return choice(expectation1.endTokenDeriv(e), expectation2.endTokenDeriv(e))
+            return choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
-            return choice(expectation1.textTokenDeriv(t), expectation2.textTokenDeriv(t))
+            return choice(pattern1.textTokenDeriv(t), pattern2.textTokenDeriv(t))
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation1.expectedTokens() + expectation2.expectedTokens()
+            return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
         override fun toString(): String {
-            return if (expectation1 is OneOrMore && expectation2 is Empty)
-                "<zeroOrMore>${expectation1.expectation}</zeroOrMore>"
+            return if (pattern1 is OneOrMore && pattern2 is Empty)
+                "<zeroOrMore>${pattern1.pattern}</zeroOrMore>"
             else
-                "<choice>$expectation1$expectation2</choice>"
+                "<choice>$pattern1$pattern2</choice>"
         }
     }
 
-    class OneOrMore(val expectation: Pattern) : Pattern {
+    class OneOrMore(val pattern: Pattern) : Pattern {
 
         override val nullable: Boolean
-            get() = expectation.nullable
+            get() = pattern.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation.matches(t)
+            return pattern.matches(t)
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
             return group(
-                    expectation.textTokenDeriv(t),
-                    choice(OneOrMore(expectation), empty())
+                    pattern.textTokenDeriv(t),
+                    choice(OneOrMore(pattern), empty())
             )
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             return group(
-                    expectation.startTokenDeriv(s),
-                    choice(OneOrMore(expectation), empty())
+                    pattern.startTokenDeriv(s),
+                    choice(OneOrMore(pattern), empty())
             )
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
             return group(
-                    expectation.endTokenDeriv(e),
-                    choice(OneOrMore(expectation), empty())
+                    pattern.endTokenDeriv(e),
+                    choice(OneOrMore(pattern), empty())
             )
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation.expectedTokens()
+            return pattern.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<oneOrMore>$expectation</oneOrMore>"
+            return "<oneOrMore>$pattern</oneOrMore>"
         }
 
     }
 
-    class Concur(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
+    class Concur(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
-            get() = expectation1.nullable && expectation2.nullable
+            get() = pattern1.nullable && pattern2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation1.matches(t) || expectation2.matches(t)
+            return pattern1.matches(t) || pattern2.matches(t)
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
             return concur(
-                    expectation1.textTokenDeriv(t),
-                    expectation2.textTokenDeriv(t)
+                    pattern1.textTokenDeriv(t),
+                    pattern2.textTokenDeriv(t)
             )
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val d1 = expectation1.startTokenDeriv(s)
-            val d2 = expectation2.startTokenDeriv(s)
+            val d1 = pattern1.startTokenDeriv(s)
+            val d2 = pattern2.startTokenDeriv(s)
             return choice(
                     choice(
-                            concur(d1, expectation2),
-                            concur(expectation1, d2)
+                            concur(d1, pattern2),
+                            concur(pattern1, d2)
                     ),
                     concur(d1, d2)
             )
         }
 
         override fun endTokenDeriv(t: EndTagToken): Pattern {
-            val d1 = expectation1.endTokenDeriv(t)
-            val d2 = expectation2.endTokenDeriv(t)
+            val d1 = pattern1.endTokenDeriv(t)
+            val d2 = pattern2.endTokenDeriv(t)
             return choice(
                     choice(
-                            concur(d1, expectation2),
-                            concur(expectation1, d2)
+                            concur(d1, pattern2),
+                            concur(pattern1, d2)
                     ),
                     concur(d1, d2)
             )
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation1.expectedTokens() + expectation2.expectedTokens()
+            return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<concur>$expectation1$expectation2</concur>"
+            return "<concur>$pattern1$pattern2</concur>"
         }
 
     }
 
-    class All(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
+    class All(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
-            get() = expectation1.nullable && expectation2.nullable
+            get() = pattern1.nullable && pattern2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation1.matches(t) && expectation2.matches(t)
+            return pattern1.matches(t) && pattern2.matches(t)
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation1.expectedTokens() + expectation2.expectedTokens()
+            return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<all>$expectation1$expectation2</all>"
+            return "<all>$pattern1$pattern2</all>"
         }
     }
 
-    class ConcurOneOrMore(val expectation: Pattern) : Pattern {
+    class ConcurOneOrMore(val pattern: Pattern) : Pattern {
 
         override val nullable: Boolean
-            get() = expectation.nullable
+            get() = pattern.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return expectation.matches(t)
+            return pattern.matches(t)
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
             return concur(
-                    expectation.textTokenDeriv(t),
-                    choice(ConcurOneOrMore(expectation), empty())
+                    pattern.textTokenDeriv(t),
+                    choice(ConcurOneOrMore(pattern), empty())
             )
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             return concur(
-                    expectation.startTokenDeriv(s),
-                    choice(ConcurOneOrMore(expectation), anyContent())
+                    pattern.startTokenDeriv(s),
+                    choice(ConcurOneOrMore(pattern), anyContent())
             )
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
             return concur(
-                    expectation.endTokenDeriv(e),
-                    choice(ConcurOneOrMore(expectation), anyContent())
+                    pattern.endTokenDeriv(e),
+                    choice(ConcurOneOrMore(pattern), anyContent())
             )
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return expectation.expectedTokens()
+            return pattern.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<concurOneOrMore>$expectation</concurOneOrMore>"
+            return "<concurOneOrMore>$pattern</concurOneOrMore>"
         }
 
     }
 
-    class Group(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
+    class Group(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
-            get() = expectation1.nullable && expectation2.nullable
+            get() = pattern1.nullable && pattern2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-//            _log.info("expectation1=$expectation1 ; expectation1.matches(t)=${expectation1.matches(t)}; expectation1.nullable = ${expectation1.nullable} ")
-            return if (!expectation1.matches(t) && expectation1.nullable)
-                expectation2.matches(t)
+//            _log.info("pattern1=$pattern1 ; pattern1.matches(t)=${pattern1.matches(t)}; pattern1.nullable = ${pattern1.nullable} ")
+            return if (!pattern1.matches(t) && pattern1.nullable)
+                pattern2.matches(t)
             else
-                expectation1.matches(t)
+                pattern1.matches(t)
         }
 
         override fun textTokenDeriv(t: TextToken): Pattern {
-            val p = group(expectation1.textTokenDeriv(t), expectation2)
-            return if (expectation1.nullable)
-                choice(p, expectation2.textTokenDeriv(t))
+            val p = group(pattern1.textTokenDeriv(t), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.textTokenDeriv(t))
             else p
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val p = group(expectation1.startTokenDeriv(s), expectation2)
-            return if (expectation1.nullable)
-                choice(p, expectation2.startTokenDeriv(s))
+            val p = group(pattern1.startTokenDeriv(s), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.startTokenDeriv(s))
             else p
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val p = group(expectation1.endTokenDeriv(e), expectation2)
-            return if (expectation1.nullable)
-                choice(p, expectation2.endTokenDeriv(e))
+            val p = group(pattern1.endTokenDeriv(e), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.endTokenDeriv(e))
             else p
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return if (expectation1.nullable)
-                expectation1.expectedTokens() + expectation2.expectedTokens()
+            return if (pattern1.nullable)
+                pattern1.expectedTokens() + pattern2.expectedTokens()
             else
-                expectation1.expectedTokens()
+                pattern1.expectedTokens()
         }
 
         override fun toString(): String {
-            return "<group>$expectation1$expectation2</group>"
+            return "<group>$pattern1$pattern2</group>"
         }
 
     }
 
-//    class Not(val expectation: Expectation) : Expectation {
+//    class Not(val pattern: Expectation) : Expectation {
 //
 //        override fun matches(t: TAGMLToken): Boolean {
-//            return !expectation.matches(t)
+//            return !pattern.matches(t)
 //        }
 //
 //        override fun startTokenDeriv(s: StartTagToken): Expectation {
-//            return if (expectation.matches(s))
+//            return if (pattern.matches(s))
 //                notAllowed()
 //            else
 //                RangeOpen(FixedIdentifier(s.tagName)).startTokenDeriv(s)
 //        }
 //
 //        override fun endTokenDeriv(e: EndTagToken): Expectation {
-//            return if (this.expectation.matches(e))
+//            return if (this.pattern.matches(e))
 //                notAllowed()
 //            else
 //                RangeClose(FixedIdentifier(e.tagName)).endTokenDeriv(e)
 //        }
 //
 //        override fun textTokenDeriv(t: TextToken): Expectation {
-//            return if (expectation.matches(t))
+//            return if (pattern.matches(t))
 //                notAllowed()
 //            else
 //                Text().textTokenDeriv(t)
@@ -433,7 +433,7 @@ object Expectations {
 //        }
 //
 //        override fun toString(): String {
-//            return "<not>$expectation</not>"
+//            return "<not>$pattern</not>"
 //        }
 //
 //    }

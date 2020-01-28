@@ -1,6 +1,6 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NotAllowed
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NotAllowed
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken

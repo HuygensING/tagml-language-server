@@ -3,8 +3,8 @@ package nl.knaw.huc.di.rd.tag.tagml.derivation
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concurOneOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.zeroOrMore
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Range
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Text
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import org.slf4j.LoggerFactory

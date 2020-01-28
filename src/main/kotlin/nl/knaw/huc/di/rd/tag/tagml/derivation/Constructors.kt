@@ -1,18 +1,18 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.After
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.All
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Choice
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Concur
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.ConcurOneOrMore
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.EMPTY
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Empty
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Group
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NOT_ALLOWED
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.NotAllowed
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.OneOrMore
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.TEXT
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Text
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.After
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.All
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Choice
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Concur
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.ConcurOneOrMore
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.EMPTY
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Empty
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Group
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NOT_ALLOWED
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NotAllowed
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.OneOrMore
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.TEXT
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 
 object Constructors {
 
@@ -38,8 +38,8 @@ object Constructors {
         }
 
         if (expectation1 is After) {
-            val p1 = expectation1.expectation1
-            val p2 = expectation1.expectation2
+            val p1 = expectation1.pattern1
+            val p2 = expectation1.pattern2
             return after(p1, after(p2, expectation2))
         }
 
@@ -97,22 +97,22 @@ object Constructors {
         }
 
         if (expectation1 is After && expectation2 is After) {
-            val e1 = expectation1.expectation1
-            val e2 = expectation1.expectation2
-            val e3 = expectation2.expectation1
-            val e4 = expectation2.expectation2
+            val e1 = expectation1.pattern1
+            val e2 = expectation1.pattern2
+            val e3 = expectation2.pattern1
+            val e4 = expectation2.pattern2
             return after(all(e1, e3), concur(e2, e4))
         }
 
         if (expectation1 is After) {
-            val e1 = expectation1.expectation1
-            val e2 = expectation1.expectation2
+            val e1 = expectation1.pattern1
+            val e2 = expectation1.pattern2
             return after(e1, concur(e2, expectation2))
         }
 
         if (expectation2 is After) {
-            val e2 = expectation2.expectation1
-            val e3 = expectation2.expectation2
+            val e2 = expectation2.pattern1
+            val e3 = expectation2.pattern2
             return after(e2, concur(expectation1, e3))
         }
 
@@ -140,10 +140,10 @@ object Constructors {
         }
 
         if (expectation1 is After && expectation2 is After) {
-            val e1 = expectation1.expectation1
-            val e2 = expectation1.expectation2
-            val e3 = expectation2.expectation1
-            val e4 = expectation2.expectation2
+            val e1 = expectation1.pattern1
+            val e2 = expectation1.pattern2
+            val e3 = expectation2.pattern1
+            val e4 = expectation2.pattern2
             return after(all(e1, e3), all(e2, e4))
         }
 
@@ -167,11 +167,11 @@ object Constructors {
         }
         //  group (After p1 p2) p3 = after p1 (group p2 p3)
         if (expectation1 is After) {
-            return after(expectation1.expectation1, group(expectation1.expectation2, expectation2))
+            return after(expectation1.pattern1, group(expectation1.pattern2, expectation2))
         }
         //  group p1 (After p2 p3) = after p2 (group p1 p3)
         return if (expectation2 is After) {
-            after(expectation2.expectation1, group(expectation1, expectation2.expectation2))
+            after(expectation2.pattern1, group(expectation1, expectation2.pattern2))
         } else Group(expectation1, expectation2)
         //  group p1 p2 = Group p1 p2
     }
