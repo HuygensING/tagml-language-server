@@ -16,7 +16,7 @@ object WellFormedness {
 
     fun checkWellFormedness(tokens: List<TAGMLToken>): WellFormednessResult {
         val iterator = tokens.iterator()
-        var expectation: Expectation = Range(AnyTagIdentifier(), concurOneOrMore(choice(Text(), zeroOrMore(Range(AnyTagIdentifier(), Text())))))
+        var expectation: Pattern = Range(AnyTagIdentifier(), concurOneOrMore(choice(Text(), zeroOrMore(Range(AnyTagIdentifier(), Text())))))
         val errors = mutableListOf<String>()
         val expectedTokens = mutableListOf<TAGMLToken>()
 
@@ -43,7 +43,7 @@ object WellFormedness {
     }
 
 
-    private fun expectationString(expectation: Expectation): String {
+    private fun expectationString(expectation: Pattern): String {
         val expectedTokens = expectation.expectedTokens().map { it.content }
         return when (expectedTokens.size) {
             0 -> "nothing"
