@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory
 object Expectations {
     private val _log = LoggerFactory.getLogger(this::class.java)
 
-    val EMPTY: Expectation = Empty()
+    val EMPTY: Pattern = Empty()
 
-    val NOT_ALLOWED: Expectation = NotAllowed()
+    val NOT_ALLOWED: Pattern = NotAllowed()
 
-    val TEXT: Expectation = Text()
+    val TEXT: Pattern = Text()
 
-    class Empty : Expectation {
+    class Empty : Pattern {
         override val nullable: Boolean
             get() = true
 
@@ -32,7 +32,7 @@ object Expectations {
         }
     }
 
-    class NotAllowed : Expectation {
+    class NotAllowed : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -41,7 +41,7 @@ object Expectations {
         }
     }
 
-    class Range(val id: TagIdentifier, val expectation: Expectation) : Expectation {
+    class Range(val id: TagIdentifier, val expectation: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -49,7 +49,7 @@ object Expectations {
             return (t is StartTagToken) && id.matches(t.tagName)
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             return group(
                     expectation,
                     RangeClose(FixedIdentifier(s.tagName))
@@ -99,7 +99,7 @@ object Expectations {
 //        }
 //    }
 
-    class RangeClose(val id: TagIdentifier) : Expectation {
+    class RangeClose(val id: TagIdentifier) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -107,7 +107,7 @@ object Expectations {
             return (t is EndTagToken) && id.matches(t.tagName)
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             return empty()
         }
 
@@ -126,7 +126,7 @@ object Expectations {
 
     }
 
-    class Text : Expectation {
+    class Text : Pattern {
         override val nullable: Boolean
             get() = true
 
@@ -134,7 +134,7 @@ object Expectations {
             return (t is TextToken)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return text()
         }
 
@@ -144,7 +144,7 @@ object Expectations {
     }
 
     // combinators
-    class After(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+    class After(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -155,15 +155,15 @@ object Expectations {
                 expectation1.matches(t)
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             return after(expectation1.startTokenDeriv(s), expectation2)
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             return after(expectation1.endTokenDeriv(e), expectation2)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return after(expectation1.textTokenDeriv(t), expectation2)
         }
 
@@ -177,7 +177,7 @@ object Expectations {
 
     }
 
-    class Choice(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+    class Choice(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = expectation1.nullable || expectation2.nullable
 
@@ -185,15 +185,15 @@ object Expectations {
             return expectation1.matches(t) || expectation2.matches(t)
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             return choice(expectation1.startTokenDeriv(s), expectation2.startTokenDeriv(s))
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             return choice(expectation1.endTokenDeriv(e), expectation2.endTokenDeriv(e))
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return choice(expectation1.textTokenDeriv(t), expectation2.textTokenDeriv(t))
         }
 
@@ -209,7 +209,7 @@ object Expectations {
         }
     }
 
-    class OneOrMore(val expectation: Expectation) : Expectation {
+    class OneOrMore(val expectation: Pattern) : Pattern {
 
         override val nullable: Boolean
             get() = expectation.nullable
@@ -218,21 +218,21 @@ object Expectations {
             return expectation.matches(t)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return group(
                     expectation.textTokenDeriv(t),
                     choice(OneOrMore(expectation), empty())
             )
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             return group(
                     expectation.startTokenDeriv(s),
                     choice(OneOrMore(expectation), empty())
             )
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             return group(
                     expectation.endTokenDeriv(e),
                     choice(OneOrMore(expectation), empty())
@@ -249,7 +249,7 @@ object Expectations {
 
     }
 
-    class Concur(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+    class Concur(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = expectation1.nullable && expectation2.nullable
 
@@ -257,14 +257,14 @@ object Expectations {
             return expectation1.matches(t) || expectation2.matches(t)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return concur(
                     expectation1.textTokenDeriv(t),
                     expectation2.textTokenDeriv(t)
             )
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             val d1 = expectation1.startTokenDeriv(s)
             val d2 = expectation2.startTokenDeriv(s)
             return choice(
@@ -276,7 +276,7 @@ object Expectations {
             )
         }
 
-        override fun endTokenDeriv(t: EndTagToken): Expectation {
+        override fun endTokenDeriv(t: EndTagToken): Pattern {
             val d1 = expectation1.endTokenDeriv(t)
             val d2 = expectation2.endTokenDeriv(t)
             return choice(
@@ -298,7 +298,7 @@ object Expectations {
 
     }
 
-    class All(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+    class All(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = expectation1.nullable && expectation2.nullable
 
@@ -315,7 +315,7 @@ object Expectations {
         }
     }
 
-    class ConcurOneOrMore(val expectation: Expectation) : Expectation {
+    class ConcurOneOrMore(val expectation: Pattern) : Pattern {
 
         override val nullable: Boolean
             get() = expectation.nullable
@@ -324,21 +324,21 @@ object Expectations {
             return expectation.matches(t)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             return concur(
                     expectation.textTokenDeriv(t),
                     choice(ConcurOneOrMore(expectation), empty())
             )
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             return concur(
                     expectation.startTokenDeriv(s),
                     choice(ConcurOneOrMore(expectation), anyContent())
             )
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             return concur(
                     expectation.endTokenDeriv(e),
                     choice(ConcurOneOrMore(expectation), anyContent())
@@ -355,7 +355,7 @@ object Expectations {
 
     }
 
-    class Group(val expectation1: Expectation, val expectation2: Expectation) : Expectation {
+    class Group(val expectation1: Pattern, val expectation2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = expectation1.nullable && expectation2.nullable
 
@@ -367,21 +367,21 @@ object Expectations {
                 expectation1.matches(t)
         }
 
-        override fun textTokenDeriv(t: TextToken): Expectation {
+        override fun textTokenDeriv(t: TextToken): Pattern {
             val p = group(expectation1.textTokenDeriv(t), expectation2)
             return if (expectation1.nullable)
                 choice(p, expectation2.textTokenDeriv(t))
             else p
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Expectation {
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
             val p = group(expectation1.startTokenDeriv(s), expectation2)
             return if (expectation1.nullable)
                 choice(p, expectation2.startTokenDeriv(s))
             else p
         }
 
-        override fun endTokenDeriv(e: EndTagToken): Expectation {
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
             val p = group(expectation1.endTokenDeriv(e), expectation2)
             return if (expectation1.nullable)
                 choice(p, expectation2.endTokenDeriv(e))

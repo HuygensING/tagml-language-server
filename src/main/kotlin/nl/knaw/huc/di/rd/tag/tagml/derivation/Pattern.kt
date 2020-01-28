@@ -6,13 +6,13 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
-interface Expectation {
+interface Pattern {
 
     val nullable: Boolean
 
     fun matches(t: TAGMLToken): Boolean = false
 
-    fun deriv(token: TAGMLToken): Expectation {
+    fun deriv(token: TAGMLToken): Pattern {
         return when (token) {
             is StartTagToken -> startTokenDeriv(token)
             is EndTagToken -> endTokenDeriv(token)
@@ -21,11 +21,11 @@ interface Expectation {
         }
     }
 
-    fun startTokenDeriv(s: StartTagToken): Expectation = NotAllowed()
+    fun startTokenDeriv(s: StartTagToken): Pattern = NotAllowed()
 
-    fun endTokenDeriv(e: EndTagToken): Expectation = NotAllowed()
+    fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed()
 
-    fun textTokenDeriv(t: TextToken): Expectation = NotAllowed()
+    fun textTokenDeriv(t: TextToken): Pattern = NotAllowed()
 
     fun expectedTokens(): List<TAGMLToken> = emptyList()
 

@@ -16,19 +16,19 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Expectations.Text
 
 object Constructors {
 
-    fun notAllowed(): Expectation {
+    fun notAllowed(): Pattern {
         return NOT_ALLOWED
     }
 
-    fun empty(): Expectation {
+    fun empty(): Pattern {
         return EMPTY
     }
 
-    fun text(): Expectation {
+    fun text(): Pattern {
         return TEXT
     }
 
-    fun after(expectation1: Expectation, expectation2: Expectation): Expectation {
+    fun after(expectation1: Pattern, expectation2: Pattern): Pattern {
         if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
             return notAllowed()
         }
@@ -46,7 +46,7 @@ object Constructors {
         return After(expectation1, expectation2)
     }
 
-    fun choice(expectation1: Expectation, expectation2: Expectation): Expectation {
+    fun choice(expectation1: Pattern, expectation2: Pattern): Pattern {
         //  choice p NotAllowed = p
         if (expectation1 is NotAllowed) {
             return expectation2
@@ -63,11 +63,11 @@ object Constructors {
         //  choice p1 p2 = Choice p1 p2
     }
 
-    fun zeroOrMore(expectation: Expectation): Expectation {
+    fun zeroOrMore(expectation: Pattern): Pattern {
         return choice(oneOrMore(expectation), empty())
     }
 
-    private fun oneOrMore(expectation: Expectation): Expectation {
+    private fun oneOrMore(expectation: Pattern): Pattern {
         return if (expectation is NotAllowed
                 || expectation is Empty)
             expectation
@@ -75,7 +75,7 @@ object Constructors {
             OneOrMore(expectation)
     }
 
-    fun concurOneOrMore(expectation: Expectation): Expectation {
+    fun concurOneOrMore(expectation: Pattern): Pattern {
         return if (expectation is NotAllowed
                 || expectation is Empty)
             expectation
@@ -83,7 +83,7 @@ object Constructors {
             ConcurOneOrMore(expectation)
     }
 
-    fun concur(expectation1: Expectation, expectation2: Expectation): Expectation {
+    fun concur(expectation1: Pattern, expectation2: Pattern): Pattern {
         if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
             return notAllowed()
         }
@@ -119,7 +119,7 @@ object Constructors {
         return Concur(expectation1, expectation2)
     }
 
-    private fun all(expectation1: Expectation, expectation2: Expectation): Expectation {
+    private fun all(expectation1: Pattern, expectation2: Pattern): Pattern {
 
         if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
             return notAllowed()
@@ -151,7 +151,7 @@ object Constructors {
 
     }
 
-    fun group(expectation1: Expectation, expectation2: Expectation): Expectation {
+    fun group(expectation1: Pattern, expectation2: Pattern): Pattern {
         //  group p NotAllowed = NotAllowed
         //  group NotAllowed p = NotAllowed
         if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
@@ -176,6 +176,6 @@ object Constructors {
         //  group p1 p2 = Group p1 p2
     }
 
-    fun anyContent(): Expectation = text() // might not cover it
+    fun anyContent(): Pattern = text() // might not cover it
 
 }
