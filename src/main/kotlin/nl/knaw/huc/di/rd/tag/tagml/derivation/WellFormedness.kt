@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 object WellFormedness {
-    private val _log = LoggerFactory.getLogger(this::class.java)
+    private val LOG = LoggerFactory.getLogger(this::class.java)
 
     data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: List<TAGMLToken>)
 
@@ -32,16 +32,16 @@ object WellFormedness {
         val expectedTokens = mutableListOf<TAGMLToken>()
         var stepsXML = "<wellformednesscheck>\n"
 
-        var stepCount = AtomicInteger(1)
+        val stepCount = AtomicInteger(1)
         var goOn = iterator.hasNext()
         while (goOn) {
             stepsXML += """<step n="${stepCount.getAndIncrement()}">"""
-            stepsXML += """<expectation>${expectation.toString()}</expectation>"""
+            stepsXML += """<expectation>$expectation</expectation>"""
 
             val token = iterator.next()
             val matches = expectation.matches(token)
             stepsXML += """<token matches="$matches"><![CDATA[${token.content}]]></token>"""
-            _log.info("expectation=$expectation, token=${token.content}, match=$matches")
+            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
             if (matches) {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
@@ -54,13 +54,13 @@ object WellFormedness {
             stepsXML += "</step>\n"
         }
         stepsXML += """<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>"""
-        _log.info("remaining expectation=$expectation")
+        LOG.info("remaining expectation=$expectation")
         if (errors.isEmpty() && !expectation.nullable) {
             expectedTokens.addAll(expectation.expectedTokens())
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
         stepsXML += "\n</wellformednesscheck>"
-        _log.info("steps=\n{}\n", stepsXML)
+        LOG.info("steps=\n{}\n", stepsXML)
         return WellFormednessResult(
                 !iterator.hasNext() && expectation.nullable,
                 errors,

@@ -16,7 +16,7 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 
 object Constructors {
 
-    fun notAllowed(): Pattern {
+    private fun notAllowed(): Pattern {
         return NOT_ALLOWED
     }
 

@@ -8,7 +8,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 
 class HoverTest {
-    private val _log = LoggerFactory.getLogger(this::class.java)
+    private val LOG = LoggerFactory.getLogger(this::class.java)
 
     @Test
     fun testHover() {
@@ -17,6 +17,6 @@ class HoverTest {
         val position = Position(0, 0)
         val positionParams = TextDocumentPositionParams(textDocumentIdentifier, position)
         val hover = server.textDocumentService.hover(positionParams).join()
-        _log.info("hover={}", hover)
+        LOG.info("hover={}", hover)
     }
 }

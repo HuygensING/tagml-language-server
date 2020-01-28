@@ -12,10 +12,8 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
-import org.slf4j.LoggerFactory
 
 object Patterns {
-    private val _log = LoggerFactory.getLogger(this::class.java)
 
     val EMPTY: Pattern = Empty()
 
@@ -41,7 +39,7 @@ object Patterns {
         }
     }
 
-    class Range(val id: TagIdentifier, val pattern: Pattern) : Pattern {
+    class Range(private val id: TagIdentifier, private val pattern: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -99,7 +97,7 @@ object Patterns {
 //        }
 //    }
 
-    class RangeClose(val id: TagIdentifier) : Pattern {
+    class RangeClose(private val id: TagIdentifier) : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -177,7 +175,7 @@ object Patterns {
 
     }
 
-    class Choice(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
+    class Choice(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern1.nullable || pattern2.nullable
 
@@ -249,7 +247,7 @@ object Patterns {
 
     }
 
-    class Concur(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
+    class Concur(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern1.nullable && pattern2.nullable
 
@@ -298,7 +296,7 @@ object Patterns {
 
     }
 
-    class All(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
+    class All(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern1.nullable && pattern2.nullable
 
@@ -315,7 +313,7 @@ object Patterns {
         }
     }
 
-    class ConcurOneOrMore(val pattern: Pattern) : Pattern {
+    class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
 
         override val nullable: Boolean
             get() = pattern.nullable
@@ -355,7 +353,7 @@ object Patterns {
 
     }
 
-    class Group(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
+    class Group(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern1.nullable && pattern2.nullable
 

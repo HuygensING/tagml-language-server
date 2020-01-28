@@ -5,7 +5,7 @@ import java.io.InputStream
 import java.io.PrintStream
 
 
-fun main(args: Array<String>) {
+fun main() {
     println("starting tagml language server...")
     startServer(System.`in`, System.out)
 }

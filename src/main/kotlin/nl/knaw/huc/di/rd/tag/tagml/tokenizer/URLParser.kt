@@ -21,32 +21,32 @@ object URLParser {
 
     val digit = charIn(CharRange('0', '9'))
     val digits = digit.rep
-    val port = digits
-    val lowalpha = charIn(CharRange('a', 'z'))
-    val highalpha = charIn(CharRange('A', 'Z'))
-    val alpha = lowalpha or highalpha
-    val alphadigit = alpha or digit
+    private val port = digits
+    private val lowalpha = charIn(CharRange('a', 'z'))
+    private val highalpha = charIn(CharRange('A', 'Z'))
+    private val alpha = lowalpha or highalpha
+    private val alphadigit = alpha or digit
     val domainlabel = (alphadigit then (alphadigit or char('-')).optrep then alphadigit)
-    val toplabel = alpha or (alpha then (alphadigit or char('-')).optrep then alphadigit)
+    private val toplabel = alpha or (alpha then (alphadigit or char('-')).optrep then alphadigit)
     val hostname = (domainlabel then char('.')).optrep then toplabel
-    val hostnumber = digits then char('.') then digits then char('.') then digits then char('.') then digits
-    val host = hostname or hostnumber
+    private val hostnumber = digits then char('.') then digits then char('.') then digits then char('.') then digits
+    private val host = hostname or hostnumber
     val hostport = host then (char(':') then port).opt
-    val hex = digit or charIn(CharRange('a', 'f')) or charIn(CharRange('A', 'F'))
-    val escape = char('%') then hex then hex
-    val safe = charIn("""$-_.+""")
-    val extra = charIn("""!*'(),""")
-    val unreserved = alpha or digit or safe or extra
-    val uchar = unreserved or escape
-    val hsegment = (uchar or charIn(";:@&=")).optrep
-    val search = hsegment
-    val hpath = hsegment then (char('/') then hsegment).optrep
-    val httpurl = (string("http") then char('s').opt then string("://") then hostport then (char('/') then hpath then (char('?') then search).opt).opt)
+    private val hex = digit or charIn(CharRange('a', 'f')) or charIn(CharRange('A', 'F'))
+    private val escape = char('%') then hex then hex
+    private val safe = charIn("""$-_.+""")
+    private val extra = charIn("""!*'(),""")
+    private val unreserved = alpha or digit or safe or extra
+    private val uchar = unreserved or escape
+    private val hsegment = (uchar or charIn(";:@&=")).optrep
+    private val search = hsegment
+    private val hpath = hsegment then (char('/') then hsegment).optrep
+    private val httpurl = (string("http") then char('s').opt then string("://") then hostport then (char('/') then hpath then (char('?') then search).opt).opt)
             .map { it.concatenateLeaves() }
 
-    val fsegment = hsegment
-    val fpath = fsegment then (char('/') then fsegment).optrep
-    val fileurl = (string("file://") then (host or string("localhost")).opt then char('/') then fpath)
+    private val fsegment = hsegment
+    private val fpath = fsegment then (char('/') then fsegment).optrep
+    private val fileurl = (string("file://") then (host or string("localhost")).opt then char('/') then fpath)
             .map { it.concatenateLeaves() }
 
     val url = httpurl or fileurl

@@ -9,12 +9,14 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.junit.Ignore
 import org.junit.Test
 import java.net.URL
 
 class TAGMLTokenizerTest {
 
-    //    @Test
+    @Test
+    @Ignore
     fun testNameSpaceDefinition() {
         val tagml = "[!ns ns1 http://example.org/namespace/ns1][hello>World!<hello]"
 

@@ -2,6 +2,7 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.eclipse.lsp4j.MessageParams
 import org.eclipse.lsp4j.MessageType
+import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -9,11 +10,12 @@ import java.io.OutputStreamWriter
 
 
 class TAGMLLanguageServerTest {
-    private val _log = LoggerFactory.getLogger(TAGMLLanguageServerTest::class.java)
+    private val LOG = LoggerFactory.getLogger(TAGMLLanguageServerTest::class.java)
 
 //    val TIMEOUT = 20000
 
-//    @Test
+    @Test
+    @Ignore
     @Throws(IOException::class)
     fun testNotification() {
         val client = AssertingEndpoint()

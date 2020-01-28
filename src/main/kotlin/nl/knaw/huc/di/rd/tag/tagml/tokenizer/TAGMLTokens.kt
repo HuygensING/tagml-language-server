@@ -6,13 +6,13 @@ abstract class TAGMLToken {
     abstract val content: String
 }
 
-class SchemaLocationToken(val url: URL) : TAGMLToken() {
+class SchemaLocationToken(private val url: URL) : TAGMLToken() {
     override fun toString() = "SchemaLocation($url)"
     override val content: String
         get() = "[!schema $url]"
 }
 
-class NameSpaceIdentifierToken(val id: String, val url: URL) : TAGMLToken() {
+class NameSpaceIdentifierToken(private val id: String, private val url: URL) : TAGMLToken() {
     override fun toString() = "NameSpace($id,$url)"
     override val content: String
         get() = "[!ns $id $url]"
@@ -31,7 +31,7 @@ class EndTagToken(val tagName: String) : TAGMLToken() {
         get() = "<$tagName]"
 }
 
-class TextToken(val textContent: String) : TAGMLToken() {
+class TextToken(private val textContent: String) : TAGMLToken() {
     override fun toString() = "Text(${textContent.replace("\n", "\\n")})"
     override val content: String
         get() = textContent

@@ -10,11 +10,14 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.URLParser.hostname
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.URLParser.hostport
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.URLParser.url
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
+import org.junit.Test
 
 class URLParserTest {
     private val logger = KotlinLogging.logger {}
 
-    //    @Test
+    @Test
+    @Ignore
     fun testABBA() {
         val p = char('a') then charIn("ab").optrep then char('a')
         assertParses("aa", p)
@@ -25,7 +28,8 @@ class URLParserTest {
     }
 
 
-    //    @Test
+    @Test
+    @Ignore
     fun test1() {
         assertParses("0", digit)
         assertParses("1", digit)
@@ -37,7 +41,8 @@ class URLParserTest {
         assertParses("example.org", hostport)
     }
 
-    //    @Test
+    @Test
+    @Ignore
     fun testURLs() {
         assertParses("http://example.org", url)
         assertParses("http://example.org/schema.yaml", url)
