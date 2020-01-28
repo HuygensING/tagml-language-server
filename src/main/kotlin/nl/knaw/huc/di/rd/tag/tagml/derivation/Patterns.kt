@@ -199,11 +199,30 @@ object Patterns {
             return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
+        fun aggregateSubPatterns(): Set<Pattern> {
+            val aggregate = mutableSetOf<Pattern>()
+            if (pattern1 is Choice)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is Choice)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
+        }
+
         override fun toString(): String {
             return if (pattern1 is OneOrMore && pattern2 is Empty)
                 "<zeroOrMore>${pattern1.pattern}</zeroOrMore>"
+//            else if (pattern1 is Choice && pattern2 is Choice)
+//                "<choice>${pattern1.pattern1}${pattern1.pattern2}${pattern2.pattern1}${pattern2.pattern2}</choice>"
+//            else if (pattern1 is Choice)
+//                "<choice>${pattern1.pattern1}${pattern1.pattern2}$pattern2</choice>"
+//            else if (pattern2 is Choice)
+//                "<choice>pattern1${pattern2.pattern1}${pattern2.pattern2}</choice>"
             else
-                "<choice>$pattern1$pattern2</choice>"
+                "<choice>${aggregateSubPatterns().joinToString("")}</choice>"
         }
     }
 

@@ -1,0 +1,57 @@
+[tag>text<tag]
+[tag> text <tag]
+
+expect:
+step 1:
+- token: [tag>
+- expect: anyOpenTag
+- match: yes
+- derived expectation: group(choice(anyOpenTag, text),closeTag(tag)) // moet de expectation al meteen de hele token sequence vangen?
+
+step 2:
+- token: text
+- expect: group(choice(anyOpenTag, text),closeTag(tag))
+- match: yes, matches with text
+- derived expectation: group(choice(anyOpenTag,empty),closeTag(tag))
+
+step 3
+- token: <tag]
+- expect: group(choice(anyOpenTag,empty),closeTag(tag))
+- match: yes, matches with closeTag(tag)
+- derived expectation: empty
+
+step 3
+- eof (matches empty)
+
+
+
+
+[tag>[color>Green<color] [food>Eggs<food] and [food>Ham<food]<tag]
+
+step 1:
+- token: [tag>
+- expect: anyOpenTag
+- match: yes
+- derived expectation: group(choice(anyOpenTag, text),closeTag(tag))
+
+step 2:
+- token: [color>
+- expect: group(choice(anyOpenTag, text),closeTag(tag))
+- match: yes, matches anyOpenTag
+- derived expectation: group(choice(anyOpenTag, text,empty),closeTag(color),choice(anyOpenTag, text,empty),closeTag(tag))
+
+step 3:
+- token: Green
+- expect: group(choice(anyOpenTag, text),closeTag(color),choice(anyOpenTag, text),closeTag(tag))
+
+
+-----
+patterncombinators met 2 patterns: kunnen ze uitgebreid worden tot n patterns?
+choice(p1,p2) -> choice(p1..pn)
+dit zou de nesting van patterns minder maken: choice(p1,p2,p3) wordt nu choice(choice(p1,p2),p3) of choice(p1,choice(p2,p3))
+in haskell is dit niet te doen, omdat je voor elk aantal parameters een regel moet schrijven
+in Jing-Trang zijn After, Choice, Group en Interleave BinaryPatterns -> dus geen aggregatie?
+
+
+-----
+texttokens met alleen whitespace apart behandelen?

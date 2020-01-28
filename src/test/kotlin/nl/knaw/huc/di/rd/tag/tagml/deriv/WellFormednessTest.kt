@@ -1,6 +1,11 @@
 package nl.knaw.huc.di.rd.tag.tagml.deriv
 
 import arrow.core.Either
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.EMPTY
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.TEXT
+import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.derivation.WellFormedness.checkWellFormedness
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
@@ -26,7 +31,7 @@ class WellFormednessTest {
     }
 
     @Test
-    fun testWellFormedTAGML_Mixed() {
+    fun testWellFormedTAGML_mixed() {
         // TagML: Expectation = Range("*", Mixed((Range("*", Text())
         val tagml = "[tag>[color>Green<color] [food>Eggs<food] and [food>Ham<food]<tag]"
         assertTAGMLisWellFormed(tagml)
@@ -50,6 +55,15 @@ class WellFormednessTest {
     fun testNotWellFormedTAGML2() {
         val tagml = "[tag>text<gat]"
         assertTAGMLisNotWellFormed(tagml, "Unexpected token: found <gat], but expected any of [[*>, <tag]]")
+    }
+
+    @Test
+    fun testPatternRepresentationAggregation() {
+        val p1 = choice(Range(FixedIdentifier("a"), TEXT), TEXT)
+        val p2 = choice(Range(FixedIdentifier("b"), TEXT), TEXT)
+        val p3 = choice(p1, p2)
+        val p4 = choice(p3, EMPTY)
+        assertThat(p4.toString()).isEqualTo("""<choice><range id="a"><text/></range><text/><range id="b"><text/></range><empty/></choice>""")
     }
 
     private fun assertTAGMLisWellFormed(tagml: String) {
