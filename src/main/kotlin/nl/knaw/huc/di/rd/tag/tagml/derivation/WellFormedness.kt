@@ -12,12 +12,13 @@ import org.slf4j.LoggerFactory
 object WellFormedness {
     private val _log = LoggerFactory.getLogger(this::class.java)
 
-    data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>)
+    data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: List<TAGMLToken>)
 
     fun checkWellFormedness(tokens: List<TAGMLToken>): WellFormednessResult {
         val iterator = tokens.iterator()
         var expectation: Expectation = Range(AnyTagIdentifier(), concurOneOrMore(choice(Text(), zeroOrMore(Range(AnyTagIdentifier(), Text())))))
         val errors = mutableListOf<String>()
+        val expectedTokens = mutableListOf<TAGMLToken>()
 
         var goOn = iterator.hasNext()
         while (goOn) {
@@ -28,16 +29,17 @@ object WellFormedness {
                 goOn = iterator.hasNext()
             } else {
 //                _log.error("Unexpected token: found $token, but expected ${expectation.expectedTokens()}")
-
+                expectedTokens.add(expectation.expectedTokens())
                 errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
                 goOn = false
             }
         }
         _log.info("remaining expectation=${expectation}")
         if (errors.isEmpty() && !expectation.nullable) {
+            expectedTokens.add(expectation.expectedTokens())
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
-        return WellFormednessResult(!iterator.hasNext() && expectation.nullable, errors)
+        return WellFormednessResult(!iterator.hasNext() && expectation.nullable, errors, expectedTokens)
     }
 
 
