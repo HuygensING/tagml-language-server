@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 object WellFormedness {
     private val LOG = LoggerFactory.getLogger(this::class.java)
 
-    data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: List<TAGMLToken>)
+    data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: Set<TAGMLToken>)
 
     fun checkWellFormedness(tokens: List<TAGMLToken>): WellFormednessResult {
         val iterator = tokens.iterator()
@@ -29,14 +29,15 @@ object WellFormedness {
                 )
         )
         val errors = mutableListOf<String>()
-        val expectedTokens = mutableListOf<TAGMLToken>()
-        var stepsXML = StringBuilder("<wellformednesscheck>\n")
+        val expectedTokens = mutableSetOf<TAGMLToken>()
+        val stepsXML = StringBuilder("<wellformednesscheck>\n")
 
         val stepCount = AtomicInteger(1)
         var goOn = iterator.hasNext()
         while (goOn) {
             stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
             stepsXML.append("""<expectation>$expectation</expectation>""")
+            stepsXML.append("""<expectedTokens>${expectation.expectedTokens()}</expectedTokens>""")
 
             val token = iterator.next()
             val matches = expectation.matches(token)
@@ -46,7 +47,6 @@ object WellFormedness {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
             } else {
-//                _log.error("Unexpected token: found $token, but expected ${expectation.expectedTokens()}")
                 expectedTokens.addAll(expectation.expectedTokens())
                 errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
                 goOn = false

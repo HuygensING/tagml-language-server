@@ -27,6 +27,6 @@ interface Pattern {
 
     fun textTokenDeriv(t: TextToken): Pattern = NotAllowed()
 
-    fun expectedTokens(): List<TAGMLToken> = emptyList()
+    fun expectedTokens(): Set<TAGMLToken> = emptySet()
 
 }

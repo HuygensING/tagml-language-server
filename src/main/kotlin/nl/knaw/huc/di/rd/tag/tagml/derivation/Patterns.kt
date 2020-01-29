@@ -6,7 +6,9 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concur
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.interleave
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.text
+import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
@@ -20,6 +22,8 @@ object Patterns {
     val NOT_ALLOWED: Pattern = NotAllowed()
 
     val TEXT: Pattern = Text()
+
+    val ANY_TEXT_TOKEN = TextToken("*")
 
     class Empty : Pattern {
         override val nullable: Boolean
@@ -54,13 +58,8 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
-            val tagName = when (id) {
-                is TagIdentifiers.AnyTagIdentifier -> "*"
-                is FixedIdentifier -> id.tagName
-                else -> "?"
-            }
-            return listOf(StartTagToken(tagName))
+        override fun expectedTokens(): Set<TAGMLToken> {
+            return setOf(StartTagToken(determineTagName(id)))
         }
 
         override fun toString(): String {
@@ -80,13 +79,9 @@ object Patterns {
             return empty()
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
-            val tagName = when (id) {
-                is TagIdentifiers.AnyTagIdentifier -> "*"
-                is FixedIdentifier -> id.tagName
-                else -> "?"
-            }
-            return listOf(EndTagToken(tagName))
+        override fun expectedTokens(): Set<TAGMLToken> {
+            val tagName = determineTagName(id)
+            return setOf(EndTagToken(tagName))
         }
 
         override fun toString(): String {
@@ -105,6 +100,10 @@ object Patterns {
 
         override fun textTokenDeriv(t: TextToken): Pattern {
             return text()
+        }
+
+        override fun expectedTokens(): Set<TAGMLToken> {
+            return setOf(ANY_TEXT_TOKEN)
         }
 
         override fun toString(): String {
@@ -137,7 +136,7 @@ object Patterns {
             return after(pattern1.textTokenDeriv(t), pattern2)
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern1.expectedTokens()
         }
 
@@ -167,7 +166,7 @@ object Patterns {
             return pattern1.matches(t) && pattern2.matches(t)
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
@@ -209,7 +208,7 @@ object Patterns {
             return choice(pattern1.textTokenDeriv(t), pattern2.textTokenDeriv(t))
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
@@ -231,6 +230,17 @@ object Patterns {
                 "<zeroOrMore>${pattern1.pattern}</zeroOrMore>"
             else
                 "<choice>${aggregateSubPatterns().joinToString("")}</choice>"
+        }
+
+        override fun hashCode(): Int {
+            return this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return (other is Choice) && (
+                    (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
+                            (other.pattern1 == pattern2 && other.pattern2 == pattern1)
+                    )
         }
     }
 
@@ -273,7 +283,7 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
@@ -327,7 +337,7 @@ object Patterns {
             else p
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return if (pattern1.nullable)
                 pattern1.expectedTokens() + pattern2.expectedTokens()
             else
@@ -349,6 +359,61 @@ object Patterns {
 
         override fun toString(): String {
             return "<group>${aggregateSubPatterns().joinToString("")}</group>"
+        }
+    }
+
+    class Interleave(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+        override val nullable: Boolean
+            get() = pattern1.nullable && pattern2.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return pattern1.matches(t) || pattern2.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Pattern {
+            return choice(
+                    interleave(pattern1.textTokenDeriv(t), pattern2),
+                    interleave(pattern2.textTokenDeriv(t), pattern1)
+            )
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
+            return choice(
+                    interleave(pattern1.startTokenDeriv(s), pattern2),
+                    interleave(pattern2.startTokenDeriv(s), pattern1)
+            )
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
+            return choice(
+                    interleave(pattern1.endTokenDeriv(e), pattern2),
+                    interleave(pattern2.endTokenDeriv(e), pattern1)
+            )
+        }
+
+        override fun expectedTokens(): Set<TAGMLToken> {
+            return pattern1.expectedTokens() + pattern2.expectedTokens()
+        }
+
+        fun aggregateSubPatterns(): List<Pattern> {
+            val aggregate = mutableListOf<Pattern>()
+            if (pattern1 is Interleave)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is Interleave)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
+        }
+
+        override fun toString(): String {
+            if (pattern1 is Text)
+                return "<mixed>$pattern2</mixed>"
+            if (pattern2 is Text)
+                return "<mixed>$pattern1</mixed>"
+            return "<interleave>${aggregateSubPatterns().joinToString("")}</interleave>"
         }
     }
 
@@ -381,7 +446,7 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern.expectedTokens()
         }
 
@@ -420,7 +485,7 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): List<TAGMLToken> {
+        override fun expectedTokens(): Set<TAGMLToken> {
             return pattern.expectedTokens()
         }
 
@@ -429,4 +494,12 @@ object Patterns {
         }
     }
 
+    private fun determineTagName(id: TagIdentifier): String {
+        return when (id) {
+            is AnyTagIdentifier -> "*"
+            is FixedIdentifier -> id.tagName
+            else -> "?"
+        }
+    }
 }
+

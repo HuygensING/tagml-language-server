@@ -55,3 +55,6 @@ in Jing-Trang zijn After, Choice, Group en Interleave BinaryPatterns -> dus geen
 
 -----
 texttokens met alleen whitespace apart behandelen?
+
+http://conferences.idealliance.org/extreme/html/2006/SperbergMcQueen01/EML2006SperbergMcQueen01.html
+https://www.princexml.com/howcome/2007/xtech/papers/output/0077-30.pdf

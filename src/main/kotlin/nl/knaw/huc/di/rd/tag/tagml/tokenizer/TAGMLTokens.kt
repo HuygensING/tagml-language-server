@@ -23,18 +23,41 @@ class StartTagToken(val tagName: String) : TAGMLToken() {
     override val content: String
         get() = "[$tagName>"
 
+    override fun hashCode(): Int {
+        return this.javaClass.hashCode() + tagName.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is StartTagToken && other.tagName.equals(tagName)
+    }
 }
 
 class EndTagToken(val tagName: String) : TAGMLToken() {
     override fun toString() = "End($tagName)"
     override val content: String
         get() = "<$tagName]"
+
+    override fun hashCode(): Int {
+        return this.javaClass.hashCode() + tagName.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is EndTagToken && other.tagName.equals(tagName)
+    }
 }
 
 class TextToken(private val textContent: String) : TAGMLToken() {
     override fun toString() = "Text(${textContent.replace("\n", "\\n")})"
     override val content: String
         get() = textContent
+
+    override fun hashCode(): Int {
+        return this.javaClass.hashCode() + textContent.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is TextToken && other.textContent.equals(textContent)
+    }
 }
 
 class StartTextVariationToken : TAGMLToken() {
