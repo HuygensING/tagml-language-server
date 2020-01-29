@@ -68,35 +68,6 @@ object Patterns {
         }
     }
 
-//    class RangeOpen(val id: TagIdentifier) : Expectation {
-//        override val nullable: Boolean
-//            get() = false
-//
-//        override fun matches(t: TAGMLToken): Boolean {
-//            return (t is StartTagToken) && id.matches(t.tagName)
-//        }
-//
-//        override fun startTokenDeriv(s: StartTagToken): Expectation {
-//            return after(
-//                    Not(RangeClose(FixedIdentifier(s.tagName))),
-//                    RangeClose(FixedIdentifier(s.tagName))
-//            )
-//        }
-//
-//        override fun expectedTokens(): List<TAGMLToken> {
-//            val tagName = when (id) {
-//                is TagIdentifiers.AnyTagIdentifier -> "*"
-//                is FixedIdentifier -> id.tagName
-//                else -> "?"
-//            }
-//            return listOf(StartTagToken(tagName))
-//        }
-//
-//        override fun toString(): String {
-//            return """<rangeOpen id="$id">"""
-//        }
-//    }
-
     class RangeClose(private val id: TagIdentifier) : Pattern {
         override val nullable: Boolean
             get() = false
@@ -142,6 +113,7 @@ object Patterns {
     }
 
     // combinators
+
     class After(val pattern1: Pattern, val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = false
@@ -169,10 +141,52 @@ object Patterns {
             return pattern1.expectedTokens()
         }
 
-        override fun toString(): String {
-            return "<after>$pattern1$pattern2</after>"
+        fun aggregateSubPatterns(): List<Pattern> {
+            val aggregate = mutableListOf<Pattern>()
+            if (pattern1 is After)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is After)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
         }
 
+        override fun toString(): String {
+            return "<after>${aggregateSubPatterns().joinToString("")}</after>"
+        }
+    }
+
+    class All(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+        override val nullable: Boolean
+            get() = pattern1.nullable && pattern2.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return pattern1.matches(t) && pattern2.matches(t)
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return pattern1.expectedTokens() + pattern2.expectedTokens()
+        }
+
+        fun aggregateSubPatterns(): List<Pattern> {
+            val aggregate = mutableListOf<Pattern>()
+            if (pattern1 is All)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is All)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
+        }
+
+        override fun toString(): String {
+            return "<all>${aggregateSubPatterns().joinToString("")}</all>"
+        }
     }
 
     class Choice(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
@@ -215,55 +229,9 @@ object Patterns {
         override fun toString(): String {
             return if (pattern1 is OneOrMore && pattern2 is Empty)
                 "<zeroOrMore>${pattern1.pattern}</zeroOrMore>"
-//            else if (pattern1 is Choice && pattern2 is Choice)
-//                "<choice>${pattern1.pattern1}${pattern1.pattern2}${pattern2.pattern1}${pattern2.pattern2}</choice>"
-//            else if (pattern1 is Choice)
-//                "<choice>${pattern1.pattern1}${pattern1.pattern2}$pattern2</choice>"
-//            else if (pattern2 is Choice)
-//                "<choice>pattern1${pattern2.pattern1}${pattern2.pattern2}</choice>"
             else
                 "<choice>${aggregateSubPatterns().joinToString("")}</choice>"
         }
-    }
-
-    class OneOrMore(val pattern: Pattern) : Pattern {
-
-        override val nullable: Boolean
-            get() = pattern.nullable
-
-        override fun matches(t: TAGMLToken): Boolean {
-            return pattern.matches(t)
-        }
-
-        override fun textTokenDeriv(t: TextToken): Pattern {
-            return group(
-                    pattern.textTokenDeriv(t),
-                    choice(OneOrMore(pattern), empty())
-            )
-        }
-
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            return group(
-                    pattern.startTokenDeriv(s),
-                    choice(OneOrMore(pattern), empty())
-            )
-        }
-
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            return group(
-                    pattern.endTokenDeriv(e),
-                    choice(OneOrMore(pattern), empty())
-            )
-        }
-
-        override fun expectedTokens(): List<TAGMLToken> {
-            return pattern.expectedTokens()
-        }
-
-        override fun toString(): String {
-            return "<oneOrMore>$pattern</oneOrMore>"
-        }
-
     }
 
     class Concur(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
@@ -309,31 +277,121 @@ object Patterns {
             return pattern1.expectedTokens() + pattern2.expectedTokens()
         }
 
-        override fun toString(): String {
-            return "<concur>$pattern1$pattern2</concur>"
+        fun aggregateSubPatterns(): List<Pattern> {
+            val aggregate = mutableListOf<Pattern>()
+            if (pattern1 is Concur)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is Concur)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
         }
 
+        override fun toString(): String {
+            return "<concur>${aggregateSubPatterns().joinToString("")}</concur>"
+        }
     }
 
-    class All(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+    class Group(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern1.nullable && pattern2.nullable
 
         override fun matches(t: TAGMLToken): Boolean {
-            return pattern1.matches(t) && pattern2.matches(t)
+            return if (!pattern1.matches(t) && pattern1.nullable)
+                pattern2.matches(t)
+            else
+                pattern1.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Pattern {
+            val p = group(pattern1.textTokenDeriv(t), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.textTokenDeriv(t))
+            else p
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
+            val p = group(pattern1.startTokenDeriv(s), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.startTokenDeriv(s))
+            else p
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
+            val p = group(pattern1.endTokenDeriv(e), pattern2)
+            return if (pattern1.nullable)
+                choice(p, pattern2.endTokenDeriv(e))
+            else p
         }
 
         override fun expectedTokens(): List<TAGMLToken> {
-            return pattern1.expectedTokens() + pattern2.expectedTokens()
+            return if (pattern1.nullable)
+                pattern1.expectedTokens() + pattern2.expectedTokens()
+            else
+                pattern1.expectedTokens()
+        }
+
+        fun aggregateSubPatterns(): List<Pattern> {
+            val aggregate = mutableListOf<Pattern>()
+            if (pattern1 is Group)
+                aggregate.addAll(pattern1.aggregateSubPatterns())
+            else
+                aggregate.add(pattern1)
+            if (pattern2 is Group)
+                aggregate.addAll(pattern2.aggregateSubPatterns())
+            else
+                aggregate.add(pattern2)
+            return aggregate
         }
 
         override fun toString(): String {
-            return "<all>$pattern1$pattern2</all>"
+            return "<group>${aggregateSubPatterns().joinToString("")}</group>"
         }
     }
 
-    class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
+    class OneOrMore(val pattern: Pattern) : Pattern {
+        override val nullable: Boolean
+            get() = pattern.nullable
 
+        override fun matches(t: TAGMLToken): Boolean {
+            return pattern.matches(t)
+        }
+
+        override fun textTokenDeriv(t: TextToken): Pattern {
+            return group(
+                    pattern.textTokenDeriv(t),
+                    choice(OneOrMore(pattern), empty())
+            )
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
+            return group(
+                    pattern.startTokenDeriv(s),
+                    choice(OneOrMore(pattern), empty())
+            )
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
+            return group(
+                    pattern.endTokenDeriv(e),
+                    choice(OneOrMore(pattern), empty())
+            )
+        }
+
+        override fun expectedTokens(): List<TAGMLToken> {
+            return pattern.expectedTokens()
+        }
+
+        override fun toString(): String {
+            return "<oneOrMore>$pattern</oneOrMore>"
+        }
+    }
+
+
+    class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern.nullable
 
@@ -369,91 +427,6 @@ object Patterns {
         override fun toString(): String {
             return "<concurOneOrMore>$pattern</concurOneOrMore>"
         }
-
     }
-
-    class Group(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
-        override val nullable: Boolean
-            get() = pattern1.nullable && pattern2.nullable
-
-        override fun matches(t: TAGMLToken): Boolean {
-//            _log.info("pattern1=$pattern1 ; pattern1.matches(t)=${pattern1.matches(t)}; pattern1.nullable = ${pattern1.nullable} ")
-            return if (!pattern1.matches(t) && pattern1.nullable)
-                pattern2.matches(t)
-            else
-                pattern1.matches(t)
-        }
-
-        override fun textTokenDeriv(t: TextToken): Pattern {
-            val p = group(pattern1.textTokenDeriv(t), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.textTokenDeriv(t))
-            else p
-        }
-
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val p = group(pattern1.startTokenDeriv(s), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.startTokenDeriv(s))
-            else p
-        }
-
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val p = group(pattern1.endTokenDeriv(e), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.endTokenDeriv(e))
-            else p
-        }
-
-        override fun expectedTokens(): List<TAGMLToken> {
-            return if (pattern1.nullable)
-                pattern1.expectedTokens() + pattern2.expectedTokens()
-            else
-                pattern1.expectedTokens()
-        }
-
-        override fun toString(): String {
-            return "<group>$pattern1$pattern2</group>"
-        }
-
-    }
-
-//    class Not(val pattern: Expectation) : Expectation {
-//
-//        override fun matches(t: TAGMLToken): Boolean {
-//            return !pattern.matches(t)
-//        }
-//
-//        override fun startTokenDeriv(s: StartTagToken): Expectation {
-//            return if (pattern.matches(s))
-//                notAllowed()
-//            else
-//                RangeOpen(FixedIdentifier(s.tagName)).startTokenDeriv(s)
-//        }
-//
-//        override fun endTokenDeriv(e: EndTagToken): Expectation {
-//            return if (this.pattern.matches(e))
-//                notAllowed()
-//            else
-//                RangeClose(FixedIdentifier(e.tagName)).endTokenDeriv(e)
-//        }
-//
-//        override fun textTokenDeriv(t: TextToken): Expectation {
-//            return if (pattern.matches(t))
-//                notAllowed()
-//            else
-//                Text().textTokenDeriv(t)
-//        }
-//
-//        override fun expectedTokens(): List<TAGMLToken> {
-//            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//        }
-//
-//        override fun toString(): String {
-//            return "<not>$pattern</not>"
-//        }
-//
-//    }
-
 
 }

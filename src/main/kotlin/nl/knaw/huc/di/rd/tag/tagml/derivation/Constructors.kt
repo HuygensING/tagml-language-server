@@ -119,8 +119,7 @@ object Constructors {
         return Concur(expectation1, expectation2)
     }
 
-    private fun all(expectation1: Pattern, expectation2: Pattern): Pattern {
-
+    fun all(expectation1: Pattern, expectation2: Pattern): Pattern {
         if (expectation1 is NotAllowed || expectation2 is NotAllowed) {
             return notAllowed()
         }
