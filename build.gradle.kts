@@ -37,6 +37,9 @@ repositories {
     maven {
         url = uri("http://maven.huygens.knaw.nl/repository")
     }
+    maven {
+        url = uri("https://dl.bintray.com/kotlin/kotlin-dev")
+    }
 }
 
 dependencies {
@@ -65,6 +68,9 @@ dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc.debug:${lsp_version}")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lspVersion}")
+
+    // https://github.com/Kotlin/kotlinx.cli
+    implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.2.0-dev-7")
 
 //    implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3.2-SNAPSHOT")
