@@ -18,3 +18,9 @@ LSP Features in development
  * [textDocument/documentSymbol](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol).
  * [textDocument/hover](https://microsoft.github.io/language-server-protocol/specification#textDocument_hover).
  * [textDocument/rename](https://microsoft.github.io/language-server-protocol/specification#textDocument_rename).
+ 
+ run:
+ 
+ `gradle shadowJar`
+ 
+ `java -jar build/libs/tagml-language-server-1.0-SNAPSHOT.jar`

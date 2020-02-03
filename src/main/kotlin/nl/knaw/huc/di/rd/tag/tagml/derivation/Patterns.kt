@@ -417,6 +417,50 @@ object Patterns {
         }
     }
 
+    class HierarchyLevel : Pattern {
+
+        private val pattern1: Pattern = text()
+        private val pattern2: Lazy<Pattern> = lazy { Range(AnyTagIdentifier(), HierarchyLevel()) }
+
+        override val nullable: Boolean
+            get() = pattern1.nullable || pattern2.value.nullable
+
+        override fun matches(t: TAGMLToken): Boolean {
+            return pattern1.matches(t) || pattern2.value.matches(t)
+        }
+
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
+            return choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
+        }
+
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
+            return choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
+        }
+
+        override fun textTokenDeriv(t: TextToken): Pattern {
+            return choice(pattern1.textTokenDeriv(t), pattern2.value.textTokenDeriv(t))
+        }
+
+        override fun expectedTokens(): Set<TAGMLToken> {
+            return pattern1.expectedTokens() + pattern2.value.expectedTokens()
+        }
+
+        override fun toString(): String {
+            return "<hierarchyLevel/>"
+        }
+
+        override fun hashCode(): Int {
+            return this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return (other is HierarchyLevel) && (
+                    (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
+                            (other.pattern1 == pattern2 && other.pattern2 == pattern1)
+                    )
+        }
+    }
+
     class OneOrMore(val pattern: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern.nullable

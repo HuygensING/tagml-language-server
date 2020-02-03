@@ -12,8 +12,10 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Interleave
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NOT_ALLOWED
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NotAllowed
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.OneOrMore
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.TEXT
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
+import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 
 object Constructors {
 
@@ -30,6 +32,8 @@ object Constructors {
     }
 
     fun anyContent(): Pattern = text() // might not cover it
+
+    fun layer(): Pattern = Range(AnyTagIdentifier(), choice(text(), layer()))
 
     internal fun mixed(pattern: Pattern): Pattern {
         return interleave(text(), pattern)
