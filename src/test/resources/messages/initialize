@@ -2,7 +2,7 @@ Content-Length: 161
 
 {
   "jsonrpc": "2.0",
-  "id": 1,
+  "id": 5,
   "method": "initialize",
   "params": {
     "processId": 314,

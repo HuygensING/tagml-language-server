@@ -61,13 +61,14 @@ dependencies {
     implementation("io.arrow-kt:arrow-core-data:${arrowVersion}")
 
     // https://github.com/eclipse/lsp4j
-    val lspVersion = "0.8.1"
+    val lspVersion = "0.6.0" // LSP 3.14
+//    val lspVersion = "0.8.1" // LSP 3.15
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:${lspVersion}")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.generator:${lsp_version}")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc.debug:${lsp_version}")
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lspVersion}")
+//    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.websocket:${lspVersion}")
 
     // https://github.com/Kotlin/kotlinx.cli
     implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.2.0-dev-7")

@@ -1,19 +1,33 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.eclipse.lsp4j.*
+import org.eclipse.lsp4j.jsonrpc.ResponseErrorException
 import org.eclipse.lsp4j.jsonrpc.messages.Either
 import org.eclipse.lsp4j.jsonrpc.messages.Either.forLeft
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseError
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseErrorCode
 import org.eclipse.lsp4j.services.TextDocumentService
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.CompletableFuture
 
 
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
-//    private val logger = LoggerFactory.getLogger(this.javaClass)
+    //    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val docs: MutableMap<String, TAGMLDocumentModel> = synchronizedMap(hashMapOf())
 
     override fun didOpen(params: DidOpenTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didOpen($params)")
+//        checkServerIsInitialized()
+        if (!tagmlLanguageServer.isInitialized) {
+//            val exceptionalResult: CompletableFuture<*> = CompletableFuture<Any>()
+            val error = ResponseError(
+                    ResponseErrorCode.serverNotInitialized,
+                    "server not initialized, expected 'initialize' first",
+                    null
+            )
+            throw(ResponseErrorException(error))
+        }
+
         val model = TAGMLDocumentModel(params.textDocument.uri, params.textDocument.text, params.textDocument.version)
         this.docs[params.textDocument.uri] = model
         CompletableFuture.runAsync {
@@ -22,6 +36,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             )
         }
     }
+
 
     override fun didChange(params: DidChangeTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didChange($params)")
@@ -35,7 +50,9 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     }
 
     override fun hover(position: TextDocumentPositionParams): CompletableFuture<Hover> {
-        val contents = MarkupContent("kind", "value")
+        val contents = MarkupContent()
+        contents.kind = "KIND"
+        contents.value = "VALUE"
         return CompletableFuture.supplyAsync { Hover(contents) }
     }
 
@@ -83,5 +100,17 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         }
         val completionItemList = mutableListOf(completionItem1, completionItem2)
         return CompletableFuture.completedFuture(forLeft(completionItemList))
+    }
+
+    private fun checkServerIsInitialized() {
+        if (!tagmlLanguageServer.isInitialized) {
+            throw(ResponseErrorException(
+                    ResponseError(
+                            ResponseErrorCode.serverNotInitialized,
+                            "server not initialized, expected 'initialize' first",
+                            null
+                    )
+            ))
+        }
     }
 }

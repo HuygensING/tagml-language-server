@@ -14,6 +14,7 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     private val workspaceService = TAGMLWorkspaceService()
     var client: LanguageClient? = null
     var shutdownRequested = false
+    var isInitialized = false
 
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
 //        logger.info("initialize($params)")
@@ -26,12 +27,9 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
             setTextDocumentSync(TextDocumentSyncKind.Full)
             documentSymbolProvider = true
         }
+        isInitialized = true
 
         return CompletableFuture.supplyAsync { InitializeResult(serverCapabilities) }
-    }
-
-    override fun initialized(params: InitializedParams?) {
-        super.initialized(params)
     }
 
     override fun getWorkspaceService(): WorkspaceService = workspaceService
@@ -41,7 +39,7 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#shutdown
     override fun shutdown(): CompletableFuture<Any> {
         shutdownRequested = true
-        return CompletableFuture.supplyAsync { shutdownRequested }
+        return CompletableFuture.supplyAsync { null }
     }
 
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#exit

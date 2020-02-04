@@ -68,3 +68,7 @@ https://www.princexml.com/howcome/2007/xtech/papers/output/0077-30.pdf
                   when schema defined: for every open layer, show the next children as open tags
   - on '|': when inside open/close tag: show available layer_ids  + '+'; when schema is defined: show '+'"+ layername for layers that haven't been opened yet, layername for others
   - on ' ' after tagname, when schema defined: show annotation names as defined in schema
+
+
+# on the growth of the derived patterns (and how to limit that:
+https://maniagnosis.crsr.net/2012/05/parsing-with-derivatives-compaction.html

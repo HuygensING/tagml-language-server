@@ -1,0 +1,15 @@
+Content-Length: 258
+
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "textDocument/didOpen",
+  "params": {
+    "textDocument": {
+      "uri": "file:///tmp/somefile.tagml",
+      "languageId": "tagml",
+      "version": 0,
+      "text": "[tag\u003eaap noot mies\u003ctag]"
+    }
+  }
+}

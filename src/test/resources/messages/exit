@@ -1,0 +1,7 @@
+Content-Length: 53
+
+{
+  "jsonrpc": "2.0",
+  "id": 9,
+  "method": "exit"
+}
