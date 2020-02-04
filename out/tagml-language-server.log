@@ -1,4 +1,4 @@
-[Trace - 03:44:32 PM] Received request 'initialize - (1)'
+[Trace - 10:34:44 AM] Received request 'initialize - (1)'
 Params: {
   "processId": 314,
   "rootUri": "file:///c/test.tagml",
@@ -6,29 +6,7 @@ Params: {
 }
 
 
-[Trace - 03:44:32 PM] Sending response 'initialize - (1)'. Processing request took 35ms
-Result: {
-  "capabilities": {
-    "textDocumentSync": 1,
-    "hoverProvider": true,
-    "completionProvider": {},
-    "definitionProvider": true,
-    "referencesProvider": true,
-    "documentSymbolProvider": true,
-    "codeActionProvider": true
-  }
-}
-
-
-[Trace - 03:46:23 PM] Received request 'initialize - (1)'
-Params: {
-  "processId": 314,
-  "rootUri": "file:///c/test.tagml",
-  "capabilities": {}
-}
-
-
-[Trace - 03:46:23 PM] Sending response 'initialize - (1)'. Processing request took 2ms
+[Trace - 10:34:44 AM] Sending response 'initialize - (1)'. Processing request took 30ms
 Result: {
   "capabilities": {
     "textDocumentSync": 1,

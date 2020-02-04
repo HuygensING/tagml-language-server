@@ -4,17 +4,16 @@ import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.jsonrpc.messages.Either
 import org.eclipse.lsp4j.jsonrpc.messages.Either.forLeft
 import org.eclipse.lsp4j.services.TextDocumentService
-import org.slf4j.LoggerFactory
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.CompletableFuture
 
 
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+//    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val docs: MutableMap<String, TAGMLDocumentModel> = synchronizedMap(hashMapOf())
 
     override fun didOpen(params: DidOpenTextDocumentParams) {
-        logger.info("TAGMLTextDocumentService.didOpen($params)")
+//        logger.info("TAGMLTextDocumentService.didOpen($params)")
         val model = TAGMLDocumentModel(params.textDocument.uri, params.textDocument.text, params.textDocument.version)
         this.docs[params.textDocument.uri] = model
         CompletableFuture.runAsync {
@@ -25,7 +24,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     }
 
     override fun didChange(params: DidChangeTextDocumentParams) {
-        logger.info("TAGMLTextDocumentService.didChange($params)")
+//        logger.info("TAGMLTextDocumentService.didChange($params)")
         val model = TAGMLDocumentModel(params.textDocument.uri, "text", params.textDocument.version)
         this.docs[params.textDocument.uri] = model
         CompletableFuture.runAsync {

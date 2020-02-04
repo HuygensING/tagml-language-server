@@ -2,17 +2,18 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.*
-import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
+import kotlin.system.exitProcess
 
 
 class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 
-    private val logger = LoggerFactory.getLogger(this.javaClass)!!
+//    private val logger = LoggerFactory.getLogger(this.javaClass)!!
 
     private val textDocumentService = TAGMLTextDocumentService(this)
     private val workspaceService = TAGMLWorkspaceService()
     var client: LanguageClient? = null
+    var shutdownRequested = false
 
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
 //        logger.info("initialize($params)")
@@ -37,11 +38,18 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 
     override fun getTextDocumentService(): TextDocumentService = textDocumentService
 
-    override fun shutdown(): CompletableFuture<Any> = CompletableFuture.supplyAsync { true }
+    // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#shutdown
+    override fun shutdown(): CompletableFuture<Any> {
+        shutdownRequested = true
+        return CompletableFuture.supplyAsync { shutdownRequested }
+    }
 
-    //    val exited = CompletableFuture<String>()
+    // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#exit
     override fun exit() {
-//        exited.complete(null)
+        if (shutdownRequested)
+            exitProcess(0)
+        else
+            exitProcess(1)
     }
 
     override fun connect(client: LanguageClient?) {
