@@ -10,7 +10,7 @@ import ch.qos.logback.core.encoder.LayoutWrappingEncoder
 import ch.qos.logback.core.spi.ContextAwareBase
 import nl.knaw.huc.di.rd.tag.tagml.lsp.Constants.LOGFILE_PROPERTY
 
-class TLSLoggerFactory() : ContextAwareBase(), Configurator {
+class TLSLoggerFactory : ContextAwareBase(), Configurator {
     private val loggerContext = LoggerContext()
 
     init {

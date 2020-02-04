@@ -72,7 +72,9 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         // this goes into the TAGMLDocumentModel (?) -> so this contains the parsed tagml?
         // we need that for the autocompleter
         val res = mutableListOf<Diagnostic>()
-        val diagnostic = Diagnostic(Range(), "this is a test").apply {
+        val start: Position = Position(1, 1)
+        val end: Position = Position(1, 5)
+        val diagnostic = Diagnostic(Range(start, end), "this is a test").apply {
             severity = DiagnosticSeverity.Error
         }
         res.add(diagnostic)

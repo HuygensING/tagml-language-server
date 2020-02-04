@@ -28,7 +28,7 @@ class StartTagToken(val tagName: String) : TAGMLToken() {
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is StartTagToken && other.tagName.equals(tagName)
+        return other is StartTagToken && other.tagName == tagName
     }
 }
 
@@ -42,7 +42,7 @@ class EndTagToken(val tagName: String) : TAGMLToken() {
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is EndTagToken && other.tagName.equals(tagName)
+        return other is EndTagToken && other.tagName == tagName
     }
 }
 
@@ -56,7 +56,7 @@ class TextToken(private val textContent: String) : TAGMLToken() {
     }
 
     override fun equals(other: Any?): Boolean {
-        return other is TextToken && other.textContent.equals(textContent)
+        return other is TextToken && other.textContent == textContent
     }
 }
 

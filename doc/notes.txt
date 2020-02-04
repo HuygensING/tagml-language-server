@@ -70,5 +70,8 @@ https://www.princexml.com/howcome/2007/xtech/papers/output/0077-30.pdf
   - on ' ' after tagname, when schema defined: show annotation names as defined in schema
 
 
-# on the growth of the derived patterns (and how to limit that:
+# on the growth of the derived patterns (and how to limit that):
 https://maniagnosis.crsr.net/2012/05/parsing-with-derivatives-compaction.html
+
+https://crypto.stanford.edu/~blynn/haskell/pwd.html
+https://arxiv.org/abs/1604.04695

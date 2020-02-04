@@ -6,7 +6,6 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concur
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.interleave
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.EMPTY
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
@@ -56,7 +55,7 @@ class PatternsTest {
         val p1 = choice(Range(FixedIdentifier("a"), TEXT), TEXT)
         val p2 = choice(Range(FixedIdentifier("b"), TEXT), TEXT)
         val p3 = choice(p1, p2)
-        val p4 = choice(p3, Patterns.EMPTY)
+        val p4 = choice(p3, EMPTY)
         assertThat(p4.toString()).isEqualTo("""<choice><range id="a"><text/></range><text/><range id="b"><text/></range><empty/></choice>""")
     }
 
