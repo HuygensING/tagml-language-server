@@ -27,8 +27,7 @@ class TokenIndexTest {
                 r(3, 0, 3, 6)
         )
 
-        val index = TokenIndex("test")
-        index.locatedTokens = listOf(lt2, lt3, lt1).shuffled()
+        val index = TokenIndex("test", listOf(lt2, lt3, lt1).shuffled())
 
         // check sorting
         assertThat(index.locatedTokens).containsExactly(lt1, lt2, lt3)

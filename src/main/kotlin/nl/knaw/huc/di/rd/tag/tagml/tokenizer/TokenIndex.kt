@@ -10,9 +10,11 @@ class TokenIndex(val uri: String) {
     // list of pairs Token, Range, sorted by range
 
     var locatedTokens: List<LocatedToken> = listOf()
-        set(l: List<LocatedToken>) {
-            field = l.sortedWith(locatedTokenComparator)
-        }
+
+    constructor(uri: String, list: List<LocatedToken>) : this(uri) {
+        locatedTokens = list.sortedWith(locatedTokenComparator)
+    }
+
 
     fun tokenAt(position: Position): TAGMLToken? {
         val index = locatedTokens.binarySearch { relativePosition(position, it.second) }
