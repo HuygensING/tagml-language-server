@@ -5,7 +5,7 @@ import org.eclipse.lsp4j.Position
 
 object TokenizerUtils {
 
-    class SomeClass(val tagml: String) {
+    class PositionCalculator(val tagml: String) {
 
         internal val lineLengths = mutableListOf<Int>()
 

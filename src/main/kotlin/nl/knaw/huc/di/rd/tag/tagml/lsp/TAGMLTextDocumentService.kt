@@ -74,14 +74,28 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         // also: which opentag and closetag belong together
         // this goes into the TAGMLDocumentModel (?) -> so this contains the parsed tagml?
         // we need that for the autocompleter
+
         val res = mutableListOf<Diagnostic>()
+
+        if (model.hasParseFailure) {
+            val r = Range(model.errorPosition, model.errorPosition)
+            val parseDiagnostic = Diagnostic(r, model.errorMessage).apply {
+                severity = DiagnosticSeverity.Error
+            }
+            res.add(parseDiagnostic)
+        }
+
+//        addTestDiagnostic(res)
+        return res
+    }
+
+    private fun addTestDiagnostic(res: MutableList<Diagnostic>) {
         val start: Position = Position(1, 1)
         val end: Position = Position(1, 5)
         val diagnostic = Diagnostic(Range(start, end), "this is a test").apply {
             severity = DiagnosticSeverity.Information
         }
         res.add(diagnostic)
-        return res
     }
 
     override fun didSave(params: DidSaveTextDocumentParams?) {

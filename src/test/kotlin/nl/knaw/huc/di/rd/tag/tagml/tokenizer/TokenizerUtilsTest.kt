@@ -16,7 +16,7 @@ class TokenizerUtilsTest {
             666666
             7777777
         """.trimIndent()
-        val x = TokenizerUtils.SomeClass(text)
+        val x = TokenizerUtils.PositionCalculator(text)
         println(text)
         println(text.length)
         println(x.lineLengths)
