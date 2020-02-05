@@ -10,8 +10,8 @@ class TokenIndex(val uri: String) {
     // list of pairs Token, Range, sorted by range
 
     var locatedTokens: List<LocatedToken> = listOf()
-        set(_locatedTokens: List<LocatedToken>) {
-            field = _locatedTokens.sortedWith(locatedTokenComparator)
+        set(l: List<LocatedToken>) {
+            field = l.sortedWith(locatedTokenComparator)
         }
 
     fun tokenAt(position: Position): TAGMLToken? {

@@ -12,19 +12,19 @@ class TokenIndexTest {
         val openRoot = StartTagToken("root")
         val lt1 = Pair(
                 openRoot,
-                Range(p(0, 0), p(0, 6))
+                r(0, 0, 0, 6)
         )
 
         val text = TextToken("Roses are red\nViolets are blue")
         val lt2 = Pair(
                 text,
-                Range(p(1, 0), p(2, 16))
+                r(1, 0, 2, 16)
         )
 
         val closeRoot = EndTagToken("root")
         val lt3 = Pair(
                 closeRoot,
-                Range(p(3, 0), p(3, 6))
+                r(3, 0, 3, 6)
         )
 
         val index = TokenIndex("test")
@@ -50,5 +50,7 @@ class TokenIndexTest {
         assertThat(index.tokenAt(p(10, 10))).isNull()
     }
 
-    fun p(l: Int, c: Int): Position = Position(l, c)
+    private fun p(l: Int, c: Int): Position = Position(l, c)
+
+    private fun r(l1: Int, c1: Int, l2: Int, c2: Int): Range = Range(p(l1, c1), p(l2, c2))
 }

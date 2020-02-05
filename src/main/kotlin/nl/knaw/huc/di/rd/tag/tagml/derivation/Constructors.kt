@@ -33,7 +33,7 @@ object Constructors {
 
     fun anyContent(): Pattern = text() // might not cover it
 
-    fun layer(): Pattern = Range(AnyTagIdentifier(), choice(text(), layer()))
+    private fun layer(): Pattern = Range(AnyTagIdentifier(), choice(text(), layer()))
 
     internal fun mixed(pattern: Pattern): Pattern {
         return interleave(text(), pattern)

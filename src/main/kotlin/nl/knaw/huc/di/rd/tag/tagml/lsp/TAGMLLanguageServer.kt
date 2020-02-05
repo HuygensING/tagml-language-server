@@ -13,7 +13,7 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     private val textDocumentService = TAGMLTextDocumentService(this)
     private val workspaceService = TAGMLWorkspaceService()
     var client: LanguageClient? = null
-    var shutdownRequested = false
+    private var shutdownRequested = false
     var isInitialized = false
 
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
