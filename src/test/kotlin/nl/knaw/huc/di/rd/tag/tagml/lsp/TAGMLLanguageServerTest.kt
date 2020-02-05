@@ -29,7 +29,7 @@ class TAGMLLanguageServerTest {
 
     @Test
     fun test2() {
-        val p = MessageParams(MessageType.Info, "Hello World")
+//        val p = MessageParams(MessageType.Info, "Hello World")
     }
 
     private fun OutputStreamWriter.writeResponse(response: String) {

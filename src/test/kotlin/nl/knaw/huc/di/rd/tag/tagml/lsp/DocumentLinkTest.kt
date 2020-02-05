@@ -1,6 +1,5 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
-import org.eclipse.lsp4j.DocumentSymbolParams
 import org.junit.Test
 import org.slf4j.LoggerFactory
 
@@ -13,7 +12,7 @@ class DocumentLinkTest : RequestTest() {
         val textDocumentIdentifier = openDocument(tagml)
 
         try {
-            val documentSymbolParams = DocumentSymbolParams(textDocumentIdentifier)
+//            val documentSymbolParams = DocumentSymbolParams(textDocumentIdentifier)
 //            val result = server.textDocumentService.documentLink()Symbol(documentSymbolParams).join()
 //            _log.info("result={}", result)
 

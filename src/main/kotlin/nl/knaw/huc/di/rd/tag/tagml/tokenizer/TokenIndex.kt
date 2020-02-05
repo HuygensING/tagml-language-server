@@ -4,24 +4,22 @@ import org.eclipse.lsp4j.Position
 import org.eclipse.lsp4j.Range
 import org.eclipse.lsp4j.util.Positions
 
-typealias LocatedToken = Pair<TAGMLToken, Range>
+data class RangedToken(val token: TAGMLToken, val range: Range)
 
 class TokenIndex(val uri: String) {
-    // list of pairs Token, Range, sorted by range
 
-    var locatedTokens: List<LocatedToken> = listOf()
+    var rangedTokens: List<RangedToken> = listOf()
 
-    constructor(uri: String, list: List<LocatedToken>) : this(uri) {
-        locatedTokens = list.sortedWith(locatedTokenComparator)
+    constructor(uri: String, list: List<RangedToken>) : this(uri) {
+        rangedTokens = list.sortedWith(locatedTokenComparator)
     }
 
-
     fun tokenAt(position: Position): TAGMLToken? {
-        val index = locatedTokens.binarySearch { relativePosition(position, it.second) }
+        val index = rangedTokens.binarySearch { relativePosition(position, it.range) }
         return if (index < 0)
             null
         else
-            locatedTokens[index].first
+            rangedTokens[index].token
     }
 }
 
@@ -31,7 +29,7 @@ private fun relativePosition(p: Position, r: Range): Int = when {
     else -> 0                            // in range
 }
 
-private val locatedTokenComparator = compareBy<LocatedToken> { it.second.start.line }
-        .thenBy { it.second.start.character }
-        .thenBy { it.second.end.line }
-        .thenBy { it.second.end.character }
+private val locatedTokenComparator = compareBy<RangedToken> { it.range.start.line }
+        .thenBy { it.range.start.character }
+        .thenBy { it.range.end.line }
+        .thenBy { it.range.end.character }
