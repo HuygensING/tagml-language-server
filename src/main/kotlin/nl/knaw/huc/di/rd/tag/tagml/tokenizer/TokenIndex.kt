@@ -14,9 +14,12 @@ class TokenIndex(val uri: String) {
             field = _locatedTokens.sortedWith(locatedTokenComparator)
         }
 
-    fun tokenAt(position: Position): LocatedToken? {
+    fun tokenAt(position: Position): TAGMLToken? {
         val index = locatedTokens.binarySearch { relativePosition(position, it.second) }
-        return locatedTokens.elementAtOrNull(index)
+        return if (index < 0)
+            null
+        else
+            locatedTokens[index].first
     }
 }
 
