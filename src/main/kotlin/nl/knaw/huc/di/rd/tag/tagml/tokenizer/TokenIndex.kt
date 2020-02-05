@@ -8,7 +8,7 @@ data class RangedToken(val token: TAGMLToken, val range: Range)
 
 class TokenIndex(val uri: String) {
 
-    var rangedTokens: List<RangedToken> = listOf()
+    internal var rangedTokens: List<RangedToken> = listOf()
 
     constructor(uri: String, list: List<RangedToken>) : this(uri) {
         rangedTokens = list.sortedWith(locatedTokenComparator)

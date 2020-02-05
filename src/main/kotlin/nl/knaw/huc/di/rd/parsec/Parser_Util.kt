@@ -11,3 +11,4 @@ infix fun <I, A> Parser<I, A>.ort(p: Parser<I, A>): Parser<I, A> = { reader ->
         false -> a.fold({ a }, { tryp(p)(reader) })
     }
 }
+
