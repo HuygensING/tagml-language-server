@@ -32,7 +32,10 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         this.docs[params.textDocument.uri] = model
         CompletableFuture.runAsync {
             tagmlLanguageServer.client?.publishDiagnostics(
-                    PublishDiagnosticsParams(params.textDocument.uri, validate(model))
+                    PublishDiagnosticsParams(
+                            params.textDocument.uri,
+                            validate(model)
+                    )
             )
         }
     }
@@ -66,7 +69,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 
     private fun validate(model: TAGMLDocumentModel): List<Diagnostic> {
         // validate the tagml and on errors, return a list of diagnostics
-        val text = model.text
+//        val text = model.text
         // parsing the tagml should also return a list of tokens (opentag, closetag, text) with their positions in the text
         // also: which opentag and closetag belong together
         // this goes into the TAGMLDocumentModel (?) -> so this contains the parsed tagml?
@@ -75,14 +78,14 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         val start: Position = Position(1, 1)
         val end: Position = Position(1, 5)
         val diagnostic = Diagnostic(Range(start, end), "this is a test").apply {
-            severity = DiagnosticSeverity.Error
+            severity = DiagnosticSeverity.Information
         }
         res.add(diagnostic)
         return res
     }
 
     override fun didSave(params: DidSaveTextDocumentParams?) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TODO("not implemented")
     }
 
     override fun didClose(params: DidCloseTextDocumentParams) {
