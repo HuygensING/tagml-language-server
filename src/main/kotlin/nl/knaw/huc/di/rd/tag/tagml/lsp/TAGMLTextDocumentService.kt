@@ -28,26 +28,26 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             throw(ResponseErrorException(error))
         }
 
-        val model = TAGMLDocumentModel(params.textDocument.uri, params.textDocument.text, params.textDocument.version)
-        this.docs[params.textDocument.uri] = model
-        CompletableFuture.runAsync {
-            tagmlLanguageServer.client?.publishDiagnostics(
-                    PublishDiagnosticsParams(
-                            params.textDocument.uri,
-                            validate(model)
-                    )
-            )
-        }
+        val uri = params.textDocument.uri
+        val model = TAGMLDocumentModel(uri, params.textDocument.text, params.textDocument.version)
+        this.docs[uri] = model
+        publishDiagnostics(uri, model)
     }
-
 
     override fun didChange(params: DidChangeTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didChange($params)")
-        val model = TAGMLDocumentModel(params.textDocument.uri, "text", params.textDocument.version)
+        val model = TAGMLDocumentModel(params.textDocument.uri, "TODO!!", params.textDocument.version)
         this.docs[params.textDocument.uri] = model
+        publishDiagnostics(params.textDocument.uri, model)
+    }
+
+    private fun publishDiagnostics(uri: String, model: TAGMLDocumentModel) {
         CompletableFuture.runAsync {
             tagmlLanguageServer.client?.publishDiagnostics(
-                    PublishDiagnosticsParams(params.textDocument.uri, validate(model))
+                    PublishDiagnosticsParams(
+                            uri,
+                            validate(model)
+                    )
             )
         }
     }
@@ -79,9 +79,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 
         if (model.hasParseFailure) {
             val r = Range(model.errorPosition, model.errorPosition)
-            val parseDiagnostic = Diagnostic(r, model.errorMessage).apply {
-                severity = DiagnosticSeverity.Error
-            }
+            val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
             res.add(parseDiagnostic)
         }
 

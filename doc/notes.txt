@@ -64,7 +64,9 @@ https://maniagnosis.crsr.net/2012/05/parsing-with-derivatives-compaction.html
 
 https://crypto.stanford.edu/~blynn/haskell/pwd.html
 https://arxiv.org/abs/1604.04695
-
+http://david.darais.com/assets/papers/parsing-with-derivatives/pwd.pdf
+http://matt.might.net/articles/parsing-with-derivatives/
+https://github.com/tmmcguire/Java-Parser-Derivatives
 ------------------------------------------------------------------------------------------------------------------------
 
 # LSP
