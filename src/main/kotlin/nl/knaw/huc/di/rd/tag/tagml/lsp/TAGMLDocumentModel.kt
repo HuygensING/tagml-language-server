@@ -8,11 +8,11 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import org.eclipse.lsp4j.Position
 
 class TAGMLDocumentModel(val uri: String, val text: String, val version: Int) {
-    var errorMessage: String? = null
     var hasParseFailure: Boolean = false
+    var errorPosition: Position? = null
+    var errorMessage: String? = null
     private var tokens: List<TAGMLToken>? = null
     private var reject: Response.Reject<Char, List<TAGMLToken>>? = null
-    var errorPosition: Position? = null
 
     init {
         when (val result = tokenize(text)) {
@@ -47,7 +47,7 @@ class PositionCalculator(val tagml: String) {
     fun calculatePosition(location: Location): Position {
         var line = 0
         var total = 0
-        while (total <= location.position && line <= lineLengths.size) {
+        while (total <= location.position && line < lineLengths.size) {
             total += lineLengths[line]
             line += 1
         }

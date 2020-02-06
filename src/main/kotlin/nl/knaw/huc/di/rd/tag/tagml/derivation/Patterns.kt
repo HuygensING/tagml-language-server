@@ -98,7 +98,7 @@ object Patterns {
             return (t is TextToken)
         }
 
-        // relaxng: A text pattern matches zero or more text nodes. Thus the derivative of Text with respect to a text node is Text, not Empty.
+        // relaxng: A text pattern matches zero or more text nodes. Thus the derivative of Text with respect to a text node is Text, not Empty
         // TODO: if the parser does not return consecutive texttokens, then this can return empty()
         override fun textTokenDeriv(t: TextToken): Pattern {
 //            return empty()
