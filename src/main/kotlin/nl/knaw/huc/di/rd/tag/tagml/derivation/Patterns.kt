@@ -274,9 +274,9 @@ object Patterns {
             )
         }
 
-        override fun endTokenDeriv(t: EndTagToken): Pattern {
-            val d1 = pattern1.endTokenDeriv(t)
-            val d2 = pattern2.endTokenDeriv(t)
+        override fun endTokenDeriv(e: EndTagToken): Pattern {
+            val d1 = pattern1.endTokenDeriv(e)
+            val d2 = pattern2.endTokenDeriv(e)
             return choice(
                     choice(
                             concur(d1, pattern2),
