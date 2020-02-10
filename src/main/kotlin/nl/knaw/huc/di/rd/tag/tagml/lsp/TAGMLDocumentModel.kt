@@ -3,7 +3,7 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 import arrow.core.Either
 import lambdada.parsec.parser.Response
 import lambdada.parsec.utils.Location
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import org.eclipse.lsp4j.Position
 
@@ -11,8 +11,8 @@ class TAGMLDocumentModel(val uri: String, val text: String, val version: Int) {
     var hasParseFailure: Boolean = false
     var errorPosition: Position? = null
     var errorMessage: String? = null
-    private var tokens: List<TAGMLToken>? = null
-    private var reject: Response.Reject<Char, List<TAGMLToken>>? = null
+    private var tokens: List<LSPToken>? = null
+    private var reject: Response.Reject<Char, List<LSPToken>>? = null
 
     init {
         when (val result = tokenize(text)) {
@@ -22,11 +22,11 @@ class TAGMLDocumentModel(val uri: String, val text: String, val version: Int) {
         }
     }
 
-    private fun onSuccess(tokenList: List<TAGMLToken>) {
+    private fun onSuccess(tokenList: List<LSPToken>) {
         this.tokens = tokenList
     }
 
-    private fun onFailure(reject: Response.Reject<Char, List<TAGMLToken>>, text: String) {
+    private fun onFailure(reject: Response.Reject<Char, List<LSPToken>>, text: String) {
         this.reject = reject
         this.hasParseFailure = true
         val pc = PositionCalculator(text)

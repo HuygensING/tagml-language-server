@@ -2,8 +2,9 @@ package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import arrow.core.Either
 import lambdada.parsec.extension.charsToString
-import lambdada.parsec.io.Reader
 import lambdada.parsec.parser.*
+import nl.knaw.huc.di.rd.parsec.PositionalReader
+import nl.knaw.huc.di.rd.parsec.lsptmap
 import nl.knaw.huc.di.rd.parsec.ort
 import java.net.URL
 
@@ -29,23 +30,23 @@ object TAGMLTokenizer {
 
     // use `try` because schemaLocation and startTag both start with '['
     private val schemaLocation = `try`(string("[!schema ") thenRight url thenLeft char(']'))
-            .map { SchemaLocationToken(URL(it.toList().joinToString(separator = ""))) }
+            .lsptmap { SchemaLocationToken(URL(it.toList().joinToString(separator = ""))) }
 
     private val namespaceDefinition = (string("[!ns ") then whitespace thenRight namespaceIdentifier then whitespace then url thenLeft char(']'))
-            .map { NameSpaceIdentifierToken(it.first.first, URL(it.second.toList().joinToString(separator = ""))) }
+            .lsptmap { NameSpaceIdentifierToken(it.first.first, URL(it.second.toList().joinToString(separator = ""))) }
 
     private val startTag = (char('[') thenRight tagName thenLeft char('>'))
-            .map { StartTagToken(it) }
+            .lsptmap { StartTagToken(it) }
 
     val endTag = (char('<') thenRight tagName thenLeft char(']'))
-            .map { EndTagToken(it) }
+            .lsptmap { EndTagToken(it) }
 
     private val text = (not(specialChar).map { it.toString() } or escapedSpecialChar).rep
-            .map { TextToken(it.joinToString(separator = "")) }
+            .lsptmap { TextToken(it.joinToString(separator = "")) }
 
-    val startTextVariation = string("<|").map { StartTextVariationToken() }
-    private val textVariationSeparator = char('|').map { TextVariationSeparatorToken() }
-    private val endTextVariation = string("|>").map { EndTextVariationToken() }
+    val startTextVariation = string("<|").lsptmap { StartTextVariationToken() }
+    private val textVariationSeparator = char('|').lsptmap { TextVariationSeparatorToken() }
+    private val endTextVariation = string("|>").lsptmap { EndTextVariationToken() }
 
     val tagmlParser = (schemaLocation.opt then
             (startTag ort text ort endTag ort startTextVariation ort endTextVariation ort textVariationSeparator).rep
@@ -53,13 +54,21 @@ object TAGMLTokenizer {
             .map { listOfNotNull(it.first) + it.second }
 
 
-    fun tokenize(tagml: String): Either<Response.Reject<Char, List<TAGMLToken>>, List<TAGMLToken>> {
-        val tagmlReader = Reader.string(tagml)
+    fun tokenize(tagml: String): Either<Response.Reject<Char, List<LSPToken>>, List<LSPToken>> {
+        val tagmlReader = PositionalReader.string(tagml)
         return tagmlParser(tagmlReader)
                 .fold(
                         { Either.Right(it.value) },
                         { Either.Left(it) }
                 )
     }
+//    fun tokenize0(tagml: String): Either<Response.Reject<Char, List<TAGMLToken>>, List<TAGMLToken>> {
+//        val tagmlReader = Reader.string(tagml)
+//        return tagmlParser(tagmlReader)
+//                .fold(
+//                        { Either.Right(it.value) },
+//                        { Either.Left(it) }
+//                )
+//    }
 
 }

@@ -1,7 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import arrow.core.Either
-import lambdada.parsec.io.Reader
+import nl.knaw.huc.di.rd.parsec.PositionalReader
 import nl.knaw.huc.di.rd.parsec.ort
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.endTag
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.startTextVariation
@@ -99,7 +99,7 @@ class TAGMLTokenizerTest {
     @Test
     fun tokenizeTest6() {
         val tagml = "<|"
-        val tagmlReader = Reader.string(tagml)
+        val tagmlReader = PositionalReader.string(tagml)
         val p = endTag ort startTextVariation
         println(p(tagmlReader))
     }
@@ -128,7 +128,7 @@ class TAGMLTokenizerTest {
                 showErrorLocation(tagml, result)
                 fail("Parsing failed: ${result.a}")
             }
-            is Either.Right -> assertThat(result.b.toString()).isEqualTo(expectedTokens.toString())
+            is Either.Right -> assertThat(result.b.map { it.token }.toString()).isEqualTo(expectedTokens.toString())
         }
     }
 

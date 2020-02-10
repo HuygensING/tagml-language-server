@@ -2,7 +2,7 @@ package nl.knaw.huc.di.rd.tag.tagml.deriv
 
 import arrow.core.Either
 import nl.knaw.huc.di.rd.tag.tagml.derivation.WellFormedness.checkWellFormedness
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions
@@ -64,7 +64,7 @@ class WellFormednessTest {
         }
     }
 
-    private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<TAGMLToken>) -> Unit) {
+    private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<LSPToken>) -> Unit) {
         when (val result = tokenize(tagml)
                 .also { println(it) }) {
             is Either.Left -> {
