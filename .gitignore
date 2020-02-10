@@ -8,3 +8,7 @@ build
 *.iml
 
 out
+*.tagml
+*.tag
+*.log
+.ipynb_checkpoints
