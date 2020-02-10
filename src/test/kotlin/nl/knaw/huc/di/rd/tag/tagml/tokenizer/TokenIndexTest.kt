@@ -10,19 +10,19 @@ class TokenIndexTest {
     @Test
     fun test() {
         val openRoot = StartTagToken("root")
-        val lt1 = RangedToken(
+        val lt1 = LSPToken(
                 openRoot,
                 r(0, 0, 0, 6)
         )
 
         val text = TextToken("Roses are red\nViolets are blue")
-        val lt2 = RangedToken(
+        val lt2 = LSPToken(
                 text,
                 r(1, 0, 2, 16)
         )
 
         val closeRoot = EndTagToken("root")
-        val lt3 = RangedToken(
+        val lt3 = LSPToken(
                 closeRoot,
                 r(3, 0, 3, 6)
         )
@@ -30,7 +30,7 @@ class TokenIndexTest {
         val index = TokenIndex("test", listOf(lt2, lt3, lt1).shuffled())
 
         // check sorting
-        assertThat(index.rangedTokens).containsExactly(lt1, lt2, lt3)
+        assertThat(index.lspTokens).containsExactly(lt1, lt2, lt3)
 
         assertThat(index.tokenAt(p(0, 0))).isEqualTo(openRoot)
         assertThat(index.tokenAt(p(0, 3))).isEqualTo(openRoot)
