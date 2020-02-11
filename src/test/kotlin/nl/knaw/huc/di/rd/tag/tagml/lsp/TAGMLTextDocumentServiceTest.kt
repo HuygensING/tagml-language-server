@@ -10,18 +10,34 @@ import org.junit.Test
 class TAGMLTextDocumentServiceTest {
 
     @Test
-    fun testDidOpen() {
+    fun testDidOpen1() {
         val client = TestClient()
-        val tds = startTDS(client)
-        val params = DidOpenTextDocumentParams(TextDocumentItem("uri", "tagml", 1, "[[does not parse!]]]"))
-        tds.didOpen(params)
-        waitForDidOpenToFinish(client)
+        doDidOpen(client, "[tag>text<tag]")
 
         val diagnostics = client.publishDiagnosticsParams?.diagnostics
         assertThat(diagnostics).hasSize(1)
         val firstDiagnostic = diagnostics!![0]
         assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
         println(firstDiagnostic)
+    }
+
+    @Test
+    fun testDidOpen() {
+        val client = TestClient()
+        doDidOpen(client, "[[does not parse!]]]")
+
+        val diagnostics = client.publishDiagnosticsParams?.diagnostics
+        assertThat(diagnostics).hasSize(1)
+        val firstDiagnostic = diagnostics!![0]
+        assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
+        println(firstDiagnostic)
+    }
+
+    private fun doDidOpen(client: TestClient, tagml: String) {
+        val tds = startTDS(client)
+        val params = DidOpenTextDocumentParams(TextDocumentItem("uri", "tagml", 1, tagml))
+        tds.didOpen(params)
+        waitForDidOpenToFinish(client)
     }
 
     private fun startTDS(client: TestClient): TAGMLTextDocumentService {
