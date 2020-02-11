@@ -29,7 +29,6 @@ object TAGMLTokenizer {
 
     private val namespaceIdentifier = variableName
 
-    // use `try` because schemaLocation and startTag both start with '['
     private val markStart: Parser<Char, String> = {
         val p = (it as PositionalReader).read()
         if (p == null) {
@@ -47,6 +46,7 @@ object TAGMLTokenizer {
         Response.Accept("", r, false)
     }
 
+    // use `try` because schemaLocation and startTag both start with '['
     private val schemaLocation = `try`(string("[!schema ") thenRight url thenLeft char(']'))
             .lsptmap { SchemaLocationToken(URL(it.toList().joinToString(separator = ""))) }
 
