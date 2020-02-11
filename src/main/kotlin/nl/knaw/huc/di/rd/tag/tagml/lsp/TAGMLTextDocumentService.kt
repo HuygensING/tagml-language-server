@@ -70,9 +70,12 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     }
 
     override fun hover(position: TextDocumentPositionParams): CompletableFuture<Hover> {
+        val docId = position.textDocument.uri
+        val model = docs[docId]
+        val token = model?.tokenIndex?.tokenAt(position.position)
         val contents = MarkupContent()
-        contents.kind = "KIND"
-        contents.value = "VALUE"
+        contents.kind = "token"
+        contents.value = "$token"
         return CompletableFuture.supplyAsync { Hover(contents) }
     }
 
@@ -102,10 +105,20 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             // TODO: validate the tagml tokens
             val tokens = model.tokens!! // TODO: refactor model to Either
             val firstToken = tokens.first()
-            val diagnostic1 = Diagnostic(firstToken.range, "This is the first token!", DiagnosticSeverity.Information, "test information")
+            val diagnostic1 = Diagnostic(
+                    firstToken.range,
+                    "This is the first token! (${firstToken.token})",
+                    DiagnosticSeverity.Information,
+                    "test information"
+            )
             res.add(diagnostic1)
             val lastToken = tokens.last()
-            val diagnostic2 = Diagnostic(lastToken.range, "This is the last token!", DiagnosticSeverity.Warning, "test warning")
+            val diagnostic2 = Diagnostic(
+                    lastToken.range,
+                    "This is the last token! (${lastToken.token})",
+                    DiagnosticSeverity.Warning,
+                    "test warning"
+            )
             res.add(diagnostic2)
         }
 

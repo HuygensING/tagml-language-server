@@ -2,7 +2,6 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import arrow.core.Either
 import lambdada.parsec.parser.Response
-import lambdada.parsec.utils.Location
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TokenIndex
@@ -13,8 +12,8 @@ class TAGMLDocumentModel(private val uri: String, val text: String, val version:
     var errorPosition: Position? = null
     var errorMessage: String? = null
     var tokens: List<LSPToken>? = null
+    var tokenIndex: TokenIndex? = null
     private var reject: Response.Reject<Char, List<LSPToken>>? = null
-    private var tokenIndex: TokenIndex? = null
 
     init {
         when (val result = tokenize(text)) {
@@ -38,24 +37,3 @@ class TAGMLDocumentModel(private val uri: String, val text: String, val version:
     }
 }
 
-class PositionCalculator(val tagml: String) {
-
-    internal val lineLengths = mutableListOf<Int>()
-
-    init {
-        val lineLengthList = tagml.split("\n").map { it.length }
-        this.lineLengths.addAll(lineLengthList)
-    }
-
-    fun calculatePosition(location: Location): Position {
-        var line = 0
-        var total = 0
-        while (total <= location.position && line < lineLengths.size) {
-            total += lineLengths[line]
-            line += 1
-        }
-        line -= 1
-        val character = (location.position - total + lineLengths[line])
-        return Position(line, character)
-    }
-}
