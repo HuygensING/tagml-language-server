@@ -16,8 +16,24 @@ class TestClient : LanguageClient {
         this.logMessageParams = message
     }
 
+    fun readLogMessage(): Pair<MessageType?, String?> {
+        val logMessage = logMessageParams?.message
+        val type = logMessageParams?.type
+        logMessageParams = null
+        return type to logMessage
+    }
+
     override fun publishDiagnostics(diagnostics: PublishDiagnosticsParams?) {
         this.publishDiagnosticsParams = diagnostics
+    }
+
+    fun readDiagnostics(): List<Diagnostic> {
+        val list = if (publishDiagnosticsParams == null)
+            listOf()
+        else
+            publishDiagnosticsParams!!.diagnostics
+        publishDiagnosticsParams = null
+        return list
     }
 
     override fun showMessage(messageParams: MessageParams?) {
@@ -32,15 +48,5 @@ class TestClient : LanguageClient {
     override fun telemetryEvent(`object`: Any?) {
         this.telemetryEventObject = `object`
     }
-
-    fun readDiagnostics(): List<Diagnostic> {
-        val list = if (publishDiagnosticsParams == null)
-            listOf()
-        else
-            publishDiagnosticsParams!!.diagnostics
-        publishDiagnosticsParams = null
-        return list
-    }
-
 
 }

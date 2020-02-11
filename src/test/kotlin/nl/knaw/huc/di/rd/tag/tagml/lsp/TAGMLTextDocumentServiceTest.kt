@@ -31,7 +31,7 @@ class TAGMLTextDocumentServiceTest {
         waitForDiagnosticsToBePublished(client)
 
         val openDiagnostics = client.readDiagnostics()
-        assertThat(openDiagnostics).hasSize(0)
+        assertThat(openDiagnostics).hasSize(2)
 
         val textDocument = VersionedTextDocumentIdentifier(uri, 2)
         val contentChanges = listOf(TextDocumentContentChangeEvent("[[[throw me an error!"))
