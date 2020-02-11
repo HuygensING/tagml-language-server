@@ -105,7 +105,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             val diagnostic1 = Diagnostic(firstToken.range, "This is the first token!", DiagnosticSeverity.Information, "test information")
             res.add(diagnostic1)
             val lastToken = tokens.last()
-            val diagnostic2 = Diagnostic(lastToken.range, "This is the last token!", DiagnosticSeverity.Hint, "test hint")
+            val diagnostic2 = Diagnostic(lastToken.range, "This is the last token!", DiagnosticSeverity.Warning, "test warning")
             res.add(diagnostic2)
         }
 
