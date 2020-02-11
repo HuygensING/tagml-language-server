@@ -42,7 +42,9 @@ object TAGMLTokenizer {
 
     private val markEnd: Parser<Char, String> = {
         val r = it as PositionalReader
-        r.endPosition = r.lastPosition
+        var endPosition = r.lastPosition
+        endPosition.character += 1
+        r.endPosition = endPosition
         Response.Accept("", r, false)
     }
 

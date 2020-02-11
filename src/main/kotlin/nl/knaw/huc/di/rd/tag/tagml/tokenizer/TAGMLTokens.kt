@@ -13,7 +13,7 @@ data class LSPToken(val token: TAGMLToken, val range: Range) {
     //    If you want to specify a range that contains a line including the line ending character(s)
     //    then use an end position denoting the start of the next line.
     override fun toString(): String {
-        return "$token at [(${range.start.line},${range.start.character})-(${range.end.line},${range.end.character + 1})]"
+        return "$token at [(${range.start.line},${range.start.character})-(${range.end.line},${range.end.character})]"
     }
 }
 
