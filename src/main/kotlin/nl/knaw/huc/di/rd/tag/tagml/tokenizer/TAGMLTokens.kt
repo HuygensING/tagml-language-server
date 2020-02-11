@@ -1,10 +1,13 @@
 package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
+import org.eclipse.lsp4j.Range
 import java.net.URL
 
 abstract class TAGMLToken {
     abstract val content: String
 }
+
+data class LSPToken(val token: TAGMLToken, val range: Range)
 
 class SchemaLocationToken(private val url: URL) : TAGMLToken() {
     override fun toString() = "SchemaLocation($url)"

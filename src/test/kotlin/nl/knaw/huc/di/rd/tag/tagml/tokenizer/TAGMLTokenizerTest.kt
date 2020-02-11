@@ -1,7 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.tokenizer
 
 import arrow.core.Either
-import lambdada.parsec.io.Reader
+import nl.knaw.huc.di.rd.parsec.PositionalReader
 import nl.knaw.huc.di.rd.parsec.ort
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.endTag
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.startTextVariation
@@ -9,6 +9,8 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.eclipse.lsp4j.Position
+import org.eclipse.lsp4j.Range
 import org.junit.Ignore
 import org.junit.Test
 import java.net.URL
@@ -40,6 +42,22 @@ class TAGMLTokenizerTest {
 
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
+    
+    @Test
+    fun testTokenRanges() {
+        val tagml = "[hello>\nWorld!\n<hello]"
+
+        var l = parse(tagml)
+        println(l)
+        val token0 = l[0]
+        assertThat(token0.range).isEqualTo(r(0, 0, 0, 6))
+        val token1 = l[1]
+        assertThat(token1.range).isEqualTo(r(0, 7, 1, 6))
+        val token2 = l[2]
+        assertThat(token2.range).isEqualTo(r(2, 0, 2, 6))
+    }
+
+    private fun r(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range = Range(Position(startLine, startChar), Position(endLine, endChar))
 
     @Test
     fun tokenizeTest1() {
@@ -99,7 +117,7 @@ class TAGMLTokenizerTest {
     @Test
     fun tokenizeTest6() {
         val tagml = "<|"
-        val tagmlReader = Reader.string(tagml)
+        val tagmlReader = PositionalReader.string(tagml)
         val p = endTag ort startTextVariation
         println(p(tagmlReader))
     }
@@ -122,14 +140,19 @@ class TAGMLTokenizerTest {
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
 
-    private fun assertTokenizingSucceeds(tagml: String, expectedTokens: List<TAGMLToken>) {
-        when (val result = tokenize(tagml).also { println(it) }) {
+    private fun parse(tagml: String): List<LSPToken> {
+        return when (val result = tokenize(tagml).also { println(it) }) {
             is Either.Left -> {
                 showErrorLocation(tagml, result)
                 fail("Parsing failed: ${result.a}")
             }
-            is Either.Right -> assertThat(result.b.toString()).isEqualTo(expectedTokens.toString())
+            is Either.Right -> result.b
         }
+    }
+
+    private fun assertTokenizingSucceeds(tagml: String, expectedTokens: List<TAGMLToken>) {
+        val l = parse(tagml)
+        assertThat(l.map { it.token }.toString()).isEqualTo(expectedTokens.toString())
     }
 
 }

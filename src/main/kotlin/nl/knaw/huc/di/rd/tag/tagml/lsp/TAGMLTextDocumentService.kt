@@ -10,7 +10,6 @@ import org.eclipse.lsp4j.services.TextDocumentService
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.CompletableFuture
 
-
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
     //    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val docs: MutableMap<String, TAGMLDocumentModel> = synchronizedMap(hashMapOf())
@@ -99,6 +98,15 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             val r = Range(model.errorPosition, model.errorPosition)
             val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
             res.add(parseDiagnostic)
+        } else {
+            // TODO: validate the tagml tokens
+            val tokens = model.tokens!! // TODO: refactor model to Either
+            val firstToken = tokens.first()
+            val diagnostic1 = Diagnostic(firstToken.range, "This is the first token!", DiagnosticSeverity.Information, "test information")
+            res.add(diagnostic1)
+            val lastToken = tokens.last()
+            val diagnostic2 = Diagnostic(lastToken.range, "This is the last token!", DiagnosticSeverity.Hint, "test hint")
+            res.add(diagnostic2)
         }
 
 //        addTestDiagnostic(res)

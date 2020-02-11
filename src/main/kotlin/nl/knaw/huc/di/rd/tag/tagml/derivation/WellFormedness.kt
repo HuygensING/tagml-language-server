@@ -7,6 +7,7 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.HierarchyLevel
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
@@ -16,7 +17,7 @@ object WellFormedness {
 
     data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: Set<TAGMLToken>)
 
-    fun checkWellFormedness(tokens: List<TAGMLToken>): WellFormednessResult {
+    fun checkWellFormedness(tokens: List<LSPToken>): WellFormednessResult {
         val iterator = tokens.iterator()
         var expectation: Pattern = Range(
                 AnyTagIdentifier(),
@@ -40,7 +41,7 @@ object WellFormedness {
             stepsXML.append("""<expectation>$expectation</expectation>""")
             stepsXML.append("""<expectedTokens>${expectation.expectedTokens()}</expectedTokens>""")
 
-            val token = iterator.next()
+            val token = iterator.next().token
             val matches = expectation.matches(token)
             stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
             LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
