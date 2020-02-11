@@ -8,13 +8,13 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TokenIndex
 import org.eclipse.lsp4j.Position
 
-class TAGMLDocumentModel(val uri: String, val text: String, val version: Int) {
+class TAGMLDocumentModel(private val uri: String, val text: String, val version: Int) {
     var hasParseFailure: Boolean = false
     var errorPosition: Position? = null
     var errorMessage: String? = null
     var tokens: List<LSPToken>? = null
     private var reject: Response.Reject<Char, List<LSPToken>>? = null
-    var tokenIndex: TokenIndex? = null
+    private var tokenIndex: TokenIndex? = null
 
     init {
         when (val result = tokenize(text)) {

@@ -47,7 +47,7 @@ class TAGMLTokenizerTest {
     fun testTokenRanges() {
         val tagml = "[hello>\nWorld!\n<hello]"
 
-        var l = parse(tagml)
+        val l = parse(tagml)
         println(l)
         val token0 = l[0]
         assertThat(token0.range).isEqualTo(r(0, 0, 0, 6))

@@ -16,8 +16,8 @@ infix fun <I, A> Parser<I, A>.ort(p: Parser<I, A>): Parser<I, A> = { reader ->
     }
 }
 
-infix fun <I, A> Parser<I, A>.lsptmap(f: (A) -> TAGMLToken): Parser<I, LSPToken> = {
-    this(it).fold({
+infix fun <I, A> Parser<I, A>.lsptmap(f: (A) -> TAGMLToken): Parser<I, LSPToken> = { reader ->
+    this(reader).fold({
         val value = LSPToken(
                 f(it.value),
                 Range(

@@ -45,7 +45,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
     }
 
     private fun updateText(originalText: String?, contentChanges: List<TextDocumentContentChangeEvent>): String {
-        var orig = if (originalText == null) "" else originalText
+        var orig = originalText ?: ""
         for (changeEvent in contentChanges) {
             val range = changeEvent.range
             val text = changeEvent.text

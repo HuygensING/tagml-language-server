@@ -6,11 +6,11 @@ import java.util.concurrent.CompletableFuture
 
 class TestClient : LanguageClient {
 
-    var logMessageParams: MessageParams? = null
+    private var logMessageParams: MessageParams? = null
     var publishDiagnosticsParams: PublishDiagnosticsParams? = null
-    var showMessageParams: MessageParams? = null
-    var showMessageRequestParams: ShowMessageRequestParams? = null
-    var telemetryEventObject: Any? = null
+    private var showMessageParams: MessageParams? = null
+    private var showMessageRequestParams: ShowMessageRequestParams? = null
+    private var telemetryEventObject: Any? = null
 
     override fun logMessage(message: MessageParams?) {
         this.logMessageParams = message
