@@ -2,10 +2,12 @@ package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.lsp4j.InitializeParams
+import org.junit.Ignore
 import org.junit.Test
 
 class InitializeTest {
 
+    @Ignore
     @Test
     fun testInitialize() {
         val server = TAGMLLanguageServer()

@@ -7,7 +7,11 @@ abstract class TAGMLToken {
     abstract val content: String
 }
 
-data class LSPToken(val token: TAGMLToken, val range: Range)
+data class LSPToken(val token: TAGMLToken, val range: Range) {
+    override fun toString(): String {
+        return "$token at [(${range.start.line},${range.start.character})-(${range.end.line},${range.end.character})]"
+    }
+}
 
 class SchemaLocationToken(private val url: URL) : TAGMLToken() {
     override fun toString() = "SchemaLocation($url)"
