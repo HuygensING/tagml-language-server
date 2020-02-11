@@ -1,6 +1,7 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.eclipse.lsp4j.*
+import org.eclipse.lsp4j.jsonrpc.messages.Either
 import org.eclipse.lsp4j.services.*
 import java.util.concurrent.CompletableFuture
 import kotlin.system.exitProcess
@@ -19,13 +20,23 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     override fun initialize(params: InitializeParams): CompletableFuture<InitializeResult> {
 //        logger.info("initialize($params)")
         val serverCapabilities = ServerCapabilities().apply {
-            setCodeActionProvider(true)
-            completionProvider = CompletionOptions()
-            definitionProvider = true
+            textDocumentSync = Either.forLeft(TextDocumentSyncKind.Full)
+            completionProvider = CompletionOptions(false, listOf("[", "<", "|"))
             hoverProvider = true
-            referencesProvider = true
-            setTextDocumentSync(TextDocumentSyncKind.Full)
-            documentSymbolProvider = true
+            documentHighlightProvider = true
+//            documentLinkProvider = DocumentLinkOptions()
+//            signatureHelpProvider = null
+//            declarationProvider = Either.forLeft(false)
+//            definitionProvider = false
+//            typeDefinitionProvider = Either.forLeft(false)
+//            implementationProvider = Either.forLeft(false)
+//            referencesProvider = false
+//            documentHighlightProvider = false
+//            documentSymbolProvider = false
+//            codeActionProvider = Either.forLeft(false)
+//            codeLensProvider = null
+//            documentLinkProvider = null
+//            colorProvider = null
         }
         isInitialized = true
 
@@ -60,3 +71,4 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 // https://github.com/LucasBullen/LSP4J_Tutorial
 
 }
+
