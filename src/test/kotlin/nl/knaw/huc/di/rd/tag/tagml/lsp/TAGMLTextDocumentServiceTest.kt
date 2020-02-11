@@ -1,34 +1,31 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
 import org.assertj.core.api.Assertions.assertThat
-import org.eclipse.lsp4j.DiagnosticSeverity
-import org.eclipse.lsp4j.DidOpenTextDocumentParams
-import org.eclipse.lsp4j.InitializeParams
-import org.eclipse.lsp4j.TextDocumentItem
+import org.eclipse.lsp4j.*
 import org.junit.Test
 
 class TAGMLTextDocumentServiceTest {
 
     @Test
-    fun testDidOpen1() {
+    fun testDidOpenWithCorrectTAGML() {
         val client = TestClient()
         doDidOpen(client, "[tag>text<tag]")
 
-        val diagnostics = client.publishDiagnosticsParams?.diagnostics
-        assertThat(diagnostics).hasSize(1)
-        val firstDiagnostic = diagnostics!![0]
-        assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
+        val diagnostics = client.readDiagnostics()
+        assertThat(diagnostics).hasSize(2)
+        val firstDiagnostic = diagnostics[0]
+        assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Information)
         println(firstDiagnostic)
     }
 
     @Test
-    fun testDidOpen() {
+    fun testDidOpenWithUnparsableTAGML() {
         val client = TestClient()
         doDidOpen(client, "[[does not parse!]]]")
 
-        val diagnostics = client.publishDiagnosticsParams?.diagnostics
+        val diagnostics = client.readDiagnostics()
         assertThat(diagnostics).hasSize(1)
-        val firstDiagnostic = diagnostics!![0]
+        val firstDiagnostic = diagnostics[0]
         assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
         println(firstDiagnostic)
     }
@@ -37,7 +34,32 @@ class TAGMLTextDocumentServiceTest {
         val tds = startTDS(client)
         val params = DidOpenTextDocumentParams(TextDocumentItem("uri", "tagml", 1, tagml))
         tds.didOpen(params)
-        waitForDidOpenToFinish(client)
+        waitForDiagnosticsToBePublished(client)
+    }
+
+    @Test
+    fun testDidChange() {
+        val client = TestClient()
+        val tds = startTDS(client)
+        val uri = "file:///tmp/test.tagml"
+        val params = DidOpenTextDocumentParams(TextDocumentItem(uri, "tagml", 1, "[tag>text<tag]"))
+        tds.didOpen(params)
+        waitForDiagnosticsToBePublished(client)
+
+        val openDiagnostics = client.readDiagnostics()
+        assertThat(openDiagnostics).hasSize(2)
+
+        val textDocument = VersionedTextDocumentIdentifier(uri, 2)
+        val contentChanges = listOf(TextDocumentContentChangeEvent("[[[throw me an error!"))
+        val changeParams = DidChangeTextDocumentParams(textDocument, contentChanges)
+        tds.didChange(changeParams)
+        waitForDiagnosticsToBePublished(client)
+
+        val diagnostics = client.readDiagnostics()
+        assertThat(diagnostics).hasSize(1)
+        val firstDiagnostic = diagnostics[0]
+        assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
+        println(firstDiagnostic)
     }
 
     private fun startTDS(client: TestClient): TAGMLTextDocumentService {
@@ -48,7 +70,7 @@ class TAGMLTextDocumentServiceTest {
         return TAGMLTextDocumentService(ls)
     }
 
-    private fun waitForDidOpenToFinish(client: TestClient) {
+    private fun waitForDiagnosticsToBePublished(client: TestClient) {
         while (client.publishDiagnosticsParams == null) {
             Thread.sleep(10)
         }

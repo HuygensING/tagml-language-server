@@ -27,17 +27,35 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             throw(ResponseErrorException(error))
         }
 
-        val uri = params.textDocument.uri
-        val model = TAGMLDocumentModel(uri, params.textDocument.text, params.textDocument.version)
-        this.docs[uri] = model
-        publishDiagnostics(uri, model)
+        val docId = params.textDocument.uri
+        val model = TAGMLDocumentModel(docId, params.textDocument.text, params.textDocument.version)
+        this.docs[docId] = model
+        publishDiagnostics(docId, model)
     }
 
     override fun didChange(params: DidChangeTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didChange($params)")
-        val model = TAGMLDocumentModel(params.textDocument.uri, "TODO!!", params.textDocument.version)
-        this.docs[params.textDocument.uri] = model
-        publishDiagnostics(params.textDocument.uri, model)
+        val docId = params.textDocument.uri
+        val originalText = docs[docId]?.text
+        val changedText = updateText(originalText, params.contentChanges)
+
+        val model = TAGMLDocumentModel(docId, changedText, params.textDocument.version)
+        this.docs[docId] = model
+        publishDiagnostics(docId, model)
+    }
+
+    private fun updateText(originalText: String?, contentChanges: List<TextDocumentContentChangeEvent>): String {
+        var orig = if (originalText == null) "" else originalText
+        for (changeEvent in contentChanges) {
+            val range = changeEvent.range
+            val text = changeEvent.text
+            if (range == null) {
+                orig = text
+            } else {
+                TODO()
+            }
+        }
+        return orig
     }
 
     private fun publishDiagnostics(uri: String, model: TAGMLDocumentModel) {

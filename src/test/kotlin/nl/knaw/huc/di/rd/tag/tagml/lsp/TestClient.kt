@@ -1,9 +1,6 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
-import org.eclipse.lsp4j.MessageActionItem
-import org.eclipse.lsp4j.MessageParams
-import org.eclipse.lsp4j.PublishDiagnosticsParams
-import org.eclipse.lsp4j.ShowMessageRequestParams
+import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.LanguageClient
 import java.util.concurrent.CompletableFuture
 
@@ -19,8 +16,24 @@ class TestClient : LanguageClient {
         this.logMessageParams = message
     }
 
+    fun readLogMessage(): Pair<MessageType?, String?> {
+        val logMessage = logMessageParams?.message
+        val type = logMessageParams?.type
+        logMessageParams = null
+        return type to logMessage
+    }
+
     override fun publishDiagnostics(diagnostics: PublishDiagnosticsParams?) {
         this.publishDiagnosticsParams = diagnostics
+    }
+
+    fun readDiagnostics(): List<Diagnostic> {
+        val list = if (publishDiagnosticsParams == null)
+            listOf()
+        else
+            publishDiagnosticsParams!!.diagnostics
+        publishDiagnosticsParams = null
+        return list
     }
 
     override fun showMessage(messageParams: MessageParams?) {
@@ -35,6 +48,5 @@ class TestClient : LanguageClient {
     override fun telemetryEvent(`object`: Any?) {
         this.telemetryEventObject = `object`
     }
-
 
 }
