@@ -61,8 +61,8 @@ dependencies {
     implementation("io.arrow-kt:arrow-core-data:${arrowVersion}")
 
     // https://github.com/eclipse/lsp4j
-//    val lspVersion = "0.7.0" // LSP 3.14
-    val lspVersion = "0.8.1" // LSP 3.15
+    val lspVersion = "0.6.0" // LSP 3.14
+//    val lspVersion = "0.8.1" // LSP 3.15
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:${lspVersion}")
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:${lspVersion}")
 //    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.generator:${lsp_version}")

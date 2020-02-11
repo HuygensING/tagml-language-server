@@ -23,7 +23,7 @@ class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
             textDocumentSync = Either.forLeft(TextDocumentSyncKind.Full)
             completionProvider = CompletionOptions(false, listOf("[", "<", "|"))
             hoverProvider = true
-            documentHighlightProvider = true
+            documentHighlightProvider = false
 //            documentLinkProvider = DocumentLinkOptions()
 //            signatureHelpProvider = null
 //            declarationProvider = Either.forLeft(false)
