@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
     val traceFile by parser.option(ArgType.String, fullName = "trace", shortName = "t", description = "LSP tracing on, write to indicated file")
     val verbose by parser.option(ArgType.Boolean, shortName = "v", description = "increase verbosity").default(false)
     parser.parse(args)
-    val logfile by parser.option(ArgType.String, shortName = "l", description = "file to log to")
+//    val logfile by parser.option(ArgType.String, shortName = "l", description = "file to log to")
     if (verbose) println("starting tagml language server...")
     startServer(System.`in`, System.out, traceFile)
 }
@@ -27,7 +27,7 @@ fun startServer(inputStream: InputStream, out: PrintStream, traceFile: String?) 
     } else {
         LSPLauncher.createServerLauncher(server, inputStream, out)
     }
-    val startListening = l.startListening()
+    l.startListening()
     server.connect(l.remoteProxy)
 }
 

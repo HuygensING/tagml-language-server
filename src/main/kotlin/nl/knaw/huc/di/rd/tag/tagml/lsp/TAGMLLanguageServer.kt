@@ -12,8 +12,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 //    private val logger = LoggerFactory.getLogger(this.javaClass)!!
 
     private val textDocumentService = TAGMLTextDocumentService(this)
-    private val workspaceService = TAGMLWorkspaceService
-    var client: LanguageClient? = null
+    lateinit var client: LanguageClient // connect() should be called before accessing this
     private var shutdownRequested = false
     var isInitialized = false
 
@@ -43,7 +42,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
         return CompletableFuture.supplyAsync { InitializeResult(serverCapabilities) }
     }
 
-    override fun getWorkspaceService(): WorkspaceService = workspaceService
+    override fun getWorkspaceService(): WorkspaceService = TAGMLWorkspaceService
 
     override fun getTextDocumentService(): TextDocumentService = textDocumentService
 
@@ -61,7 +60,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
             exitProcess(1)
     }
 
-    override fun connect(client: LanguageClient?) {
+    override fun connect(client: LanguageClient) {
         this.client = client
     }
 

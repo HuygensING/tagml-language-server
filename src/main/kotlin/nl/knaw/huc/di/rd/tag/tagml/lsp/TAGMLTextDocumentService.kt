@@ -60,7 +60,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 
     private fun publishDiagnostics(uri: String, model: TAGMLDocumentModel) {
         CompletableFuture.runAsync {
-            tagmlLanguageServer.client?.publishDiagnostics(
+            tagmlLanguageServer.client.publishDiagnostics(
                     PublishDiagnosticsParams(
                             uri,
                             validate(model)
