@@ -4,7 +4,7 @@ import org.eclipse.lsp4j.DidChangeConfigurationParams
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams
 import org.eclipse.lsp4j.services.WorkspaceService
 
-class TAGMLWorkspaceService : WorkspaceService {
+object TAGMLWorkspaceService : WorkspaceService {
 //    private val logger = LoggerFactory.getLogger(this.javaClass)!!
 
     override fun didChangeWatchedFiles(params: DidChangeWatchedFilesParams?) {

@@ -8,7 +8,7 @@ class LogConfiguratorTest {
     @Test
     fun configure() {
         System.setProperty(LOGFILE_PROPERTY, "tls.log")
-        val logger = TLSLoggerFactory().getLogger(this.javaClass)
+        val logger = TLSLoggerFactory.getLogger(this.javaClass)
         logger.trace("TRACE")
         logger.info("INFO")
         logger.debug("DEBUG")

@@ -10,7 +10,7 @@ class InitializeTest {
     @Ignore
     @Test
     fun testInitialize() {
-        val server = TAGMLLanguageServer()
+        val server = TAGMLLanguageServer
         val params = InitializeParams().also {
             it.processId = 42
         }

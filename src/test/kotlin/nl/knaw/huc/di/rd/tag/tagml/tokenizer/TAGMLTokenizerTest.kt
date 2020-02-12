@@ -42,7 +42,7 @@ class TAGMLTokenizerTest {
 
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
-    
+
     @Test
     fun testTokenRanges() {
         val tagml = "[hello>\nWorld!\n<hello]"
@@ -50,14 +50,61 @@ class TAGMLTokenizerTest {
         val l = parse(tagml)
         println(l)
         val token0 = l[0]
-        assertThat(token0.range).isEqualTo(r(0, 0, 0, 6))
+        assertThat(token0.range).isEqualTo(r(0, 0, 0, 7))
         val token1 = l[1]
         assertThat(token1.range).isEqualTo(r(0, 7, 1, 6))
         val token2 = l[2]
-        assertThat(token2.range).isEqualTo(r(2, 0, 2, 6))
+        assertThat(token2.range).isEqualTo(r(2, 0, 2, 7))
     }
 
-    private fun r(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range = Range(Position(startLine, startChar), Position(endLine, endChar))
+    @Test
+    fun testTokenRanges2() {
+        val tagml = """
+            [tagml>[a>
+            One
+            <a][b>
+            Two
+            <b][c>
+            Three
+            <c]<tagml]
+            """.trimIndent()
+
+        val l = parse(tagml)
+        println(l)
+        val token0 = l[0]
+        assertThat(token0.range).isEqualTo(r(0, 0, 0, 7))
+
+        val token1 = l[1]
+        assertThat(token1.range).isEqualTo(r(0, 7, 0, 10))
+
+        val token2 = l[2]
+        assertThat(token2.range).isEqualTo(r(0, 10, 1, 3))
+
+        val token3 = l[3]
+        assertThat(token3.range).isEqualTo(r(2, 0, 2, 3))
+
+        val token4 = l[4]
+        assertThat(token4.range).isEqualTo(r(2, 3, 2, 6))
+
+        val token5 = l[5]
+        assertThat(token5.range).isEqualTo(r(2, 0, 2, 7))
+
+        val token6 = l[6]
+        assertThat(token6.range).isEqualTo(r(2, 0, 2, 7))
+
+        val token7 = l[7]
+        assertThat(token7.range).isEqualTo(r(2, 0, 2, 7))
+
+        val token8 = l[8]
+        assertThat(token8.range).isEqualTo(r(2, 0, 2, 7))
+
+        val token9 = l[9]
+        assertThat(token9.range).isEqualTo(r(2, 0, 2, 7))
+
+        val token10 = l[10]
+        assertThat(token10.range).isEqualTo(r(2, 0, 2, 7))
+    }
+
 
     @Test
     fun tokenizeTest1() {
@@ -98,14 +145,14 @@ class TAGMLTokenizerTest {
         val startPart2 = StartTagToken("part2")
         val textCookieMonster = TextToken("Cookie Monster ")
         val textLikes = TextToken("likes")
-        val startTextVariation = StartTextVariationToken()
+        val startTextVariation = StartTextVariationToken
         val textMany = TextToken(" many")
         val textCookies = TextToken("cookies")
-        val separator1 = TextVariationSeparatorToken()
+        val separator1 = TextVariationSeparatorToken
         val textCandy = TextToken("candy")
-        val separator2 = TextVariationSeparatorToken()
+        val separator2 = TextVariationSeparatorToken
         val textApples = TextToken("apples")
-        val endTextVariation = EndTextVariationToken()
+        val endTextVariation = EndTextVariationToken
         val endTag = EndTagToken("tag")
         val endPart1 = EndTagToken("part1")
         val endPart2 = EndTagToken("part2")
@@ -131,10 +178,10 @@ class TAGMLTokenizerTest {
         val textTwo = TextToken("two")
         val textThree = TextToken("three")
         val textBoe = TextToken(" boe.")
-        val startTextVariation = StartTextVariationToken()
-        val separator1 = TextVariationSeparatorToken()
-        val separator2 = TextVariationSeparatorToken()
-        val endTextVariation = EndTextVariationToken()
+        val startTextVariation = StartTextVariationToken
+        val separator1 = TextVariationSeparatorToken
+        val separator2 = TextVariationSeparatorToken
+        val endTextVariation = EndTextVariationToken
         val expectedTokens = listOf(textBla, startTextVariation, textOne, separator1, textTwo, separator2, textThree, endTextVariation, textBoe)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
@@ -154,5 +201,7 @@ class TAGMLTokenizerTest {
         val l = parse(tagml)
         assertThat(l.map { it.token }.toString()).isEqualTo(expectedTokens.toString())
     }
+
+    private fun r(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range = Range(Position(startLine, startChar), Position(endLine, endChar))
 
 }

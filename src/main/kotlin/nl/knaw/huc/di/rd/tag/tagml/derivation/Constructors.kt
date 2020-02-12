@@ -5,46 +5,31 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.All
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Concur
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.ConcurOneOrMore
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.EMPTY
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Interleave
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NOT_ALLOWED
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.NotAllowed
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.OneOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.TEXT
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 
 object Constructors {
 
-    private fun notAllowed(): Pattern {
-        return NOT_ALLOWED
-    }
+    fun anyContent(): Pattern = Text // might not cover it
 
-    fun empty(): Pattern {
-        return EMPTY
-    }
-
-    fun text(): Pattern {
-        return TEXT
-    }
-
-    fun anyContent(): Pattern = text() // might not cover it
-
-    private fun layer(): Pattern = Range(AnyTagIdentifier(), choice(text(), layer()))
+    private fun layer(): Pattern = Range(AnyTagIdentifier, choice(Text, layer()))
 
     internal fun mixed(pattern: Pattern): Pattern {
-        return interleave(text(), pattern)
+        return interleave(Text, pattern)
     }
 
     fun zeroOrMore(pattern: Pattern): Pattern {
-        return choice(oneOrMore(pattern), empty())
+        return choice(oneOrMore(pattern), Empty)
     }
 
     fun after(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return notAllowed()
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
 
         if (pattern1 is Empty) return pattern2
 
@@ -58,20 +43,20 @@ object Constructors {
     }
 
     fun all(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return notAllowed()
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
 
         if (pattern2 is Empty) {
             return if (pattern1.nullable)
-                empty()
+                Empty
             else
-                notAllowed()
+                NotAllowed
         }
 
         if (pattern1 is Empty) {
             return if (pattern2.nullable)
-                empty()
+                Empty
             else
-                notAllowed()
+                NotAllowed
         }
 
         if (pattern1 is After && pattern2 is After) {
@@ -109,7 +94,7 @@ object Constructors {
     }
 
     fun concur(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return notAllowed()
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
         if (pattern1 is Text) return pattern2
         if (pattern2 is Text) return pattern1
 
@@ -139,7 +124,7 @@ object Constructors {
     fun group(pattern1: Pattern, pattern2: Pattern): Pattern {
         //  group p NotAllowed = NotAllowed
         //  group NotAllowed p = NotAllowed
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return notAllowed()
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
 
         //  group p Empty = p
         if (pattern2 is Empty) return pattern1
@@ -160,7 +145,7 @@ object Constructors {
     fun interleave(pattern1: Pattern, pattern2: Pattern): Pattern {
         //  interleave p NotAllowed = NotAllowed
         //  interleave NotAllowed p = NotAllowed
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return notAllowed()
+        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
 
         //  interleave p Empty = p
         if (pattern2 is Empty) return pattern1

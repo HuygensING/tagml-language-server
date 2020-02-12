@@ -6,7 +6,7 @@ import org.eclipse.lsp4j.TextDocumentIdentifier
 import org.eclipse.lsp4j.TextDocumentItem
 
 open class RequestTest {
-    var server = TAGMLLanguageServer()
+    var server = TAGMLLanguageServer
 
     internal fun openDocument(tagml: String, uri: String = "uri://some-uri"): TextDocumentIdentifier {
         val textDocumentItem = TextDocumentItem(uri, "tagml", 1, tagml)

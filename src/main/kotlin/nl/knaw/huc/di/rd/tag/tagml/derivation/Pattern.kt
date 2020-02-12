@@ -17,15 +17,15 @@ interface Pattern {
             is StartTagToken -> startTokenDeriv(token)
             is EndTagToken -> endTokenDeriv(token)
             is TextToken -> textTokenDeriv(token)
-            else -> NotAllowed()
+            else -> NotAllowed
         }
     }
 
-    fun startTokenDeriv(s: StartTagToken): Pattern = NotAllowed()
+    fun startTokenDeriv(s: StartTagToken): Pattern = NotAllowed
 
-    fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed()
+    fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed
 
-    fun textTokenDeriv(t: TextToken): Pattern = NotAllowed()
+    fun textTokenDeriv(t: TextToken): Pattern = NotAllowed
 
     fun expectedTokens(): Set<TAGMLToken> = emptySet()
 

@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
 
 fun startServer(inputStream: InputStream, out: PrintStream, traceFile: String?) {
 //    https://github.com/LucasBullen/LSP4J_Tutorial/blob/master/Exercises/1/1-README.md
-    val server = TAGMLLanguageServer()
+    val server = TAGMLLanguageServer
     val l = if (traceFile != null) {
         val trace = PrintWriter(traceFile)
         LSPLauncher.createServerLauncher(server, inputStream, out, true, trace)

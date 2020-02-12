@@ -8,7 +8,7 @@ class TAGMLTextDocumentServiceTest {
 
     @Test
     fun testDidOpenWithCorrectTAGML() {
-        val client = TestClient()
+        val client = TestClient
         doDidOpen(client, "[tag>text<tag]")
 
         val diagnostics = client.readDiagnostics()
@@ -20,7 +20,7 @@ class TAGMLTextDocumentServiceTest {
 
     @Test
     fun testDidOpenWithUnparsableTAGML() {
-        val client = TestClient()
+        val client = TestClient
         doDidOpen(client, "[[does not parse!]]]")
 
         val diagnostics = client.readDiagnostics()
@@ -39,7 +39,7 @@ class TAGMLTextDocumentServiceTest {
 
     @Test
     fun testDidChange() {
-        val client = TestClient()
+        val client = TestClient
         val tds = startTDS(client)
         val uri = "file:///tmp/test.tagml"
         val params = DidOpenTextDocumentParams(TextDocumentItem(uri, "tagml", 1, "[tag>text<tag]"))
@@ -63,7 +63,7 @@ class TAGMLTextDocumentServiceTest {
     }
 
     private fun startTDS(client: TestClient): TAGMLTextDocumentService {
-        val ls = TAGMLLanguageServer()
+        val ls = TAGMLLanguageServer
         ls.client = client
         val ip = InitializeParams()
         ls.initialize(ip).join()

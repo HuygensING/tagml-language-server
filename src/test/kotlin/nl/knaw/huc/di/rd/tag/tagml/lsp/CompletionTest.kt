@@ -14,7 +14,7 @@ class CompletionTest {
     @Test
     @Ignore
     fun testCompletion() {
-        val server = TAGMLLanguageServer()
+        val server = TAGMLLanguageServer
         val textDocument = TextDocumentIdentifier("uri")
         val position = Position(0, 0)
         val completionParams = CompletionParams(textDocument, position)

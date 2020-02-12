@@ -4,10 +4,8 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.after
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.anyContent
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concur
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.empty
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.interleave
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
@@ -17,15 +15,9 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
 object Patterns {
 
-    val EMPTY: Pattern = Empty()
-
-    val NOT_ALLOWED: Pattern = NotAllowed()
-
-    val TEXT: Pattern = Text()
-
     val ANY_TEXT_TOKEN = TextToken("*")
 
-    class Empty : Pattern {
+    object Empty : Pattern {
         override val nullable: Boolean
             get() = true
 
@@ -34,7 +26,7 @@ object Patterns {
         }
     }
 
-    class NotAllowed : Pattern {
+    object NotAllowed : Pattern {
         override val nullable: Boolean
             get() = false
 
@@ -76,7 +68,7 @@ object Patterns {
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
-            return empty()
+            return Empty
         }
 
         override fun expectedTokens(): Set<TAGMLToken> {
@@ -90,7 +82,7 @@ object Patterns {
 
     }
 
-    class Text : Pattern {
+    object Text : Pattern {
         override val nullable: Boolean
             get() = true
 
@@ -99,10 +91,10 @@ object Patterns {
         }
 
         // relaxng: A text pattern matches zero or more text nodes. Thus the derivative of Text with respect to a text node is Text, not Empty
-        // TODO: if the parser does not return consecutive texttokens, then this can return empty()
+        // TODO: if the parser does not return consecutive texttokens, then this can return Empty
         override fun textTokenDeriv(t: TextToken): Pattern {
-//            return empty()
-            return text()
+//            return Empty
+            return Text
         }
 
         override fun expectedTokens(): Set<TAGMLToken> {
@@ -162,15 +154,17 @@ object Patterns {
     }
 
     class All(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+        private val lazyNullable: Boolean by lazy { pattern1.nullable && pattern2.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable && pattern2.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern1.matches(t) && pattern2.matches(t)
         }
 
+        private val expectedTokens: Set<TAGMLToken> by lazy { pattern1.expectedTokens() + pattern2.expectedTokens() }
         override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern1.expectedTokens() + pattern2.expectedTokens()
+            return expectedTokens
         }
 
         fun aggregateSubPatterns(): List<Pattern> {
@@ -186,8 +180,9 @@ object Patterns {
             return aggregate
         }
 
+        private val serialized: String by lazy { "<all>${aggregateSubPatterns().joinToString("")}</all>" }
         override fun toString(): String {
-            return "<all>${aggregateSubPatterns().joinToString("")}</all>"
+            return serialized
         }
     }
 
@@ -420,10 +415,10 @@ object Patterns {
         }
     }
 
-    class HierarchyLevel : Pattern {
+    object HierarchyLevel : Pattern {
 
-        private val pattern1: Pattern = text()
-        private val pattern2: Lazy<Pattern> = lazy { Range(AnyTagIdentifier(), HierarchyLevel()) }
+        private val pattern1: Pattern = Text
+        private val pattern2: Lazy<Pattern> = lazy { Range(AnyTagIdentifier, HierarchyLevel) }
 
         override val nullable: Boolean
             get() = pattern1.nullable || pattern2.value.nullable
@@ -475,21 +470,21 @@ object Patterns {
         override fun textTokenDeriv(t: TextToken): Pattern {
             return group(
                     pattern.textTokenDeriv(t),
-                    choice(OneOrMore(pattern), empty())
+                    choice(OneOrMore(pattern), Empty)
             )
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             return group(
                     pattern.startTokenDeriv(s),
-                    choice(OneOrMore(pattern), empty())
+                    choice(OneOrMore(pattern), Empty)
             )
         }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern {
             return group(
                     pattern.endTokenDeriv(e),
-                    choice(OneOrMore(pattern), empty())
+                    choice(OneOrMore(pattern), Empty)
             )
         }
 
@@ -514,7 +509,7 @@ object Patterns {
         override fun textTokenDeriv(t: TextToken): Pattern {
             return concur(
                     pattern.textTokenDeriv(t),
-                    choice(ConcurOneOrMore(pattern), empty())
+                    choice(ConcurOneOrMore(pattern), Empty)
             )
         }
 

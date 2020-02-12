@@ -20,12 +20,12 @@ object WellFormedness {
     fun checkWellFormedness(tokens: List<LSPToken>): WellFormednessResult {
         val iterator = tokens.iterator()
         var expectation: Pattern = Range(
-                AnyTagIdentifier(),
+                AnyTagIdentifier,
                 concurOneOrMore(
                         choice(
-                                Text(),
+                                Text,
                                 zeroOrMore(
-                                        HierarchyLevel()
+                                        HierarchyLevel
                                 )
                         )
                 )

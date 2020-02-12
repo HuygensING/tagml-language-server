@@ -7,12 +7,12 @@ import java.util.concurrent.CompletableFuture
 import kotlin.system.exitProcess
 
 
-class TAGMLLanguageServer : LanguageServer, LanguageClientAware {
+object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 
 //    private val logger = LoggerFactory.getLogger(this.javaClass)!!
 
     private val textDocumentService = TAGMLTextDocumentService(this)
-    private val workspaceService = TAGMLWorkspaceService()
+    private val workspaceService = TAGMLWorkspaceService
     var client: LanguageClient? = null
     private var shutdownRequested = false
     var isInitialized = false

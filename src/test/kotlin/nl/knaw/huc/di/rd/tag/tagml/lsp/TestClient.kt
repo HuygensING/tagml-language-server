@@ -4,7 +4,7 @@ import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.services.LanguageClient
 import java.util.concurrent.CompletableFuture
 
-class TestClient : LanguageClient {
+object TestClient : LanguageClient {
 
     private var logMessageParams: MessageParams? = null
     var publishDiagnosticsParams: PublishDiagnosticsParams? = null

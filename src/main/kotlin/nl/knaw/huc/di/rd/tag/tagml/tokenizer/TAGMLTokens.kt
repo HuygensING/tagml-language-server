@@ -71,19 +71,19 @@ class TextToken(private val textContent: String) : TAGMLToken() {
     }
 }
 
-class StartTextVariationToken : TAGMLToken() {
+object StartTextVariationToken : TAGMLToken() {
     override fun toString() = "StartTextVariation()"
     override val content: String
         get() = "<|"
 }
 
-class EndTextVariationToken : TAGMLToken() {
+object EndTextVariationToken : TAGMLToken() {
     override fun toString() = "EndTextVariation()"
     override val content: String
         get() = "|>"
 }
 
-class TextVariationSeparatorToken : TAGMLToken() {
+object TextVariationSeparatorToken : TAGMLToken() {
     override fun toString() = "TextVariationSeparator()"
     override val content: String
         get() = "|"

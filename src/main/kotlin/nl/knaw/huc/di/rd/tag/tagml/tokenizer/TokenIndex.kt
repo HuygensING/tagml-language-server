@@ -19,15 +19,16 @@ class TokenIndex(val uri: String) {
         else
             lspTokens[index].token
     }
+
+    private fun relativePosition(p: Position, r: Range): Int = when {
+        Positions.isBefore(p, r.start) -> 1  // before range
+        Positions.isBefore(r.end, p) -> -1   // after range
+        else -> 0                            // in range
+    }
+
+    private val locatedTokenComparator = compareBy<LSPToken> { it.range.start.line }
+            .thenBy { it.range.start.character }
+            .thenBy { it.range.end.line }
+            .thenBy { it.range.end.character }
 }
 
-private fun relativePosition(p: Position, r: Range): Int = when {
-    Positions.isBefore(p, r.start) -> 1  // before range
-    Positions.isBefore(r.end, p) -> -1   // after range
-    else -> 0                            // in range
-}
-
-private val locatedTokenComparator = compareBy<LSPToken> { it.range.start.line }
-        .thenBy { it.range.start.character }
-        .thenBy { it.range.end.line }
-        .thenBy { it.range.end.character }

@@ -7,7 +7,7 @@ import org.eclipse.lsp4j.ShowMessageRequestParams
 import org.eclipse.lsp4j.services.LanguageClient
 import java.util.concurrent.CompletableFuture
 
-class TSPClient : LanguageClient {
+object TSPClient : LanguageClient {
     override fun publishDiagnostics(diagnostics: PublishDiagnosticsParams?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

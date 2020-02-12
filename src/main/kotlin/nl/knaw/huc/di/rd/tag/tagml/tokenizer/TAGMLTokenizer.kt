@@ -64,9 +64,9 @@ object TAGMLTokenizer {
     private val text = (not(specialChar).map { it.toString() } or escapedSpecialChar).rep
             .toLSPToken { TextToken(it.joinToString(separator = "")) }
 
-    val startTextVariation = string("<|").toLSPToken { StartTextVariationToken() }
-    private val textVariationSeparator = char('|').toLSPToken { TextVariationSeparatorToken() }
-    private val endTextVariation = string("|>").toLSPToken { EndTextVariationToken() }
+    val startTextVariation = string("<|").toLSPToken { StartTextVariationToken }
+    private val textVariationSeparator = char('|').toLSPToken { TextVariationSeparatorToken }
+    private val endTextVariation = string("|>").toLSPToken { EndTextVariationToken }
 
     val tagmlParser = (schemaLocation.opt then
             (startTag ort text ort endTag ort startTextVariation ort endTextVariation ort textVariationSeparator).rep

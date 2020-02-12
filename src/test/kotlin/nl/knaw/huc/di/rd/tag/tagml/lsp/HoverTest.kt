@@ -12,7 +12,7 @@ class HoverTest {
 
     @Test
     fun testHover() {
-        val server = TAGMLLanguageServer()
+        val server = TAGMLLanguageServer
         val textDocumentIdentifier = TextDocumentIdentifier("uri")
         val position = Position(0, 0)
         val positionParams = TextDocumentPositionParams(textDocumentIdentifier, position)
