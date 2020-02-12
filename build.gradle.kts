@@ -10,17 +10,18 @@
   gradlew distZip
   - to generate a full distribution zip
 */
+import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    // Apply the Kotlin JVM plugin to add support for Kotlin.
-//    id("org.jetbrains.kotlin.jvm") version "1.3.41"
+    kotlin("jvm") version "1.3.61"
 
     // Apply the application plugin to add support for building a CLI application.
     application
 
     id("com.github.johnrengelman.shadow") version "5.0.0"
-    kotlin("jvm") version "1.3.61"
+//    id("kotlinx.benchmark") version "0.2.0-dev-7"
+    kotlin("plugin.allopen") version "1.3.60"
 }
 
 application {
@@ -40,6 +41,10 @@ repositories {
     maven {
         url = uri("https://dl.bintray.com/kotlin/kotlin-dev")
     }
+    maven {
+        url = uri("https://dl.bintray.com/kotlin/kotlinx/")
+    }
+    gradlePluginPortal()
 }
 
 dependencies {
@@ -83,6 +88,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("io.github.microutils:kotlin-logging:1.7.7")
+
+//    compile("org.jetbrains.kotlinx:kotlinx.benchmark.runtime-jvm:0.2.0-dev-7")
+    implementation("org.jetbrains.kotlinx:kotlinx.benchmark.runtime:0.2.0-dev-7")
+//    "benchmarksCompile"(sourceSets.main.get().compileClasspath)
 }
 
 tasks {
@@ -106,5 +115,27 @@ tasks {
                             "Main-Class" to application.mainClassName)
             )
         }
+    }
+}
+
+configure<AllOpenExtension> {
+    annotation("org.openjdk.jmh.annotations.State")
+}
+
+sourceSets { register("benchmarks") }
+
+//benchmark {
+//    targets {
+//        register("benchmarks")
+//    }
+//}
+
+tasks.register("listrepos") {
+    doLast {
+        println("Repositories:")
+        project.repositories.map { it as MavenArtifactRepository }
+                .forEach {
+                    println("Name: ${it.name}; url: ${it.url}")
+                }
     }
 }
