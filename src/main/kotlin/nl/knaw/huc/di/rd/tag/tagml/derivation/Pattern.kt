@@ -9,9 +9,12 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 interface Pattern {
 
     /**
-     *  Does this pattern except an "empty" token?
+     *  Does this pattern expect an "empty" token?
      */
     val nullable: Boolean
+
+    val expectedTokens: Set<TAGMLToken>
+        get() = emptySet()
 
     fun matches(t: TAGMLToken): Boolean = false
 
@@ -29,7 +32,4 @@ interface Pattern {
     fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed
 
     fun textTokenDeriv(t: TextToken): Pattern = NotAllowed
-
-    val expectedTokens: Set<TAGMLToken>
-        get() = emptySet()
 }
