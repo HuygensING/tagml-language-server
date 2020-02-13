@@ -26,14 +26,7 @@ class CSVParserTest {
     private fun asReader(s: String) = MyReader(Reader.string(s))
 
     class MyReader(private val reader: Reader<Char>) : Reader<Char> {
-        override fun location(): Location {
-            return reader.location()
-        }
-
-        override fun read(): Pair<Char, Reader<Char>>? {
-            return reader.read()
-        }
-
+        override fun location(): Location = reader.location()
+        override fun read(): Pair<Char, Reader<Char>>? = reader.read()
     }
-
 }

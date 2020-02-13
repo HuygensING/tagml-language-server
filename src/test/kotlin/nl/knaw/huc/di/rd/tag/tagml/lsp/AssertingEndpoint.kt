@@ -45,7 +45,5 @@ class AssertingEndpoint : Endpoint {
         fail("expectations weren't empty " + toString())
     }
 
-    override fun toString(): String {
-        return ToStringBuilder(this).addAllFields().toString()
-    }
+    override fun toString(): String = ToStringBuilder(this).addAllFields().toString()
 }

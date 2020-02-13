@@ -10,14 +10,13 @@ object URLParser {
         return "$leftString$rightString"
     }
 
-    private fun <A> asString(obj: A): String {
-        return when (obj) {
-            is Pair<*, *> -> obj.concatenateLeaves()
-            is List<*> -> obj.joinToString("") { asString(it) }
-            null -> ""
-            else -> obj.toString()
-        }
-    }
+    private fun <A> asString(obj: A): String =
+            when (obj) {
+                is Pair<*, *> -> obj.concatenateLeaves()
+                is List<*>    -> obj.joinToString("") { asString(it) }
+                null          -> ""
+                else          -> obj.toString()
+            }
 
     val digit = charIn(CharRange('0', '9'))
     val digits = digit.rep
@@ -50,5 +49,4 @@ object URLParser {
             .map { it.concatenateLeaves() }
 
     val url = httpurl or fileurl
-
 }

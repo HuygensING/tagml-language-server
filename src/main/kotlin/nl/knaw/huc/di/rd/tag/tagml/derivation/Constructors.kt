@@ -20,13 +20,9 @@ object Constructors {
 
     private fun layer(): Pattern = Range(AnyTagIdentifier, choice(Text, layer()))
 
-    internal fun mixed(pattern: Pattern): Pattern {
-        return interleave(Text, pattern)
-    }
+    internal fun mixed(pattern: Pattern): Pattern = interleave(Text, pattern)
 
-    fun zeroOrMore(pattern: Pattern): Pattern {
-        return choice(oneOrMore(pattern), Empty)
-    }
+    fun zeroOrMore(pattern: Pattern): Pattern = choice(oneOrMore(pattern), Empty)
 
     fun after(pattern1: Pattern, pattern2: Pattern): Pattern {
         if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed

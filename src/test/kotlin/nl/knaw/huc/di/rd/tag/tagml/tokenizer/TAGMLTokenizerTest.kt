@@ -186,21 +186,20 @@ class TAGMLTokenizerTest {
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
 
-    private fun parse(tagml: String): List<LSPToken> {
-        return when (val result = tokenize(tagml).also { println(it) }) {
-            is Either.Left -> {
-                showErrorLocation(tagml, result)
-                fail("Parsing failed: ${result.a}")
+    private fun parse(tagml: String): List<LSPToken> =
+            when (val result = tokenize(tagml).also { println(it) }) {
+                is Either.Left  -> {
+                    showErrorLocation(tagml, result)
+                    fail("Parsing failed: ${result.a}")
+                }
+                is Either.Right -> result.b
             }
-            is Either.Right -> result.b
-        }
-    }
 
     private fun assertTokenizingSucceeds(tagml: String, expectedTokens: List<TAGMLToken>) {
         val l = parse(tagml)
         assertThat(l.map { it.token }.toString()).isEqualTo(expectedTokens.toString())
     }
 
-    private fun r(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range = Range(Position(startLine, startChar), Position(endLine, endChar))
-
+    private fun r(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range =
+            Range(Position(startLine, startChar), Position(endLine, endChar))
 }

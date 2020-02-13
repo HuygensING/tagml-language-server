@@ -36,62 +36,50 @@ class NameSpaceIdentifierToken(private val id: String, private val url: URL) : T
 class StartTagToken(val tagName: String) : TAGMLToken() {
     override val content: String by lazy { "[$tagName>" }
 
-    val lazySerialized by lazy { "Start($tagName)" }
-    override fun toString(): String {
-        return lazySerialized
-    }
+    private val lazySerialized by lazy { "Start($tagName)" }
+    override fun toString(): String = lazySerialized
 
-    override fun hashCode(): Int {
-        return this.javaClass.hashCode() + tagName.hashCode()
-    }
+    private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
+    override fun hashCode(): Int = lazyHashCode
 
-    override fun equals(other: Any?): Boolean {
-        return other is StartTagToken && other.tagName == tagName
-    }
+    override fun equals(other: Any?): Boolean = other is StartTagToken && other.tagName == tagName
 }
 
 class EndTagToken(val tagName: String) : TAGMLToken() {
-    override fun toString() = "End($tagName)"
-    override val content: String
-        get() = "<$tagName]"
+    override val content: String by lazy { "<$tagName]" }
 
-    override fun hashCode(): Int {
-        return this.javaClass.hashCode() + tagName.hashCode()
-    }
+    private val lazySerialized: String by lazy { "End($tagName)" }
+    override fun toString() = lazySerialized
 
-    override fun equals(other: Any?): Boolean {
-        return other is EndTagToken && other.tagName == tagName
-    }
+    private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
+    override fun hashCode(): Int = lazyHashCode
+
+    override fun equals(other: Any?): Boolean = other is EndTagToken && other.tagName == tagName
 }
 
 class TextToken(private val textContent: String) : TAGMLToken() {
-    override fun toString() = "Text(${textContent.replace("\n", "\\n")})"
-    override val content: String
-        get() = textContent
+    override val content: String = textContent
 
-    override fun hashCode(): Int {
-        return this.javaClass.hashCode() + textContent.hashCode()
-    }
+    private val lazySerialized: String by lazy { "Text(${textContent.replace("\n", "\\n")})" }
+    override fun toString() = lazySerialized
 
-    override fun equals(other: Any?): Boolean {
-        return other is TextToken && other.textContent == textContent
-    }
+    private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + textContent.hashCode() }
+    override fun hashCode(): Int = lazyHashCode
+
+    override fun equals(other: Any?): Boolean = other is TextToken && other.textContent == textContent
 }
 
 object StartTextVariationToken : TAGMLToken() {
+    override val content: String = "<|"
     override fun toString() = "StartTextVariation()"
-    override val content: String
-        get() = "<|"
 }
 
 object EndTextVariationToken : TAGMLToken() {
+    override val content: String = "|>"
     override fun toString() = "EndTextVariation()"
-    override val content: String
-        get() = "|>"
 }
 
 object TextVariationSeparatorToken : TAGMLToken() {
+    override val content: String = "|"
     override fun toString() = "TextVariationSeparator()"
-    override val content: String
-        get() = "|"
 }

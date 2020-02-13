@@ -18,14 +18,13 @@ interface Pattern {
 
     fun matches(t: TAGMLToken): Boolean = false
 
-    fun deriv(token: TAGMLToken): Pattern {
-        return when (token) {
-            is StartTagToken -> startTokenDeriv(token)
-            is EndTagToken   -> endTokenDeriv(token)
-            is TextToken     -> textTokenDeriv(token)
-            else             -> NotAllowed
-        }
-    }
+    fun deriv(token: TAGMLToken): Pattern =
+            when (token) {
+                is StartTagToken -> startTokenDeriv(token)
+                is EndTagToken   -> endTokenDeriv(token)
+                is TextToken     -> textTokenDeriv(token)
+                else             -> NotAllowed
+            }
 
     fun startTokenDeriv(s: StartTagToken): Pattern = NotAllowed
 
