@@ -8,6 +8,9 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
 interface Pattern {
 
+    /**
+     *  Does this pattern except an "empty" token?
+     */
     val nullable: Boolean
 
     fun matches(t: TAGMLToken): Boolean = false
@@ -15,9 +18,9 @@ interface Pattern {
     fun deriv(token: TAGMLToken): Pattern {
         return when (token) {
             is StartTagToken -> startTokenDeriv(token)
-            is EndTagToken -> endTokenDeriv(token)
-            is TextToken -> textTokenDeriv(token)
-            else -> NotAllowed
+            is EndTagToken   -> endTokenDeriv(token)
+            is TextToken     -> textTokenDeriv(token)
+            else             -> NotAllowed
         }
     }
 

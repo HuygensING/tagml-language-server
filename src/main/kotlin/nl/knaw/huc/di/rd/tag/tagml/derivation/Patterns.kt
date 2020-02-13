@@ -21,18 +21,14 @@ object Patterns {
         override val nullable: Boolean
             get() = true
 
-        override fun toString(): String {
-            return "<empty/>"
-        }
+        override fun toString(): String = "<empty/>"
     }
 
     object NotAllowed : Pattern {
         override val nullable: Boolean
             get() = false
 
-        override fun toString(): String {
-            return "<notAllowed/>"
-        }
+        override fun toString(): String = "<notAllowed/>"
     }
 
     class Range(private val id: TagIdentifier, private val pattern: Pattern) : Pattern {
@@ -50,13 +46,11 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return setOf(StartTagToken(determineTagName(id)))
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { setOf(StartTagToken(determineTagName(id))) }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
-        override fun toString(): String {
-            return """<range id="$id">$pattern</range>"""
-        }
+        private val lazySerialized: String by lazy { """<range id="$id">$pattern</range>""" }
+        override fun toString(): String = lazySerialized
     }
 
     class RangeClose(private val id: TagIdentifier) : Pattern {
@@ -71,15 +65,15 @@ object Patterns {
             return Empty
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy {
             val tagName = determineTagName(id)
-            return setOf(EndTagToken(tagName))
+            setOf(EndTagToken(tagName))
         }
 
-        override fun toString(): String {
-            return """<rangeClose id="$id"/>"""
-        }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
+        private val lazySerialized: String by lazy { """<rangeClose id="$id"/>""" }
+        override fun toString(): String = lazySerialized
     }
 
     object Text : Pattern {
@@ -97,13 +91,10 @@ object Patterns {
             return Text
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return setOf(ANY_TEXT_TOKEN)
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { setOf(ANY_TEXT_TOKEN) }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
-        override fun toString(): String {
-            return "<text/>"
-        }
+        override fun toString(): String = "<text/>"
     }
 
     // combinators
@@ -131,9 +122,8 @@ object Patterns {
             return after(pattern1.textTokenDeriv(t), pattern2)
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern1.expectedTokens()
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { pattern1.expectedTokens() }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -148,9 +138,8 @@ object Patterns {
             return aggregate
         }
 
-        override fun toString(): String {
-            return "<after>${aggregateSubPatterns().joinToString("")}</after>"
-        }
+        private val lazySerialization: String by lazy { "<after>${aggregateSubPatterns().joinToString("")}</after>" }
+        override fun toString(): String = lazySerialization
     }
 
     class All(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
@@ -180,15 +169,15 @@ object Patterns {
             return aggregate
         }
 
-        private val serialized: String by lazy { "<all>${aggregateSubPatterns().joinToString("")}</all>" }
-        override fun toString(): String {
-            return serialized
-        }
+        private val lazySerialized: String by lazy { "<all>${aggregateSubPatterns().joinToString("")}</all>" }
+        override fun toString(): String = lazySerialized
     }
 
     class Choice(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+
+        private val lazyNullable: Boolean by lazy { pattern1.nullable || pattern2.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable || pattern2.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern1.matches(t) || pattern2.matches(t)
@@ -223,28 +212,31 @@ object Patterns {
             return aggregate
         }
 
-        override fun toString(): String {
-            return if (pattern1 is OneOrMore && pattern2 is Empty)
+        private val lazySerialized: String by lazy {
+            if (pattern1 is OneOrMore && pattern2 is Empty)
                 "<zeroOrMore>${pattern1.pattern}</zeroOrMore>"
             else
                 "<choice>${aggregateSubPatterns().joinToString("")}</choice>"
         }
 
-        override fun hashCode(): Int {
-            return this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode()
-        }
+        override fun toString(): String = lazySerialized
+
+        private val lazyHashcode: Int by lazy { this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode() }
+        override fun hashCode(): Int = lazyHashcode
 
         override fun equals(other: Any?): Boolean {
             return (other is Choice) && (
                     (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
-                            (other.pattern1 == pattern2 && other.pattern2 == pattern1)
-                    )
+                    (other.pattern1 == pattern2 && other.pattern2 == pattern1)
+                                        )
         }
     }
 
     class Concur(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+
+        private val lazyNullable: Boolean by lazy { pattern1.nullable && pattern2.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable && pattern2.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern1.matches(t) || pattern2.matches(t)
@@ -298,14 +290,14 @@ object Patterns {
             return aggregate
         }
 
-        override fun toString(): String {
-            return "<concur>${aggregateSubPatterns().joinToString("")}</concur>"
-        }
+        private val lazySerialized: String by lazy { "<concur>${aggregateSubPatterns().joinToString("")}</concur>" }
+        override fun toString(): String = lazySerialized
     }
 
     class Group(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+        private val lazyNullable: Boolean by lazy { pattern1.nullable && pattern2.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable && pattern2.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return if (!pattern1.matches(t) && pattern1.nullable)
@@ -335,12 +327,14 @@ object Patterns {
             else p
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return if (pattern1.nullable)
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy {
+            if (pattern1.nullable)
                 pattern1.expectedTokens() + pattern2.expectedTokens()
             else
                 pattern1.expectedTokens()
         }
+
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -355,14 +349,14 @@ object Patterns {
             return aggregate
         }
 
-        override fun toString(): String {
-            return "<group>${aggregateSubPatterns().joinToString("")}</group>"
-        }
+        private val lazySerialized: String by lazy { "<group>${aggregateSubPatterns().joinToString("")}</group>" }
+        override fun toString(): String = lazySerialized
     }
 
     class Interleave(private val pattern1: Pattern, private val pattern2: Pattern) : Pattern {
+        private val lazyNullable: Boolean by lazy { pattern1.nullable && pattern2.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable && pattern2.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern1.matches(t) || pattern2.matches(t)
@@ -389,9 +383,8 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern1.expectedTokens() + pattern2.expectedTokens()
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { pattern1.expectedTokens() + pattern2.expectedTokens() }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -406,22 +399,24 @@ object Patterns {
             return aggregate
         }
 
-        override fun toString(): String {
+        private val lazySerialized: String by lazy {
             if (pattern1 is Text)
-                return "<mixed>$pattern2</mixed>"
+                "<mixed>$pattern2</mixed>"
             if (pattern2 is Text)
-                return "<mixed>$pattern1</mixed>"
-            return "<interleave>${aggregateSubPatterns().joinToString("")}</interleave>"
+                "<mixed>$pattern1</mixed>"
+            "<interleave>${aggregateSubPatterns().joinToString("")}</interleave>"
         }
+
+        override fun toString(): String = lazySerialized
     }
 
     object HierarchyLevel : Pattern {
-
         private val pattern1: Pattern = Text
         private val pattern2: Lazy<Pattern> = lazy { Range(AnyTagIdentifier, HierarchyLevel) }
 
+        private val lazyNullable: Boolean by lazy { pattern1.nullable || pattern2.value.nullable }
         override val nullable: Boolean
-            get() = pattern1.nullable || pattern2.value.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern1.matches(t) || pattern2.value.matches(t)
@@ -439,29 +434,26 @@ object Patterns {
             return choice(pattern1.textTokenDeriv(t), pattern2.value.textTokenDeriv(t))
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern1.expectedTokens() + pattern2.value.expectedTokens()
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { pattern1.expectedTokens() + pattern2.value.expectedTokens() }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
-        override fun toString(): String {
-            return "<hierarchyLevel/>"
-        }
+        override fun toString(): String = "<hierarchyLevel/>"
 
-        override fun hashCode(): Int {
-            return this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode()
-        }
+        private val lazyHashCode: Int = this.javaClass.hashCode() + pattern1.hashCode() + pattern2.hashCode()
+        override fun hashCode(): Int = lazyHashCode
 
         override fun equals(other: Any?): Boolean {
             return (other is HierarchyLevel) && (
                     (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
-                            (other.pattern1 == pattern2 && other.pattern2 == pattern1)
-                    )
+                    (other.pattern1 == pattern2 && other.pattern2 == pattern1)
+                                                )
         }
     }
 
     class OneOrMore(val pattern: Pattern) : Pattern {
+        private val lazyNullable: Boolean by lazy { pattern.nullable }
         override val nullable: Boolean
-            get() = pattern.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern.matches(t)
@@ -488,18 +480,17 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern.expectedTokens()
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { pattern.expectedTokens() }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
-        override fun toString(): String {
-            return "<oneOrMore>$pattern</oneOrMore>"
-        }
+        private val lazySerialized: String by lazy { "<oneOrMore>$pattern</oneOrMore>" }
+        override fun toString(): String = lazySerialized
     }
 
     class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
+        private val lazyNullable: Boolean by lazy { pattern.nullable }
         override val nullable: Boolean
-            get() = pattern.nullable
+            get() = lazyNullable
 
         override fun matches(t: TAGMLToken): Boolean {
             return pattern.matches(t)
@@ -526,20 +517,18 @@ object Patterns {
             )
         }
 
-        override fun expectedTokens(): Set<TAGMLToken> {
-            return pattern.expectedTokens()
-        }
+        private val lazyExpectedTokens: Set<TAGMLToken> by lazy { pattern.expectedTokens() }
+        override fun expectedTokens(): Set<TAGMLToken> = lazyExpectedTokens
 
-        override fun toString(): String {
-            return "<concurOneOrMore>$pattern</concurOneOrMore>"
-        }
+        private val lazySerialization: String by lazy { "<concurOneOrMore>$pattern</concurOneOrMore>" }
+        override fun toString(): String = lazySerialization
     }
 
     private fun determineTagName(id: TagIdentifier): String {
         return when (id) {
             is AnyTagIdentifier -> "*"
-            is FixedIdentifier -> id.tagName
-            else -> "?"
+            is FixedIdentifier  -> id.tagName
+            else                -> "?"
         }
     }
 }
