@@ -39,7 +39,7 @@ object WellFormedness {
         while (goOn) {
             stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
             stepsXML.append("""<expectation>$expectation</expectation>""")
-            stepsXML.append("""<expectedTokens>${expectation.expectedTokens()}</expectedTokens>""")
+            stepsXML.append("""<expectedTokens>${expectation.expectedTokens}</expectedTokens>""")
 
             val token = iterator.next().token
             val matches = expectation.matches(token)
@@ -49,7 +49,7 @@ object WellFormedness {
                 expectation = expectation.deriv(token)
                 goOn = iterator.hasNext()
             } else {
-                expectedTokens.addAll(expectation.expectedTokens())
+                expectedTokens.addAll(expectation.expectedTokens)
                 errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
                 goOn = false
             }
@@ -58,7 +58,7 @@ object WellFormedness {
         stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
         LOG.info("remaining expectation=$expectation")
         if (errors.isEmpty() && !expectation.nullable) {
-            expectedTokens.addAll(expectation.expectedTokens())
+            expectedTokens.addAll(expectation.expectedTokens)
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
         stepsXML.append("\n</wellformednesscheck>")
@@ -70,7 +70,7 @@ object WellFormedness {
     }
 
     private fun expectationString(expectation: Pattern): String {
-        val expectedTokens = expectation.expectedTokens().map { it.content }
+        val expectedTokens = expectation.expectedTokens.map { it.content }
         return when (expectedTokens.size) {
             0 -> "nothing"
             1 -> expectedTokens[0]

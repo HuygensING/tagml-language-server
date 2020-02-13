@@ -30,6 +30,6 @@ interface Pattern {
 
     fun textTokenDeriv(t: TextToken): Pattern = NotAllowed
 
-    fun expectedTokens(): Set<TAGMLToken> = emptySet()
-
+    val expectedTokens: Set<TAGMLToken>
+        get() = emptySet()
 }
