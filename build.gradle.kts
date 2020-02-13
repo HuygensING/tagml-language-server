@@ -19,6 +19,8 @@ plugins {
     application
 
     id("com.github.johnrengelman.shadow") version "5.0.0"
+
+    // https://github.com/melix/jmh-gradle-plugin
     id("me.champeau.gradle.jmh") version "0.5.0"
 }
 
