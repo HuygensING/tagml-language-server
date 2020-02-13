@@ -69,7 +69,6 @@ object WellFormedness {
                 expectedTokens)
     }
 
-
     private fun expectationString(expectation: Pattern): String {
         val expectedTokens = expectation.expectedTokens().map { it.content }
         return when (expectedTokens.size) {

@@ -497,7 +497,6 @@ object Patterns {
         }
     }
 
-
     class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
         override val nullable: Boolean
             get() = pattern.nullable

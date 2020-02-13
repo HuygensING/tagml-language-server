@@ -20,5 +20,4 @@ open class RequestTest {
         server.textDocumentService.didClose(didCloseTextDocumentParams)
     }
 
-
 }

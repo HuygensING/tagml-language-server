@@ -63,8 +63,6 @@ class ArrowTest {
 
     private fun givenAReader(s: String = "") = Reader.string(s)
 
-
     // TODO: make custom reader that encompasses a modelbuilder or at least an expectation stack
-
 
 }

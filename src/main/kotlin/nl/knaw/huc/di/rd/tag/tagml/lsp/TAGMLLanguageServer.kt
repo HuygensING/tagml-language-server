@@ -6,7 +6,6 @@ import org.eclipse.lsp4j.services.*
 import java.util.concurrent.CompletableFuture
 import kotlin.system.exitProcess
 
-
 object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 
 //    private val logger = LoggerFactory.getLogger(this.javaClass)!!

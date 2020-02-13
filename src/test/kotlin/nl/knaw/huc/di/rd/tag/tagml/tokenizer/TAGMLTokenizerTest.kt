@@ -105,7 +105,6 @@ class TAGMLTokenizerTest {
         assertThat(token10.range).isEqualTo(r(2, 0, 2, 7))
     }
 
-
     @Test
     fun tokenizeTest1() {
         val tagml = "[hello>World!<hello]"

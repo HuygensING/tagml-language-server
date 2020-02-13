@@ -27,7 +27,6 @@ class URLParserTest {
         assertDoesNotParse("ababab", p)
     }
 
-
     @Test
     @Ignore
     fun test1() {

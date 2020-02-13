@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.OutputStreamWriter
 
-
 class TAGMLLanguageServerTest {
     private val LOG = LoggerFactory.getLogger(TAGMLLanguageServerTest::class.java)
 
