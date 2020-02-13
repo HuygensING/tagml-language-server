@@ -1,6 +1,8 @@
+package nl.knaw.huc.di.rd.tag
+
 import org.openjdk.jmh.annotations.Benchmark
 
-class Benchmark {
+open class Benchmark {
 
     @Benchmark
     fun benchmark() {

@@ -10,7 +10,6 @@
   gradlew distZip
   - to generate a full distribution zip
 */
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -20,8 +19,7 @@ plugins {
     application
 
     id("com.github.johnrengelman.shadow") version "5.0.0"
-//    id("kotlinx.benchmark") version "0.2.0-dev-7"
-    kotlin("plugin.allopen") version "1.3.60"
+    id("me.champeau.gradle.jmh") version "0.5.0"
 }
 
 application {
@@ -40,9 +38,6 @@ repositories {
     }
     maven {
         url = uri("https://dl.bintray.com/kotlin/kotlin-dev")
-    }
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/kotlinx/")
     }
     gradlePluginPortal()
 }
@@ -88,10 +83,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("io.github.microutils:kotlin-logging:1.7.7")
-
-//    compile("org.jetbrains.kotlinx:kotlinx.benchmark.runtime-jvm:0.2.0-dev-7")
-    implementation("org.jetbrains.kotlinx:kotlinx.benchmark.runtime:0.2.0-dev-7")
-//    "benchmarksCompile"(sourceSets.main.get().compileClasspath)
 }
 
 tasks {
@@ -117,18 +108,6 @@ tasks {
         }
     }
 }
-
-configure<AllOpenExtension> {
-    annotation("org.openjdk.jmh.annotations.State")
-}
-
-sourceSets { register("benchmarks") }
-
-//benchmark {
-//    targets {
-//        register("benchmarks")
-//    }
-//}
 
 tasks.register("listrepos") {
     doLast {
