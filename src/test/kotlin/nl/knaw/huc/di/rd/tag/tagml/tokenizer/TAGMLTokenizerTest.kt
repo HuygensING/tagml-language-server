@@ -52,7 +52,7 @@ class TAGMLTokenizerTest {
         val token0 = l[0]
         assertThat(token0.range).isEqualTo(r(0, 0, 0, 7))
         val token1 = l[1]
-        assertThat(token1.range).isEqualTo(r(0, 7, 1, 6))
+        assertThat(token1.range).isEqualTo(r(0, 7, 1, 7))
         val token2 = l[2]
         assertThat(token2.range).isEqualTo(r(2, 0, 2, 7))
     }
@@ -72,37 +72,74 @@ class TAGMLTokenizerTest {
         val l = parse(tagml)
         println(l)
         val token0 = l[0]
+        assertThat(token0.token.content).isEqualTo("[tagml>").hasSize(7)
         assertThat(token0.range).isEqualTo(r(0, 0, 0, 7))
 
         val token1 = l[1]
+        assertThat(token1.token.content).isEqualTo("[a>").hasSize(3)
         assertThat(token1.range).isEqualTo(r(0, 7, 0, 10))
 
         val token2 = l[2]
-        assertThat(token2.range).isEqualTo(r(0, 10, 1, 3))
+        assertThat(token2.token.content).isEqualTo("\nOne\n").hasSize(5)
+        assertThat(token2.range).isEqualTo(r(0, 10, 1, 4))
 
         val token3 = l[3]
+        assertThat(token3.token.content).isEqualTo("<a]").hasSize(3)
         assertThat(token3.range).isEqualTo(r(2, 0, 2, 3))
 
         val token4 = l[4]
+        assertThat(token4.token.content).isEqualTo("[b>").hasSize(3)
         assertThat(token4.range).isEqualTo(r(2, 3, 2, 6))
 
         val token5 = l[5]
-        assertThat(token5.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token5.token.content).isEqualTo("\nTwo\n").hasSize(5)
+        assertThat(token5.range).isEqualTo(r(2, 6, 3, 4))
 
         val token6 = l[6]
-        assertThat(token6.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token6.token.content).isEqualTo("<b]").hasSize(3)
+        assertThat(token6.range).isEqualTo(r(4, 0, 4, 3))
 
         val token7 = l[7]
-        assertThat(token7.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token7.token.content).isEqualTo("[c>").hasSize(3)
+        assertThat(token7.range).isEqualTo(r(4, 3, 4, 6))
 
         val token8 = l[8]
-        assertThat(token8.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token8.token.content).isEqualTo("\nThree\n").hasSize(7)
+        assertThat(token8.range).isEqualTo(r(4, 6, 5, 6))
 
         val token9 = l[9]
-        assertThat(token9.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token9.token.content).isEqualTo("<c]").hasSize(3)
+        assertThat(token9.range).isEqualTo(r(6, 0, 6, 3))
 
         val token10 = l[10]
-        assertThat(token10.range).isEqualTo(r(2, 0, 2, 7))
+        assertThat(token10.token.content).isEqualTo("<tagml]").hasSize(7)
+        assertThat(token10.range).isEqualTo(r(6, 3, 6, 10))
+    }
+
+    @Test
+    fun testTokenRanges3() {
+        val tagml = "[hello>[a>Cookie<a] [b>Monster<b]<hello]"
+
+        val l = parse(tagml)
+        println(l)
+        val token0 = l[0]
+        assertThat(token0.range).isEqualTo(r(0, 0, 0, 7))
+        val token1 = l[1]
+        assertThat(token1.range).isEqualTo(r(0, 7, 0, 10))
+        val token2 = l[2]
+        assertThat(token2.range).isEqualTo(r(0, 10, 0, 16))
+        val token3 = l[3]
+        assertThat(token3.range).isEqualTo(r(0, 16, 0, 19))
+        val token4 = l[4]
+        assertThat(token4.range).isEqualTo(r(0, 19, 0, 20))
+        val token5 = l[5]
+        assertThat(token5.range).isEqualTo(r(0, 20, 0, 23))
+        val token6 = l[6]
+        assertThat(token6.range).isEqualTo(r(0, 23, 0, 30))
+        val token7 = l[7]
+        assertThat(token7.range).isEqualTo(r(0, 30, 0, 33))
+        val token8 = l[8]
+        assertThat(token8.range).isEqualTo(r(0, 33, 0, 40))
     }
 
     @Test
