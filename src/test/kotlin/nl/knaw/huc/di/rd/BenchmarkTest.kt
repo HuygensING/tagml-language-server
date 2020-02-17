@@ -16,6 +16,11 @@ class BenchmarkTest {
     }
 
     @Test
+    fun parseMediumTAGML() {
+        parseTAGMLFile("medium.tagml")
+    }
+
+    @Test
     fun parseLargeTAGML() {
         parseTAGMLFile("large.tagml")
     }
@@ -39,8 +44,4 @@ class BenchmarkTest {
         }
     }
 
-    @Test
-    fun streamTest() {
-
-    }
 }

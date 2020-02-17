@@ -1,0 +1,8 @@
+[tagml>
+  [page>
+    [p>
+      [l>line<l]
+      [l>another line<l]
+    <p]
+  <page]
+<tagml]
