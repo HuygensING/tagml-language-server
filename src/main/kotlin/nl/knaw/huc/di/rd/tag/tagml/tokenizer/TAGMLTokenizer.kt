@@ -7,6 +7,7 @@ import lambdada.parsec.parser.Response.Reject
 import nl.knaw.huc.di.rd.parsec.PositionalReader
 import nl.knaw.huc.di.rd.parsec.ort
 import nl.knaw.huc.di.rd.parsec.toLSPToken
+import org.eclipse.lsp4j.Position
 import java.net.URL
 
 object TAGMLTokenizer {
@@ -42,9 +43,7 @@ object TAGMLTokenizer {
 
     private val markEnd: Parser<Char, String> = {
         val r = it as PositionalReader
-        var endPosition = r.lastPosition
-        endPosition.character += 1
-        r.endPosition = endPosition
+        r.endPosition = Position(r.lastPosition.line, r.lastPosition.character + 1)
         Response.Accept("", r, false)
     }
 
@@ -61,8 +60,8 @@ object TAGMLTokenizer {
     val endTag = (markStart then char('<') then tagName then char(']') then markEnd)
             .toLSPToken { EndTagToken(it.first.first.second) }
 
-    private val text = (not(specialChar).map { it.toString() } or escapedSpecialChar).rep
-            .toLSPToken { TextToken(it.joinToString(separator = "")) }
+    private val text = (markStart then (not(specialChar).map { it.toString() } or escapedSpecialChar).rep then markEnd)
+            .toLSPToken { TextToken(it.first.second.joinToString(separator = "")) }
 
     val startTextVariation = string("<|").toLSPToken { StartTextVariationToken }
     private val textVariationSeparator = char('|').toLSPToken { TextVariationSeparatorToken }
