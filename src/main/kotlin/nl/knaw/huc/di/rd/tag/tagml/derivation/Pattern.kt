@@ -26,7 +26,13 @@ interface Pattern {
                 else             -> NotAllowed
             }
 
+    val startTokenDerivCache: MutableMap<StartTagToken, Pattern>
+        get() = mutableMapOf<StartTagToken, Pattern>()
+
     fun startTokenDeriv(s: StartTagToken): Pattern = NotAllowed
+
+    val endTokenDerivCache: MutableMap<EndTagToken, Pattern>
+        get() = mutableMapOf<EndTagToken, Pattern>()
 
     fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed
 

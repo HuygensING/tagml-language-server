@@ -40,10 +40,12 @@ object Patterns {
         override fun matches(t: TAGMLToken): Boolean = (t is StartTagToken) && id.matches(t.tagName)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                group(
-                        pattern,
-                        RangeClose(FixedIdentifier(s.tagName))
-                )
+                memoized(startTokenDerivCache, s) {
+                    group(
+                            pattern,
+                            RangeClose(FixedIdentifier(s.tagName))
+                    )
+                }
     }
 
     class RangeClose(private val id: TagIdentifier) : Pattern {
@@ -97,10 +99,14 @@ object Patterns {
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                after(pattern1.startTokenDeriv(s), pattern2)
+                memoized(startTokenDerivCache, s) {
+                    after(pattern1.startTokenDeriv(s), pattern2)
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                after(pattern1.endTokenDeriv(e), pattern2)
+                memoized(endTokenDerivCache, e) {
+                    after(pattern1.endTokenDeriv(e), pattern2)
+                }
 
         private val lazyTextTokenDeriv: Pattern by lazy { after(pattern1.textTokenDeriv(), pattern2) }
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
@@ -163,10 +169,14 @@ object Patterns {
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
+                memoized(startTokenDerivCache, s) {
+                    choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
+                memoized(endTokenDerivCache, e) {
+                    choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
+                }
 
         private val lazyTextTokenDeriv: Pattern by lazy { choice(pattern1.textTokenDeriv(), pattern2.textTokenDeriv()) }
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
@@ -209,29 +219,31 @@ object Patterns {
 
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val d1 = pattern1.startTokenDeriv(s)
-            val d2 = pattern2.startTokenDeriv(s)
-            return choice(
+        override fun startTokenDeriv(s: StartTagToken): Pattern =
+                memoized(startTokenDerivCache, s) {
+                    val d1 = pattern1.startTokenDeriv(s)
+                    val d2 = pattern2.startTokenDeriv(s)
                     choice(
-                            concur(d1, pattern2),
-                            concur(pattern1, d2)
-                    ),
-                    concur(d1, d2)
-            )
-        }
+                            choice(
+                                    concur(d1, pattern2),
+                                    concur(pattern1, d2)
+                            ),
+                            concur(d1, d2)
+                    )
+                }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val d1 = pattern1.endTokenDeriv(e)
-            val d2 = pattern2.endTokenDeriv(e)
-            return choice(
+        override fun endTokenDeriv(e: EndTagToken): Pattern =
+                memoized(endTokenDerivCache, e) {
+                    val d1 = pattern1.endTokenDeriv(e)
+                    val d2 = pattern2.endTokenDeriv(e)
                     choice(
-                            concur(d1, pattern2),
-                            concur(pattern1, d2)
-                    ),
-                    concur(d1, d2)
-            )
-        }
+                            choice(
+                                    concur(d1, pattern2),
+                                    concur(pattern1, d2)
+                            ),
+                            concur(d1, d2)
+                    )
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -276,19 +288,21 @@ object Patterns {
 
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val p = group(pattern1.startTokenDeriv(s), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.startTokenDeriv(s))
-            else p
-        }
+        override fun startTokenDeriv(s: StartTagToken): Pattern =
+                memoized(startTokenDerivCache, s) {
+                    val p = group(pattern1.startTokenDeriv(s), pattern2)
+                    if (pattern1.nullable)
+                        choice(p, pattern2.startTokenDeriv(s))
+                    else p
+                }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val p = group(pattern1.endTokenDeriv(e), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.endTokenDeriv(e))
-            else p
-        }
+        override fun endTokenDeriv(e: EndTagToken): Pattern =
+                memoized(endTokenDerivCache, e) {
+                    val p = group(pattern1.endTokenDeriv(e), pattern2)
+                    if (pattern1.nullable)
+                        choice(p, pattern2.endTokenDeriv(e))
+                    else p
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -330,21 +344,21 @@ object Patterns {
 
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val lazyStartTokenDeriv: Pattern by lazy {
-                choice(
-                        interleave(pattern1.startTokenDeriv(s), pattern2),
-                        interleave(pattern2.startTokenDeriv(s), pattern1)
-                )
-            }
-            return lazyStartTokenDeriv
-        }
+        override fun startTokenDeriv(s: StartTagToken): Pattern =
+                memoized(startTokenDerivCache, s) {
+                    choice(
+                            interleave(pattern1.startTokenDeriv(s), pattern2),
+                            interleave(pattern2.startTokenDeriv(s), pattern1)
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(
-                        interleave(pattern1.endTokenDeriv(e), pattern2),
-                        interleave(pattern2.endTokenDeriv(e), pattern1)
-                )
+                memoized(endTokenDerivCache, e) {
+                    choice(
+                            interleave(pattern1.endTokenDeriv(e), pattern2),
+                            interleave(pattern2.endTokenDeriv(e), pattern1)
+                    )
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -376,10 +390,14 @@ object Patterns {
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.value.matches(t)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
+                memoized(startTokenDerivCache, s) {
+                    choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
+                memoized(endTokenDerivCache, e) {
+                    choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
+                }
 
         private val lazyTextTokenDeriv by lazy { choice(pattern1.textTokenDeriv(), pattern2.value.textTokenDeriv()) }
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
@@ -410,16 +428,20 @@ object Patterns {
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                group(
-                        pattern.startTokenDeriv(s),
-                        choice(OneOrMore(pattern), Empty)
-                )
+                memoized(startTokenDerivCache, s) {
+                    group(
+                            pattern.startTokenDeriv(s),
+                            choice(OneOrMore(pattern), Empty)
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                group(
-                        pattern.endTokenDeriv(e),
-                        choice(OneOrMore(pattern), Empty)
-                )
+                memoized(endTokenDerivCache, e) {
+                    group(
+                            pattern.endTokenDeriv(e),
+                            choice(OneOrMore(pattern), Empty)
+                    )
+                }
     }
 
     class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
@@ -442,16 +464,20 @@ object Patterns {
         override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                concur(
-                        pattern.startTokenDeriv(s),
-                        choice(ConcurOneOrMore(pattern), anyContent())
-                )
+                memoized(startTokenDerivCache, s) {
+                    concur(
+                            pattern.startTokenDeriv(s),
+                            choice(ConcurOneOrMore(pattern), anyContent())
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                concur(
-                        pattern.endTokenDeriv(e),
-                        choice(ConcurOneOrMore(pattern), anyContent())
-                )
+                memoized(endTokenDerivCache, e) {
+                    concur(
+                            pattern.endTokenDeriv(e),
+                            choice(ConcurOneOrMore(pattern), anyContent())
+                    )
+                }
     }
 
     private fun determineTagName(id: TagIdentifier): String =
@@ -460,5 +486,35 @@ object Patterns {
                 is FixedIdentifier  -> id.tagName
                 else                -> "?"
             }
+
+    private fun memoized(
+            startTokenDerivCache: MutableMap<StartTagToken, Pattern>,
+            s: StartTagToken,
+            dpf: () -> Pattern
+    ): Pattern {
+        return if (startTokenDerivCache.containsKey(s)) {
+            println("startTokenDerivCache used!")
+            startTokenDerivCache[s]!!
+        } else {
+            val dp = dpf.invoke()
+            startTokenDerivCache[s] = dp
+            dp
+        }
+    }
+
+    private fun memoized(
+            endTokenDerivCache: MutableMap<EndTagToken, Pattern>,
+            e: EndTagToken,
+            dpf: () -> Pattern
+    ): Pattern {
+        return if (endTokenDerivCache.containsKey(e)) {
+            println("endTokenDerivCache used!")
+            endTokenDerivCache[e]!!
+        } else {
+            val dp = dpf.invoke()
+            endTokenDerivCache[e] = dp
+            dp
+        }
+    }
 }
 
