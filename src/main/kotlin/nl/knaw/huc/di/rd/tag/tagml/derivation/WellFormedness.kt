@@ -48,10 +48,16 @@ object WellFormedness {
             val token = iterator.next().token
             LOG.info("  token $token")
             val matches = expectation.matches(token)
+            sw.stop()
+            LOG.info("  match took ${sw.nanoTime} ns ($sw)")
+            sw.reset()
 //            stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
 //            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
             if (matches) {
+                sw.start()
                 expectation = expectation.deriv(token)
+                sw.stop()
+                LOG.info("  deriv took ${sw.nanoTime} ns ($sw)")
                 goOn = iterator.hasNext()
             } else {
                 expectedTokens.addAll(expectation.expectedTokens)
@@ -59,8 +65,6 @@ object WellFormedness {
                 goOn = false
             }
 //            stepsXML.append("</step>\n")
-            sw.stop()
-            LOG.info("  took ${sw.nanoTime} ns ($sw)")
         }
 //        stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
 //        LOG.info("remaining expectation=$expectation")
