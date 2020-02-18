@@ -73,7 +73,7 @@ object Patterns {
 
         // relaxng: A text pattern matches zero or more text nodes. Thus the derivative of Text with respect to a text node is Text, not Empty
         // TODO: if the parser does not return consecutive texttokens, then this can return Empty
-        override fun textTokenDeriv(t: TextToken): Pattern {
+        override fun textTokenDeriv(): Pattern {
 //            return Empty
             return Text
         }
@@ -102,8 +102,8 @@ object Patterns {
         override fun endTokenDeriv(e: EndTagToken): Pattern =
                 after(pattern1.endTokenDeriv(e), pattern2)
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                after(pattern1.textTokenDeriv(t), pattern2)
+        private val lazyTextTokenDeriv: Pattern by lazy { after(pattern1.textTokenDeriv(), pattern2) }
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -168,8 +168,8 @@ object Patterns {
         override fun endTokenDeriv(e: EndTagToken): Pattern =
                 choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                choice(pattern1.textTokenDeriv(t), pattern2.textTokenDeriv(t))
+        private val lazyTextTokenDeriv: Pattern by lazy { choice(pattern1.textTokenDeriv(), pattern2.textTokenDeriv()) }
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun equals(other: Any?): Boolean =
                 (other is Choice) && (
@@ -200,11 +200,14 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                concur(
-                        pattern1.textTokenDeriv(t),
-                        pattern2.textTokenDeriv(t)
-                )
+        private val lazyTextTokenDeriv: Pattern by lazy {
+            concur(
+                    pattern1.textTokenDeriv(),
+                    pattern2.textTokenDeriv()
+            )
+        }
+
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             val d1 = pattern1.startTokenDeriv(s)
@@ -264,12 +267,14 @@ object Patterns {
                 pattern1.matches(t)
         }
 
-        override fun textTokenDeriv(t: TextToken): Pattern {
-            val p = group(pattern1.textTokenDeriv(t), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.textTokenDeriv(t))
+        private val lazyTextTokenDeriv: Pattern by lazy {
+            val p = group(pattern1.textTokenDeriv(), pattern2)
+            if (pattern1.nullable)
+                choice(p, pattern2.textTokenDeriv())
             else p
         }
+
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern {
             val p = group(pattern1.startTokenDeriv(s), pattern2)
@@ -316,17 +321,24 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                choice(
-                        interleave(pattern1.textTokenDeriv(t), pattern2),
-                        interleave(pattern2.textTokenDeriv(t), pattern1)
-                )
+        private val lazyTextTokenDeriv by lazy {
+            choice(
+                    interleave(pattern1.textTokenDeriv(), pattern2),
+                    interleave(pattern2.textTokenDeriv(), pattern1)
+            )
+        }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+
+        override fun startTokenDeriv(s: StartTagToken): Pattern {
+            val lazyStartTokenDeriv: Pattern by lazy {
                 choice(
                         interleave(pattern1.startTokenDeriv(s), pattern2),
                         interleave(pattern2.startTokenDeriv(s), pattern1)
                 )
+            }
+            return lazyStartTokenDeriv
+        }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
                 choice(
@@ -369,8 +381,8 @@ object Patterns {
         override fun endTokenDeriv(e: EndTagToken): Pattern =
                 choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                choice(pattern1.textTokenDeriv(t), pattern2.value.textTokenDeriv(t))
+        private val lazyTextTokenDeriv by lazy { choice(pattern1.textTokenDeriv(), pattern2.value.textTokenDeriv()) }
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun equals(other: Any?): Boolean =
                 (other is HierarchyLevel) && (
@@ -388,11 +400,14 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern.matches(t)
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                group(
-                        pattern.textTokenDeriv(t),
-                        choice(OneOrMore(pattern), Empty)
-                )
+        private val lazyTextTokenDeriv: Pattern by lazy {
+            group(
+                    pattern.textTokenDeriv(),
+                    choice(OneOrMore(pattern), Empty)
+            )
+        }
+
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
                 group(
@@ -417,11 +432,14 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern.matches(t)
 
-        override fun textTokenDeriv(t: TextToken): Pattern =
-                concur(
-                        pattern.textTokenDeriv(t),
-                        choice(ConcurOneOrMore(pattern), Empty)
-                )
+        private val lazyTextTokenDeriv: Pattern by lazy {
+            concur(
+                    pattern.textTokenDeriv(),
+                    choice(ConcurOneOrMore(pattern), Empty)
+            )
+        }
+
+        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
                 concur(

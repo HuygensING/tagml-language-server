@@ -22,7 +22,7 @@ interface Pattern {
             when (token) {
                 is StartTagToken -> startTokenDeriv(token)
                 is EndTagToken   -> endTokenDeriv(token)
-                is TextToken     -> textTokenDeriv(token)
+                is TextToken     -> textTokenDeriv()
                 else             -> NotAllowed
             }
 
@@ -30,5 +30,5 @@ interface Pattern {
 
     fun endTokenDeriv(e: EndTagToken): Pattern = NotAllowed
 
-    fun textTokenDeriv(t: TextToken): Pattern = NotAllowed
+    fun textTokenDeriv(): Pattern = NotAllowed
 }
