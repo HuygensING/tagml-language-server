@@ -15,147 +15,164 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 
 object Constructors {
+    private val LNotAllowed = lazyOf(NotAllowed)
+    private val LText = lazyOf(Text)
+    private val LEmpty = lazyOf(Empty)
 
-    fun anyContent(): Pattern = Text // might not cover it
+    fun anyContent(): LPattern = LText // might not cover it
 
-    private fun layer(): Pattern = Range(AnyTagIdentifier, choice(Text, layer()))
+    private fun layer(): LPattern = lazy { Range(AnyTagIdentifier, choice(LText, layer())) }
 
-    internal fun mixed(pattern: Pattern): Pattern = interleave(Text, pattern)
+    internal fun mixed(lPattern: LPattern): LPattern = interleave(LText, lPattern)
 
-    fun zeroOrMore(pattern: Pattern): Pattern = choice(oneOrMore(pattern), Empty)
+    fun zeroOrMore(lPattern: LPattern): LPattern = choice(oneOrMore(lPattern), LEmpty)
 
-    fun after(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
+    fun empty() = LEmpty
+    fun text() = LText
+    fun notAllowed() = LNotAllowed
 
-        if (pattern1 is Empty) return pattern2
+    fun after(lPattern1: LPattern, lPattern2: LPattern): LPattern {
+        val pattern1 = lPattern1.value
+        if (pattern1 is NotAllowed || lPattern2.value is NotAllowed) return LNotAllowed
+
+        if (pattern1 is Empty) return lPattern2
 
         if (pattern1 is After) {
-            val p1 = pattern1.pattern1
-            val p2 = pattern1.pattern2
-            return after(p1, after(p2, pattern2))
+            val p1 = pattern1.lPattern1
+            val p2 = pattern1.lPattern2
+            return after(p1, after(p2, lPattern2))
         }
 
-        return After(pattern1, pattern2)
+        return lazy { After(lPattern1, lPattern2) }
     }
 
-    fun all(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
+    fun all(lPattern1: LPattern, lPattern2: LPattern): LPattern {
+        val pattern1 = lPattern1.value
+        if (pattern1 is NotAllowed || lPattern2.value is NotAllowed) return lazy { NotAllowed }
 
+        val pattern2 = lPattern2.value
         if (pattern2 is Empty) {
             return if (pattern1.nullable)
-                Empty
+                lazy { Empty }
             else
-                NotAllowed
+                lazy { NotAllowed }
         }
 
         if (pattern1 is Empty) {
             return if (pattern2.nullable)
-                Empty
+                lazy { Empty }
             else
-                NotAllowed
+                lazy { NotAllowed }
         }
 
         if (pattern1 is After && pattern2 is After) {
-            val e1 = pattern1.pattern1
-            val e2 = pattern1.pattern2
-            val e3 = pattern2.pattern1
-            val e4 = pattern2.pattern2
+            val e1 = pattern1.lPattern1
+            val e2 = pattern1.lPattern2
+            val e3 = pattern2.lPattern1
+            val e4 = pattern2.lPattern2
             return after(all(e1, e3), all(e2, e4))
         }
 
-        return All(pattern1, pattern2)
+        return lazy { All(lPattern1, lPattern2) }
     }
 
-    fun choice(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 == pattern2) return pattern1
-        if (pattern1 is NotAllowed) return pattern2
-        if (pattern2 is NotAllowed) return pattern1
-        return Choice(pattern1, pattern2)
+    fun choice(lPattern1: LPattern, lPattern2: LPattern): LPattern {
+        if (lPattern1 == lPattern2) return lPattern1
+        if (lPattern1.value is NotAllowed) return lPattern2
+        if (lPattern2.value is NotAllowed) return lPattern1
+        return lazy { Choice(lPattern1, lPattern2) }
     }
 
-    private fun oneOrMore(pattern: Pattern): Pattern {
-        return if (pattern is NotAllowed
-                || pattern is Empty)
-            pattern
+    fun oneOrMore(lPattern: LPattern): LPattern {
+        val pattern = lPattern.value
+        return if (pattern is NotAllowed || pattern is Empty)
+            lPattern
         else
-            OneOrMore(pattern)
+            lazy { OneOrMore(lPattern) }
     }
 
-    fun concurOneOrMore(pattern: Pattern): Pattern {
-        return if (pattern is NotAllowed
-                || pattern is Empty)
-            pattern
-        else
-            ConcurOneOrMore(pattern)
-    }
+    fun concurOneOrMore(lPattern: LPattern): LPattern =
+            if (lPattern.value is NotAllowed || lPattern.value is Empty)
+                lPattern
+            else
+                lazy { ConcurOneOrMore(lPattern) }
 
-    fun concur(pattern1: Pattern, pattern2: Pattern): Pattern {
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
-        if (pattern1 is Text) return pattern2
-        if (pattern2 is Text) return pattern1
+    fun concur(lPattern1: LPattern, lPattern2: LPattern): LPattern {
+        val pattern1 = lPattern1.value
+        if (pattern1 is NotAllowed || lPattern2.value is NotAllowed) return lazy { NotAllowed }
+        if (pattern1 is Text) return lPattern2
+
+        val pattern2 = lPattern2.value
+        if (pattern2 is Text) return lPattern1
 
         if (pattern1 is After && pattern2 is After) {
-            val e1 = pattern1.pattern1
-            val e2 = pattern1.pattern2
-            val e3 = pattern2.pattern1
-            val e4 = pattern2.pattern2
+            val e1 = pattern1.lPattern1
+            val e2 = pattern1.lPattern2
+            val e3 = pattern2.lPattern1
+            val e4 = pattern2.lPattern2
             return after(all(e1, e3), concur(e2, e4))
         }
 
         if (pattern1 is After) {
-            val e1 = pattern1.pattern1
-            val e2 = pattern1.pattern2
-            return after(e1, concur(e2, pattern2))
+            val e1 = pattern1.lPattern1
+            val e2 = pattern1.lPattern2
+            return after(e1, concur(e2, lPattern2))
         }
 
         if (pattern2 is After) {
-            val e2 = pattern2.pattern1
-            val e3 = pattern2.pattern2
-            return after(e2, concur(pattern1, e3))
+            val e2 = pattern2.lPattern1
+            val e3 = pattern2.lPattern2
+            return after(e2, concur(lPattern1, e3))
         }
 
-        return Concur(pattern1, pattern2)
+        return lazy { Concur(lPattern1, lPattern2) }
     }
 
-    fun group(pattern1: Pattern, pattern2: Pattern): Pattern {
+    fun group(lPattern1: LPattern, lPattern2: LPattern): LPattern {
         //  group p NotAllowed = NotAllowed
         //  group NotAllowed p = NotAllowed
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
-
-        //  group p Empty = p
-        if (pattern2 is Empty) return pattern1
+        val pattern1 = lPattern1.value
+        if (pattern1 is NotAllowed || lPattern2.value is NotAllowed) return lazy { NotAllowed }
 
         //  group Empty p = p
-        if (pattern1 is Empty) return pattern2
+        if (pattern1 is Empty) return lPattern2
 
         //  group (After p1 p2) p3 = after p1 (group p2 p3)
-        if (pattern1 is After) return after(pattern1.pattern1, group(pattern1.pattern2, pattern2))
+        if (pattern1 is After) return after(pattern1.lPattern1, group(pattern1.lPattern2, lPattern2))
+
+        val pattern2 = lPattern2.value
+        //  group p Empty = p
+        if (pattern2 is Empty) return lPattern1
 
         //  group p1 (After p2 p3) = after p2 (group p1 p3)
         return if (pattern2 is After) {
-            after(pattern2.pattern1, group(pattern1, pattern2.pattern2))
-        } else Group(pattern1, pattern2)
+            after(pattern2.lPattern1, group(lPattern1, pattern2.lPattern2))
+        } else lazy { Group(lPattern1, lPattern2) }
         //  group p1 p2 = Group p1 p2
     }
 
-    fun interleave(pattern1: Pattern, pattern2: Pattern): Pattern {
+    fun interleave(lPattern1: LPattern, lPattern2: LPattern): LPattern {
         //  interleave p NotAllowed = NotAllowed
         //  interleave NotAllowed p = NotAllowed
-        if (pattern1 is NotAllowed || pattern2 is NotAllowed) return NotAllowed
-
-        //  interleave p Empty = p
-        if (pattern2 is Empty) return pattern1
+        val pattern1 = lPattern1.value
+        if (pattern1 is NotAllowed || lPattern2.value is NotAllowed) {
+            return LNotAllowed
+        }
 
         //  interleave Empty p = p
-        if (pattern1 is Empty) return pattern2
+        if (pattern1 is Empty) return lPattern2
 
         //  interleave (After p1 p2) p3 = after p1 (interleave p2 p3)
-        if (pattern1 is After) return after(pattern1.pattern1, interleave(pattern1.pattern2, pattern2))
+        if (pattern1 is After) return after(pattern1.lPattern1, interleave(pattern1.lPattern2, lPattern2))
+
+        val pattern2 = lPattern2.value
+        //  interleave p Empty = p
+        if (pattern2 is Empty) return lPattern1
 
         //  interleave p1 (After p2 p3) = after p2 (interleave p1 p3)
         return if (pattern2 is After) {
-            after(pattern2.pattern1, interleave(pattern1, pattern2.pattern2))
-        } else Interleave(pattern1, pattern2)
+            after(pattern2.lPattern1, interleave(lPattern1, pattern2.lPattern2))
+        } else lazy { Interleave(lPattern1, lPattern2) }
         //  interleave p1 p2 = Interleave p1 p2
     }
 }

@@ -18,7 +18,7 @@ class MemoizationTest {
         val exp: Int
             get() = exp()
 
-        fun exp(): Int {
+        private fun exp(): Int {
             println("exp() called")
             return Random.nextInt()
         }
@@ -31,7 +31,7 @@ class MemoizationTest {
     @Test
     fun test() {
         val a = MyClass(1, 2)
-        val b = MyClass(2, 1)
+//        val b = MyClass(2, 1)
         val s = a.res
         println(s)
         val s2 = a.res

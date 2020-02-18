@@ -2,10 +2,10 @@ package nl.knaw.huc.di.rd.tag.tagml.derivation
 
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concurOneOrMore
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.zeroOrMore
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.HierarchyLevel
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Range
-import nl.knaw.huc.di.rd.tag.tagml.derivation.Patterns.Text
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
@@ -20,17 +20,19 @@ object WellFormedness {
 
     fun checkWellFormedness(tokens: List<LSPToken>): WellFormednessResult {
         val iterator = tokens.iterator()
-        var expectation: Pattern = Range(
-                AnyTagIdentifier,
-                concurOneOrMore(
-                        choice(
-                                Text,
-                                zeroOrMore(
-                                        HierarchyLevel
-                                )
-                        )
-                )
-        )
+        var expectation: Lazy<Pattern> = lazy {
+            Range(
+                    AnyTagIdentifier,
+                    concurOneOrMore(
+                            choice(
+                                    text(),
+                                    zeroOrMore(
+                                            lazy { HierarchyLevel }
+                                    )
+                            )
+                    )
+            )
+        }
         val errors = mutableListOf<String>()
         val expectedTokens = mutableSetOf<TAGMLToken>()
 //        val stepsXML = StringBuilder("<wellformednesscheck>\n")
@@ -47,7 +49,7 @@ object WellFormedness {
 
             val token = iterator.next().token
             LOG.info("  token $token")
-            val matches = expectation.matches(token)
+            val matches = expectation.value.matches(token)
             sw.stop()
             LOG.info("  match took ${sw.nanoTime} ns ($sw)")
             sw.reset()
@@ -55,27 +57,28 @@ object WellFormedness {
 //            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
             if (matches) {
                 sw.start()
-                expectation = expectation.deriv(token)
+                expectation = expectation.value.deriv(token)
                 sw.stop()
                 LOG.info("  deriv took ${sw.nanoTime} ns ($sw)")
                 goOn = iterator.hasNext()
             } else {
-                expectedTokens.addAll(expectation.expectedTokens)
-                errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation)}")
+                expectedTokens.addAll(expectation.value.expectedTokens)
+                errors.add("Unexpected token: found ${token.content}, but expected ${expectationString(expectation
+                        .value)}")
                 goOn = false
             }
 //            stepsXML.append("</step>\n")
         }
 //        stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
 //        LOG.info("remaining expectation=$expectation")
-        if (errors.isEmpty() && !expectation.nullable) {
-            expectedTokens.addAll(expectation.expectedTokens)
-            errors.add("Out of tokens, but expected ${expectationString(expectation)}")
+        if (errors.isEmpty() && !expectation.value.nullable) {
+            expectedTokens.addAll(expectation.value.expectedTokens)
+            errors.add("Out of tokens, but expected ${expectationString(expectation.value)}")
         }
 //        stepsXML.append("\n</wellformednesscheck>")
 //        LOG.info("steps=\n{}\n", stepsXML)
         return WellFormednessResult(
-                !iterator.hasNext() && expectation.nullable,
+                !iterator.hasNext() && expectation.value.nullable,
                 errors,
                 expectedTokens)
     }
@@ -83,8 +86,8 @@ object WellFormedness {
     private fun expectationString(expectation: Pattern): String {
         val expectedTokens = expectation.expectedTokens.map { it.content }
         return when (expectedTokens.size) {
-            0 -> "nothing"
-            1 -> expectedTokens[0]
+            0    -> "nothing"
+            1    -> expectedTokens[0]
             else -> "any of $expectedTokens"
         }
     }
