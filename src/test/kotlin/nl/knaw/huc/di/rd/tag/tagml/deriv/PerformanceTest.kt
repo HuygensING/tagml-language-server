@@ -7,7 +7,7 @@ import kotlin.system.measureNanoTime
 
 class PerformanceTest {
 
-    fun func() = println("Your secret number is ${Random.nextInt()}")
+    private fun func() = println("Your secret number is ${Random.nextInt()}")
 
     @Test
     fun test() {

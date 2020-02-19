@@ -18,7 +18,7 @@ class MemoizationTest {
         val exp: Int
             get() = exp()
 
-        fun exp(): Int {
+        private fun exp(): Int {
             println("exp() called")
             return Random.nextInt()
         }

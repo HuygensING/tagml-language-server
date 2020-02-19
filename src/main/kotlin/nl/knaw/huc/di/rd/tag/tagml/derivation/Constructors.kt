@@ -74,16 +74,14 @@ object Constructors {
     }
 
     private fun oneOrMore(pattern: Pattern): Pattern {
-        return if (pattern is NotAllowed
-                || pattern is Empty)
+        return if (pattern is NotAllowed || pattern is Empty)
             pattern
         else
             OneOrMore(pattern)
     }
 
     fun concurOneOrMore(pattern: Pattern): Pattern {
-        return if (pattern is NotAllowed
-                || pattern is Empty)
+        return if (pattern is NotAllowed || pattern is Empty)
             pattern
         else
             ConcurOneOrMore(pattern)
@@ -113,6 +111,13 @@ object Constructors {
             val e3 = pattern2.pattern2
             return after(e2, concur(pattern1, e3))
         }
+
+        // Concur(Concur(P1,P2),P2) = Concur(P1,P2)
+        if (pattern1 is Concur && (pattern1.pattern1 == pattern2 || pattern1.pattern2 == pattern2))
+            return pattern1
+
+        if (pattern2 is Concur && (pattern2.pattern1 == pattern1 || pattern2.pattern2 == pattern1))
+            return pattern2
 
         return Concur(pattern1, pattern2)
     }
