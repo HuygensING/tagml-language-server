@@ -125,6 +125,13 @@ object Constructors {
             return after(e2, concur(lPattern1, e3))
         }
 
+        // Concur(Concur(P1,P2),P2) = Concur(P1,P2)
+        if (pattern1 is Concur && (pattern1.lPattern1 == lPattern2 || pattern1.lPattern2 == lPattern2))
+            return lPattern1
+
+        if (pattern2 is Concur && (pattern2.lPattern1 == lPattern1 || pattern2.lPattern2 == lPattern1))
+            return lPattern2
+
         return lazy { Concur(lPattern1, lPattern2) }
     }
 

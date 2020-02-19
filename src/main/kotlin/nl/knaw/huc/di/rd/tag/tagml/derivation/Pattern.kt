@@ -13,6 +13,7 @@ interface Pattern {
     /**
      *  Does this pattern expect an "empty" token?
      */
+
     val nullable: Boolean
 
     val expectedTokens: Set<TAGMLToken>

@@ -35,17 +35,17 @@ object WellFormedness {
         }
         val errors = mutableListOf<String>()
         val expectedTokens = mutableSetOf<TAGMLToken>()
-//        val stepsXML = StringBuilder("<wellformednesscheck>\n")
+        val stepsXML = StringBuilder("<wellformednesscheck>\n")
 
         val stepCount = AtomicInteger(1)
         var goOn = iterator.hasNext()
         while (goOn) {
             val sw = StopWatch()
             sw.start()
-            LOG.info("step ${stepCount.getAndIncrement()}")
-//            stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
-//            stepsXML.append("""<expectation>$expectation</expectation>""")
-//            stepsXML.append("""<expectedTokens>${expectation.expectedTokens}</expectedTokens>""")
+            LOG.info("step ${stepCount.get()}")
+            stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
+            stepsXML.append("""<expectation>$expectation</expectation>""")
+            stepsXML.append("""<expectedTokens>${expectation.value.expectedTokens}</expectedTokens>""")
 
             val token = iterator.next().token
             LOG.info("  token $token")
@@ -53,8 +53,8 @@ object WellFormedness {
             sw.stop()
             LOG.info("  match took ${sw.nanoTime} ns ($sw)")
             sw.reset()
-//            stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
-//            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
+            stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
+            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
             if (matches) {
                 sw.start()
                 expectation = expectation.value.deriv(token)
@@ -67,16 +67,17 @@ object WellFormedness {
                         .value)}")
                 goOn = false
             }
-//            stepsXML.append("</step>\n")
+            stepsXML.append("</step>\n")
         }
-//        stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
+        stepsXML.append("""<final_expectation nullable="${expectation
+                .value.nullable}">$expectation</final_expectation>""")
 //        LOG.info("remaining expectation=$expectation")
         if (errors.isEmpty() && !expectation.value.nullable) {
             expectedTokens.addAll(expectation.value.expectedTokens)
             errors.add("Out of tokens, but expected ${expectationString(expectation.value)}")
         }
-//        stepsXML.append("\n</wellformednesscheck>")
-//        LOG.info("steps=\n{}\n", stepsXML)
+        stepsXML.append("\n</wellformednesscheck>")
+        LOG.info("steps=\n{}\n", stepsXML)
         return WellFormednessResult(
                 !iterator.hasNext() && expectation.value.nullable,
                 errors,
