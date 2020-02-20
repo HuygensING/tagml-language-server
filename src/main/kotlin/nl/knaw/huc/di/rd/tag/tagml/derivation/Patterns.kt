@@ -13,6 +13,8 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
+typealias LPattern = Lazy<Pattern>
+
 object Patterns {
 
     const val TEXT_HASH_CODE = 1
@@ -462,7 +464,7 @@ object Patterns {
 
     object HierarchyLevel : Pattern {
         private val pattern1: Pattern = Text
-        private val pattern2: Lazy<Pattern> = lazy { Range(AnyTagIdentifier, HierarchyLevel) }
+        private val pattern2: LPattern = lazy { Range(AnyTagIdentifier, HierarchyLevel) }
 
         override val nullable: Boolean by lazy { pattern1.nullable || pattern2.value.nullable }
 
