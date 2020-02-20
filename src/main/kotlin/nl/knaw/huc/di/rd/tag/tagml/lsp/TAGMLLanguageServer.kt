@@ -48,7 +48,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#shutdown
     override fun shutdown(): CompletableFuture<Any> {
         shutdownRequested = true
-        return CompletableFuture.supplyAsync { null }
+        return CompletableFuture.supplyAsync { "shutting down..." }
     }
 
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#exit
