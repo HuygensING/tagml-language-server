@@ -116,8 +116,8 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             val diagnostic2 = Diagnostic(
                     lastToken.range,
                     "This is the last token! (${lastToken.token})",
-                    DiagnosticSeverity.Warning,
-                    "test warning"
+                    DiagnosticSeverity.Information,
+                    "test information"
             )
             res.add(diagnostic2)
         }
