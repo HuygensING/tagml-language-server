@@ -1,0 +1,46 @@
+{
+	"auto_show_diagnostics_panel": "always",
+	"auto_show_diagnostics_panel_level": 4,
+	"clients":
+	{
+		"tagml-ls":
+		{
+			"command":
+			[
+				"c:\\Program Files\\Java\\jdk1.8.0_221\\bin\\java",
+				"-jar",
+				"c:\\tools\\tagml-language-server\\tagml-language-server.jar",
+				"--trace",
+				"c:\\tools\\tagml-language-server\\tls-trace.log"
+			],
+			"enabled": true,
+			"env":
+			{
+			},
+			"initializationOptions":
+			{
+			},
+			"languageId": "tagml",
+			"scopes":
+			[
+				"text.tagml"
+			],
+			"settings":
+			{
+			},
+			"syntaxes":
+			[
+				"Packages/TAGML/TAGMLµ.sublime-syntax"
+			]
+		}
+	},
+	"completion_hint_type": "auto",
+	"log_debug": true,
+	"log_payloads": true,
+	"log_server": true,
+	"log_stderr": true,
+	"only_show_lsp_completions": true,
+	"show_code_actions_bulb": true,
+	"show_diagnostics_count_in_view_status": true,
+	"show_references_in_quick_panel": true
+}
