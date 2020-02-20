@@ -31,7 +31,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 //            referencesProvider = false
 //            documentHighlightProvider = false
 //            documentSymbolProvider = false
-//            codeActionProvider = Either.forLeft(false)
+            codeActionProvider = Either.forLeft(false)
 //            codeLensProvider = null
 //            documentLinkProvider = null
 //            colorProvider = null
@@ -48,7 +48,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#shutdown
     override fun shutdown(): CompletableFuture<Any> {
         shutdownRequested = true
-        return CompletableFuture.supplyAsync { "shutting down..." }
+        return CompletableFuture.supplyAsync { null }
     }
 
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#exit

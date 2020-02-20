@@ -10,6 +10,8 @@ import org.eclipse.lsp4j.services.TextDocumentService
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.CompletableFuture
 
+typealias CodeActionList = MutableList<Either<Command, CodeAction>>
+
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
     //    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val docs: MutableMap<String, TAGMLDocumentModel> = synchronizedMap(hashMapOf())
@@ -74,8 +76,8 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         val model = docs[docId]
         val token = model?.tokenIndex?.tokenAt(position.position)
         val contents = MarkupContent()
-        contents.kind = "token"
-        contents.value = "$token"
+        contents.kind = "markdown" // alternatively:, "plaintext"
+        contents.value = "**${token}**"
         return CompletableFuture.supplyAsync { Hover(contents) }
     }
 
@@ -85,6 +87,16 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 
     override fun documentSymbol(params: DocumentSymbolParams?): CompletableFuture<MutableList<Either<SymbolInformation, DocumentSymbol>>> {
         TODO()
+    }
+
+    override fun codeAction(params: CodeActionParams?): CompletableFuture<CodeActionList> {
+        val docId = params?.textDocument?.uri
+        val model = docs[docId]
+        val range = params?.range
+        return CompletableFuture.supplyAsync {
+            val actionList = mutableListOf<Either<Command, CodeAction>>()
+            actionList
+        }
     }
 
     private fun validate(model: TAGMLDocumentModel): List<Diagnostic> {
