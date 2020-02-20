@@ -16,18 +16,18 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 object Patterns {
 
     const val TEXT_HASH_CODE = 1
-    const val ERROR_HASH_CODE = 3
+    //    const val ERROR_HASH_CODE = 3
     const val EMPTY_HASH_CODE = 5
     const val NOT_ALLOWED_HASH_CODE = 7
     const val CHOICE_HASH_CODE = 11
     const val GROUP_HASH_CODE = 13
     const val INTERLEAVE_HASH_CODE = 17
     const val ONE_OR_MORE_HASH_CODE = 19
-    const val ELEMENT_HASH_CODE = 23
-    const val VALUE_HASH_CODE = 27
-    const val ATTRIBUTE_HASH_CODE = 29
-    const val DATA_HASH_CODE = 31
-    const val LIST_HASH_CODE = 37
+    //    const val ELEMENT_HASH_CODE = 23
+//    const val VALUE_HASH_CODE = 27
+//    const val ATTRIBUTE_HASH_CODE = 29
+//    const val DATA_HASH_CODE = 31
+//    const val LIST_HASH_CODE = 37
     const val AFTER_HASH_CODE = 41
     const val ALL_HASH_CODE = 43
     const val CONCUR_HASH_CODE = 47
@@ -109,6 +109,8 @@ object Patterns {
         override fun toString(): String = "<text/>"
 
         override fun matches(t: TAGMLToken): Boolean = (t is TextToken)
+
+        override fun hashCode(): Int = TEXT_HASH_CODE
 
         // relaxng: A text pattern matches zero or more text nodes. Thus the derivative of Text with respect to a text node is Text, not Empty
         // TODO: if the parser does not return consecutive texttokens, then this can return Empty
