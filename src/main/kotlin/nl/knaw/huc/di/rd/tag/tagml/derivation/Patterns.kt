@@ -6,6 +6,9 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.choice
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.concur
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.group
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Constructors.interleave
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Deriv.memoizedEndTokenDeriv
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Deriv.memoizedStartTokenDeriv
+import nl.knaw.huc.di.rd.tag.tagml.derivation.Deriv.memoizedTextTokenDeriv
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
@@ -66,16 +69,18 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is Range &&
-                other.id == id &&
-                other.pattern == pattern
+                        other.id == id &&
+                        other.pattern == pattern
 
         override fun matches(t: TAGMLToken): Boolean = (t is StartTagToken) && id.matches(t.tagName)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                group(
-                        pattern,
-                        RangeClose(FixedIdentifier(s.tagName))
-                )
+                memoizedStartTokenDeriv(this, s) {
+                    group(
+                            pattern,
+                            RangeClose(FixedIdentifier(s.tagName))
+                    )
+                }
     }
 
     class RangeClose(private val id: TagIdentifier) : Pattern {
@@ -94,7 +99,7 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is RangeClose &&
-                other.id == id
+                        other.id == id
 
         override fun matches(t: TAGMLToken): Boolean = (t is EndTagToken) && id.matches(t.tagName)
 
@@ -134,8 +139,8 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is After &&
-                other.pattern1 == pattern1 &&
-                other.pattern2 == other.pattern2
+                        other.pattern1 == pattern1 &&
+                        other.pattern2 == other.pattern2
 
         override fun matches(t: TAGMLToken): Boolean {
             return if (!pattern1.matches(t) && pattern1.nullable)
@@ -145,13 +150,19 @@ object Patterns {
         }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                after(pattern1.startTokenDeriv(s), pattern2)
+                memoizedStartTokenDeriv(this, s) {
+                    after(pattern1.startTokenDeriv(s), pattern2)
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                after(pattern1.endTokenDeriv(e), pattern2)
+                memoizedEndTokenDeriv(this, e) {
+                    after(pattern1.endTokenDeriv(e), pattern2)
+                }
 
-        private val lazyTextTokenDeriv: Pattern by lazy { after(pattern1.textTokenDeriv(), pattern2) }
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    after(pattern1.textTokenDeriv(), pattern2)
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -182,8 +193,8 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is All &&
-                other.pattern1 == pattern1 &&
-                other.pattern2 == pattern2
+                        other.pattern1 == pattern1 &&
+                        other.pattern2 == pattern2
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) && pattern2.matches(t)
 
@@ -222,18 +233,24 @@ object Patterns {
         override fun equals(other: Any?): Boolean =
                 (other is Choice) && (
                         (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
-                        (other.pattern1 == pattern2 && other.pattern2 == pattern1))
+                                (other.pattern1 == pattern2 && other.pattern2 == pattern1))
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
+                memoizedStartTokenDeriv(this, s) {
+                    choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
+                memoizedEndTokenDeriv(this, e) {
+                    choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
+                }
 
-        private val lazyTextTokenDeriv: Pattern by lazy { choice(pattern1.textTokenDeriv(), pattern2.textTokenDeriv()) }
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    choice(pattern1.textTokenDeriv(), pattern2.textTokenDeriv())
+                }
 
         fun aggregateSubPatterns(): Set<Pattern> {
             val aggregate = mutableSetOf<Pattern>()
@@ -265,42 +282,43 @@ object Patterns {
         override fun equals(other: Any?): Boolean =
                 (other is Concur) && (
                         (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
-                        (other.pattern1 == pattern2 && other.pattern2 == pattern1))
+                                (other.pattern1 == pattern2 && other.pattern2 == pattern1))
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
-        private val lazyTextTokenDeriv: Pattern by lazy {
-            concur(
-                    pattern1.textTokenDeriv(),
-                    pattern2.textTokenDeriv()
-            )
-        }
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    concur(
+                            pattern1.textTokenDeriv(),
+                            pattern2.textTokenDeriv()
+                    )
+                }
 
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
-
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val d1 = pattern1.startTokenDeriv(s)
-            val d2 = pattern2.startTokenDeriv(s)
-            return choice(
+        override fun startTokenDeriv(s: StartTagToken): Pattern =
+                memoizedStartTokenDeriv(this, s) {
+                    val d1 = pattern1.startTokenDeriv(s)
+                    val d2 = pattern2.startTokenDeriv(s)
                     choice(
-                            concur(d1, pattern2),
-                            concur(pattern1, d2)
-                    ),
-                    concur(d1, d2)
-            )
-        }
+                            choice(
+                                    concur(d1, pattern2),
+                                    concur(pattern1, d2)
+                            ),
+                            concur(d1, d2)
+                    )
+                }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val d1 = pattern1.endTokenDeriv(e)
-            val d2 = pattern2.endTokenDeriv(e)
-            return choice(
+        override fun endTokenDeriv(e: EndTagToken): Pattern =
+                memoizedEndTokenDeriv(this, e) {
+                    val d1 = pattern1.endTokenDeriv(e)
+                    val d2 = pattern2.endTokenDeriv(e)
                     choice(
-                            concur(d1, pattern2),
-                            concur(pattern1, d2)
-                    ),
-                    concur(d1, d2)
-            )
-        }
+                            choice(
+                                    concur(d1, pattern2),
+                                    concur(pattern1, d2)
+                            ),
+                            concur(d1, d2)
+                    )
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -336,8 +354,8 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is Group &&
-                other.pattern1 == pattern1 &&
-                other.pattern2 == pattern2
+                        other.pattern1 == pattern1 &&
+                        other.pattern2 == pattern2
 
         override fun matches(t: TAGMLToken): Boolean {
             return if (!pattern1.matches(t) && pattern1.nullable)
@@ -346,28 +364,29 @@ object Patterns {
                 pattern1.matches(t)
         }
 
-        private val lazyTextTokenDeriv: Pattern by lazy {
-            val p = group(pattern1.textTokenDeriv(), pattern2)
-            if (pattern1.nullable)
-                choice(p, pattern2.textTokenDeriv())
-            else p
-        }
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    val p = group(pattern1.textTokenDeriv(), pattern2)
+                    if (pattern1.nullable)
+                        choice(p, pattern2.textTokenDeriv())
+                    else p
+                }
 
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun startTokenDeriv(s: StartTagToken): Pattern =
+                memoizedStartTokenDeriv(this, s) {
+                    val p = group(pattern1.startTokenDeriv(s), pattern2)
+                    if (pattern1.nullable)
+                        choice(p, pattern2.startTokenDeriv(s))
+                    else p
+                }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern {
-            val p = group(pattern1.startTokenDeriv(s), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.startTokenDeriv(s))
-            else p
-        }
-
-        override fun endTokenDeriv(e: EndTagToken): Pattern {
-            val p = group(pattern1.endTokenDeriv(e), pattern2)
-            return if (pattern1.nullable)
-                choice(p, pattern2.endTokenDeriv(e))
-            else p
-        }
+        override fun endTokenDeriv(e: EndTagToken): Pattern =
+                memoizedEndTokenDeriv(this, e) {
+                    val p = group(pattern1.endTokenDeriv(e), pattern2)
+                    if (pattern1.nullable)
+                        choice(p, pattern2.endTokenDeriv(e))
+                    else p
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -405,30 +424,33 @@ object Patterns {
         override fun equals(other: Any?): Boolean =
                 (other is Interleave) && (
                         (other.pattern1 == pattern1 && other.pattern2 == pattern2) ||
-                        (other.pattern1 == pattern2 && other.pattern2 == pattern1))
+                                (other.pattern1 == pattern2 && other.pattern2 == pattern1))
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
-        private val lazyTextTokenDeriv by lazy {
-            choice(
-                    interleave(pattern1.textTokenDeriv(), pattern2),
-                    interleave(pattern2.textTokenDeriv(), pattern1)
-            )
-        }
-
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    choice(
+                            interleave(pattern1.textTokenDeriv(), pattern2),
+                            interleave(pattern2.textTokenDeriv(), pattern1)
+                    )
+                }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                choice(
-                        interleave(pattern1.startTokenDeriv(s), pattern2),
-                        interleave(pattern2.startTokenDeriv(s), pattern1)
-                )
+                memoizedStartTokenDeriv(this, s) {
+                    choice(
+                            interleave(pattern1.startTokenDeriv(s), pattern2),
+                            interleave(pattern2.startTokenDeriv(s), pattern1)
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(
-                        interleave(pattern1.endTokenDeriv(e), pattern2),
-                        interleave(pattern2.endTokenDeriv(e), pattern1)
-                )
+                memoizedEndTokenDeriv(this, e) {
+                    choice(
+                            interleave(pattern1.endTokenDeriv(e), pattern2),
+                            interleave(pattern2.endTokenDeriv(e), pattern1)
+                    )
+                }
 
         fun aggregateSubPatterns(): List<Pattern> {
             val aggregate = mutableListOf<Pattern>()
@@ -459,13 +481,17 @@ object Patterns {
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.value.matches(t)
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
+                memoizedStartTokenDeriv(this, s) {
+                    choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
+                memoizedEndTokenDeriv(this, e) {
+                    choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
+                }
 
-        private val lazyTextTokenDeriv by lazy { choice(pattern1.textTokenDeriv(), pattern2.value.textTokenDeriv()) }
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) { choice(pattern1.textTokenDeriv(), pattern2.value.textTokenDeriv()) }
     }
 
     class OneOrMore(val pattern: Pattern) : Pattern {
@@ -481,30 +507,33 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is OneOrMore &&
-                other.pattern == pattern
+                        other.pattern == pattern
 
         override fun matches(t: TAGMLToken): Boolean = pattern.matches(t)
 
-        private val lazyTextTokenDeriv: Pattern by lazy {
-            group(
-                    pattern.textTokenDeriv(),
-                    choice(OneOrMore(pattern), Empty)
-            )
-        }
-
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    group(
+                            pattern.textTokenDeriv(),
+                            choice(OneOrMore(pattern), Empty)
+                    )
+                }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                group(
-                        pattern.startTokenDeriv(s),
-                        choice(OneOrMore(pattern), Empty)
-                )
+                memoizedStartTokenDeriv(this, s) {
+                    group(
+                            pattern.startTokenDeriv(s),
+                            choice(OneOrMore(pattern), Empty)
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                group(
-                        pattern.endTokenDeriv(e),
-                        choice(OneOrMore(pattern), Empty)
-                )
+                memoizedEndTokenDeriv(this, e) {
+                    group(
+                            pattern.endTokenDeriv(e),
+                            choice(OneOrMore(pattern), Empty)
+                    )
+                }
     }
 
     class ConcurOneOrMore(private val pattern: Pattern) : Pattern {
@@ -520,37 +549,39 @@ object Patterns {
 
         override fun equals(other: Any?): Boolean =
                 other is ConcurOneOrMore &&
-                other.pattern == pattern
+                        other.pattern == pattern
 
         override fun matches(t: TAGMLToken): Boolean = pattern.matches(t)
 
-        private val lazyTextTokenDeriv: Pattern by lazy {
-            concur(
-                    pattern.textTokenDeriv(),
-                    choice(ConcurOneOrMore(pattern), Empty)
-            )
-        }
-
-        override fun textTokenDeriv(): Pattern = lazyTextTokenDeriv
+        override fun textTokenDeriv(): Pattern =
+                memoizedTextTokenDeriv(this) {
+                    concur(
+                            pattern.textTokenDeriv(),
+                            choice(ConcurOneOrMore(pattern), Empty)
+                    )
+                }
 
         override fun startTokenDeriv(s: StartTagToken): Pattern =
-                concur(
-                        pattern.startTokenDeriv(s),
-                        choice(ConcurOneOrMore(pattern), anyContent())
-                )
+                memoizedStartTokenDeriv(this, s) {
+                    concur(
+                            pattern.startTokenDeriv(s),
+                            choice(ConcurOneOrMore(pattern), anyContent())
+                    )
+                }
 
         override fun endTokenDeriv(e: EndTagToken): Pattern =
-                concur(
-                        pattern.endTokenDeriv(e),
-                        choice(ConcurOneOrMore(pattern), anyContent())
-                )
+                memoizedEndTokenDeriv(this, e) {
+                    concur(
+                            pattern.endTokenDeriv(e),
+                            choice(ConcurOneOrMore(pattern), anyContent())
+                    )
+                }
     }
 
     private fun determineTagName(id: TagIdentifier): String =
             when (id) {
                 is AnyTagIdentifier -> "*"
-                is FixedIdentifier  -> id.tagName
-                else                -> "?"
+                is FixedIdentifier -> id.tagName
+                else -> "?"
             }
 }
-

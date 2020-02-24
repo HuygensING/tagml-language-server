@@ -16,7 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger
 object WellFormedness {
     private val LOG = LoggerFactory.getLogger(this::class.java)
 
-    data class WellFormednessResult(val isWellFormed: Boolean, val errors: List<String>, val expectedTokens: Set<TAGMLToken>)
+    data class WellFormednessResult(
+            val isWellFormed: Boolean,
+            val errors: List<String>,
+            val expectedTokens: Set<TAGMLToken>
+    )
 
     fun checkWellFormedness(tokens: List<LSPToken>): WellFormednessResult {
         val iterator = tokens.iterator()
@@ -67,7 +71,7 @@ object WellFormedness {
             stepsXML.append("</step>\n")
         }
         stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
-//        LOG.info("remaining expectation=$expectation")
+        LOG.info("remaining expectation=$expectation")
         if (errors.isEmpty() && !expectation.nullable) {
             expectedTokens.addAll(expectation.expectedTokens)
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
