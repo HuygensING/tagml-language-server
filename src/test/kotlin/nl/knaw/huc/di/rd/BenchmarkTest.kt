@@ -6,20 +6,24 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions
+import org.junit.Ignore
 import org.junit.Test
 
 class BenchmarkTest {
 
+    @Ignore
     @Test(timeout = 10_000)
     fun parseSmallTAGML() {
         parseTAGMLFile("small.tagml")
     }
 
+    @Ignore
     @Test(timeout = 10_000)
     fun parseMediumTAGML() {
         parseTAGMLFile("medium.tagml")
     }
 
+    @Ignore
     @Test(timeout = 10_000)
     fun parseLargeTAGML() {
         parseTAGMLFile("large.tagml")
@@ -36,12 +40,11 @@ class BenchmarkTest {
 
     private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<LSPToken>) -> Unit) {
         when (val result = TAGMLTokenizer.tokenize(tagml)) {
-            is Either.Left -> {
+            is Either.Left  -> {
                 showErrorLocation(tagml, result)
                 Assertions.fail("Parsing failed: ${result.a}")
             }
             is Either.Right -> funk(result.b)
         }
     }
-
 }
