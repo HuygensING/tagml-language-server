@@ -32,6 +32,7 @@ application {
 }
 
 repositories {
+    mavenLocal()
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
@@ -77,12 +78,14 @@ dependencies {
 
 //    implementation("javax.servlet:javax.servlet-api:4.0.1")
     implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3.2-SNAPSHOT")
+//    testImplementation("com.intigua:antlr4-autosuggest:0.0.1-SNAPSHOT")
 
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("io.github.microutils:kotlin-logging:1.7.7")
 }

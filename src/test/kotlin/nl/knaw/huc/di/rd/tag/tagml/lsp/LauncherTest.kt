@@ -27,6 +27,8 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.collections.LinkedHashMap
 import kotlin.collections.set
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class LauncherTest {
     @Test
@@ -62,24 +64,24 @@ class LauncherTest {
         result.items.add(item)
         server!!.expectedRequests["textDocument/completion"] = Pair<Any, Any>(p, result)
         val future = clientLauncher!!.remoteProxy.textDocumentService.completion(p)
-        Assert.assertEquals(Either.forRight<Any, CompletionList>(result).toString(), future[TIMEOUT, TimeUnit.MILLISECONDS].toString())
+        assertEquals(Either.forRight<Any, CompletionList>(result).toString(), future[TIMEOUT, TimeUnit.MILLISECONDS].toString())
         client!!.joinOnEmpty()
     }
 
     internal class AssertingEndpoint : Endpoint {
         var expectedRequests: MutableMap<String, Pair<Any, Any>?> = LinkedHashMap()
         override fun request(method: String, parameter: Any): CompletableFuture<*> {
-            Assert.assertTrue(expectedRequests.containsKey(method))
+            assertTrue(expectedRequests.containsKey(method))
             val result = expectedRequests.remove(method)
-            Assert.assertEquals(result!!.key.toString(), parameter.toString())
+            assertEquals(result!!.key.toString(), parameter.toString())
             return CompletableFuture.completedFuture(result.value)
         }
 
         var expectedNotifications: MutableMap<String, Any?> = LinkedHashMap()
         override fun notify(method: String, parameter: Any) {
-            Assert.assertTrue(expectedNotifications.containsKey(method))
+            assertTrue(expectedNotifications.containsKey(method))
             val `object` = expectedNotifications.remove(method)
-            Assert.assertEquals(`object`.toString(), parameter.toString())
+            assertEquals(`object`.toString(), parameter.toString())
         }
 
         /**
