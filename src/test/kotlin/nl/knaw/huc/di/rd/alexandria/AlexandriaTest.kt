@@ -1,5 +1,6 @@
 package nl.knaw.huc.di.rd.alexandria
 
+import nl.knaw.huc.di.rd.tag.tagml.lsp.Alexandria
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore
@@ -14,6 +15,13 @@ import java.nio.file.Paths
 import kotlin.test.fail
 
 class AlexandriaTest {
+    @Test
+    fun test_correct_tagml() {
+        val tagML = "[a>\nAAA AA [b>BBBAAA<a]BBBB<b]"
+        val a = Alexandria()
+        a.validate(tagML)
+    }
+
     @Test
     fun testOpeningMarkupShouldBeClosedLast() {
         val tagML = "[a|+A>AAA AA [b|+B>BBBAAA<a]BBBB<b]"

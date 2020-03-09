@@ -15,6 +15,7 @@ typealias CodeActionList = MutableList<Either<Command, CodeAction>>
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
     //    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val docs: MutableMap<String, TAGMLDocumentModel> = synchronizedMap(hashMapOf())
+    private val alexandria = Alexandria()
 
     override fun didOpen(params: DidOpenTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didOpen($params)")
@@ -114,6 +115,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
             res.add(parseDiagnostic)
         } else {
+            alexandriaValidate(model)
             // TODO: validate the tagml tokens
             val tokens = model.tokens!! // TODO: refactor model to Either
             val firstToken = tokens.first()
@@ -136,6 +138,10 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 
 //        addTestDiagnostic(res)
         return res
+    }
+
+    private fun alexandriaValidate(model: TAGMLDocumentModel) {
+        alexandria.validate(model.text)
     }
 
     private fun addTestDiagnostic(res: MutableList<Diagnostic>) {

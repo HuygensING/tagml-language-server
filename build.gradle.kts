@@ -77,7 +77,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.2.0-dev-7")
 
 //    implementation("javax.servlet:javax.servlet-api:4.0.1")
-    implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:2.3.2-SNAPSHOT")
+    val alexandriaVersion = "2.3.2-trd-515-SNAPSHOT"
+    implementation("nl.knaw.huygens.alexandria:alexandria-markup-core:${alexandriaVersion}")
 //    testImplementation("com.intigua:antlr4-autosuggest:0.0.1-SNAPSHOT")
 
     // Use the Kotlin test library.
