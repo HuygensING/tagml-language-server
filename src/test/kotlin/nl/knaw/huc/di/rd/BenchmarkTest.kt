@@ -6,7 +6,6 @@ import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
 import org.assertj.core.api.Assertions
-import org.junit.Ignore
 import org.junit.Test
 
 class BenchmarkTest {
@@ -16,14 +15,12 @@ class BenchmarkTest {
         parseTAGMLFile("small.tagml")
     }
 
-    @Ignore
-    @Test
+    @Test(timeout = 10_000)
     fun parseMediumTAGML() {
         parseTAGMLFile("medium.tagml")
     }
 
-    @Ignore
-    @Test
+    @Test(timeout = 10_000)
     fun parseLargeTAGML() {
         parseTAGMLFile("large.tagml")
     }
