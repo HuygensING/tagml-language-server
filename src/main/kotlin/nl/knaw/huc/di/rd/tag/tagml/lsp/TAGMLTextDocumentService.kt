@@ -108,40 +108,37 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         // this goes into the TAGMLDocumentModel (?) -> so this contains the parsed tagml?
         // we need that for the autocompleter
 
-        val res = mutableListOf<Diagnostic>()
-
-        if (model.hasParseFailure) {
-            val r = Range(model.errorPosition, model.errorPosition)
-            val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
-            res.add(parseDiagnostic)
-        } else {
-            alexandriaValidate(model)
-            // TODO: validate the tagml tokens
-            val tokens = model.tokens!! // TODO: refactor model to Either
-            val firstToken = tokens.first()
-            val diagnostic1 = Diagnostic(
-                    firstToken.range,
-                    "This is the first token! (${firstToken.token})",
-                    DiagnosticSeverity.Information,
-                    "test information"
-            )
-            res.add(diagnostic1)
-            val lastToken = tokens.last()
-            val diagnostic2 = Diagnostic(
-                    lastToken.range,
-                    "This is the last token! (${lastToken.token})",
-                    DiagnosticSeverity.Information,
-                    "test information"
-            )
-            res.add(diagnostic2)
-        }
-
-//        addTestDiagnostic(res)
-        return res
-    }
-
-    private fun alexandriaValidate(model: TAGMLDocumentModel) {
-        alexandria.validate(model.text)
+//        val res = mutableListOf<Diagnostic>()
+//
+//
+//        if (model.hasParseFailure) {
+//            val r = Range(model.errorPosition, model.errorPosition)
+//            val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
+//            res.add(parseDiagnostic)
+//        } else {
+//            // TODO: validate the tagml tokens
+//            val tokens = model.tokens!! // TODO: refactor model to Either
+//            val firstToken = tokens.first()
+//            val diagnostic1 = Diagnostic(
+//                    firstToken.range,
+//                    "This is the first token! (${firstToken.token})",
+//                    DiagnosticSeverity.Information,
+//                    "test information"
+//            )
+//            res.add(diagnostic1)
+//            val lastToken = tokens.last()
+//            val diagnostic2 = Diagnostic(
+//                    lastToken.range,
+//                    "This is the last token! (${lastToken.token})",
+//                    DiagnosticSeverity.Information,
+//                    "test information"
+//            )
+//            res.add(diagnostic2)
+//        }
+//
+////        addTestDiagnostic(res)
+//        return res
+        return Alexandria().validate(model.text)
     }
 
     private fun addTestDiagnostic(res: MutableList<Diagnostic>) {

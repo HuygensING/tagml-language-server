@@ -14,16 +14,25 @@ class TAGMLTextDocumentServiceTest {
             doDidOpen(client, "[tag>text<tag]")
 
             val diagnostics = client.readDiagnostics()
-            assertThat(diagnostics).hasSize(2)
-            val firstDiagnostic = diagnostics[0]
-            assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Information)
-            println(firstDiagnostic)
+            assertThat(diagnostics).hasSize(0)
         }
 
         @Test
         fun with_unparsable_TAGML() {
             val client = TestClient
             doDidOpen(client, "[[does not parse!]]]")
+
+            val diagnostics = client.readDiagnostics()
+            assertThat(diagnostics).hasSize(1)
+            val firstDiagnostic = diagnostics[0]
+            assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
+            println(firstDiagnostic)
+        }
+
+        @Test
+        fun with_incorrect_TAGML() {
+            val client = TestClient
+            doDidOpen(client, "[a>text<b]")
 
             val diagnostics = client.readDiagnostics()
             assertThat(diagnostics).hasSize(1)
