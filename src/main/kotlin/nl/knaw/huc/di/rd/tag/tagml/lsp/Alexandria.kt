@@ -49,21 +49,15 @@ class Alexandria {
 
     private fun range(tagError: TAGSyntaxError): Range {
         return Range(
-                Position(tagError.line - 1, tagError.character - 1),
-                Position(tagError.line - 1, tagError.character - 1)
+                Position(tagError.position.line - 1, tagError.position.character - 1),
+                Position(tagError.position.line - 1, tagError.position.character - 1)
         )
     }
 
     private fun range(tagError: CustomError): Range? =
-            if (tagError.startPos.isPresent && tagError.endPos.isPresent) {
-                Range(
-                        Position(tagError.startPos.get().line - 1, tagError.startPos.get().character - 1),
-                        Position(tagError.endPos.get().line - 1, tagError.endPos.get().character - 1))
-            } else {
-                Range(
-                        Position(0, 0),
-                        Position(0, 0))
-            }
+            Range(
+                    Position(tagError.startPos.line - 1, tagError.startPos.character - 1),
+                    Position(tagError.endPos.line - 1, tagError.endPos.character - 1))
 
     private fun runInStore(storeConsumer: (TAGStore) -> Unit) =
             getStore().use { store -> storeConsumer(store) }

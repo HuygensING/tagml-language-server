@@ -23,7 +23,7 @@ class TAGMLTextDocumentServiceTest {
             doDidOpen(client, "[[does not parse!]]]")
 
             val diagnostics = client.readDiagnostics()
-            assertThat(diagnostics).hasSize(1)
+            assertThat(diagnostics).hasSizeGreaterThan(0)
             val firstDiagnostic = diagnostics[0]
             assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
             println(firstDiagnostic)
@@ -61,7 +61,7 @@ class TAGMLTextDocumentServiceTest {
             waitForDiagnosticsToBePublished(client)
 
             val openDiagnostics = client.readDiagnostics()
-            assertThat(openDiagnostics).hasSize(2)
+            assertThat(openDiagnostics).hasSize(0)
 
             val textDocument = VersionedTextDocumentIdentifier(uri, 2)
             val contentChanges = listOf(TextDocumentContentChangeEvent("[[[throw me an error!"))
@@ -70,7 +70,7 @@ class TAGMLTextDocumentServiceTest {
             waitForDiagnosticsToBePublished(client)
 
             val diagnostics = client.readDiagnostics()
-            assertThat(diagnostics).hasSize(1)
+            assertThat(diagnostics).hasSizeGreaterThan(0)
             val firstDiagnostic = diagnostics[0]
             assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
             println(firstDiagnostic)
