@@ -35,7 +35,7 @@ class TAGMLTextDocumentServiceTest {
             doDidOpen(client, "[a>text<b]")
 
             val diagnostics = client.readDiagnostics()
-            assertThat(diagnostics).hasSize(1)
+            assertThat(diagnostics).hasSize(2)
             val firstDiagnostic = diagnostics[0]
             assertThat(firstDiagnostic.severity).isEqualTo(DiagnosticSeverity.Error)
             println(firstDiagnostic)

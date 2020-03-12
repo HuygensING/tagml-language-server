@@ -141,6 +141,12 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         return Alexandria().validate(model.text)
     }
 
+    override fun definition(position: TextDocumentPositionParams?): CompletableFuture<MutableList<out Location>> {
+        // TODO: implement: if the position points to a tag (open/close), refer to the complementing tag (close/open)
+        position?.textDocument?.uri
+        return super.definition(position)
+    }
+
     private fun addTestDiagnostic(res: MutableList<Diagnostic>) {
         val start: Position = Position(1, 1)
         val end: Position = Position(1, 5)

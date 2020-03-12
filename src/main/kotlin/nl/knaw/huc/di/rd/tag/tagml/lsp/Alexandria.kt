@@ -55,9 +55,10 @@ class Alexandria {
     }
 
     private fun range(tagError: CustomError): Range? =
+            // LSP expects 0-based line/character, alexandria supplies 1-based positions
             Range(
-                    Position(tagError.startPos.line - 1, tagError.startPos.character - 1),
-                    Position(tagError.endPos.line - 1, tagError.endPos.character - 1))
+                    Position(tagError.range.startPosition.line - 1, tagError.range.startPosition.character - 1),
+                    Position(tagError.range.endPosition.line - 1, tagError.range.endPosition.character - 1))
 
     private fun runInStore(storeConsumer: (TAGStore) -> Unit) =
             getStore().use { store -> storeConsumer(store) }

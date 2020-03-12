@@ -20,20 +20,19 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
         val serverCapabilities = ServerCapabilities().apply {
             textDocumentSync = Either.forLeft(TextDocumentSyncKind.Full)
             completionProvider = CompletionOptions(false, listOf("[", "<", "|"))
-            hoverProvider = true
+            hoverProvider = false
             documentHighlightProvider = false
 //            documentLinkProvider = DocumentLinkOptions()
 //            signatureHelpProvider = null
 //            declarationProvider = Either.forLeft(false)
-//            definitionProvider = false
-//            typeDefinitionProvider = Either.forLeft(false)
+            definitionProvider = true
+            typeDefinitionProvider = Either.forLeft(true)
 //            implementationProvider = Either.forLeft(false)
 //            referencesProvider = false
 //            documentHighlightProvider = false
-//            documentSymbolProvider = false
+            documentSymbolProvider = true
             codeActionProvider = Either.forLeft(false)
 //            codeLensProvider = null
-//            documentLinkProvider = null
 //            colorProvider = null
         }
         isInitialized = true
@@ -48,7 +47,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#shutdown
     override fun shutdown(): CompletableFuture<Any> {
         shutdownRequested = true
-        return CompletableFuture.supplyAsync { null }
+        return CompletableFuture.supplyAsync { }
     }
 
     // https://microsoft.github.io/language-server-protocol/specifications/specification-current/#exit
