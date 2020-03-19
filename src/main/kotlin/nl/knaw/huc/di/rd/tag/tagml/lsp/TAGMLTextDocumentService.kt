@@ -1,5 +1,6 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
+import nl.knaw.huc.di.rd.tag.tagml.lsp.AlexandriaUtil.toLSPRange
 import org.eclipse.lsp4j.*
 import org.eclipse.lsp4j.jsonrpc.ResponseErrorException
 import org.eclipse.lsp4j.jsonrpc.messages.Either
@@ -31,18 +32,20 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         }
 
         val docId = params.textDocument.uri
-        val model = TAGMLDocumentModel(docId, params.textDocument.text, params.textDocument.version)
+        val model = tagmlModelOf(BaseTAGMLDocumentModel(docId, params.textDocument.text, params.textDocument.version))
         this.docs[docId] = model
         publishDiagnostics(docId, model)
     }
 
+    private fun tagmlModelOf(base: BaseTAGMLDocumentModel): TAGMLDocumentModel = alexandria.validate(base)
+
     override fun didChange(params: DidChangeTextDocumentParams) {
 //        logger.info("TAGMLTextDocumentService.didChange($params)")
         val docId = params.textDocument.uri
-        val originalText = docs[docId]?.text
+        val originalText = docs[docId]?.base?.text
         val changedText = updateText(originalText, params.contentChanges)
 
-        val model = TAGMLDocumentModel(docId, changedText, params.textDocument.version)
+        val model = tagmlModelOf(BaseTAGMLDocumentModel(docId, changedText, params.textDocument.version))
         this.docs[docId] = model
         publishDiagnostics(docId, model)
     }
@@ -66,19 +69,19 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             tagmlLanguageServer.client.publishDiagnostics(
                     PublishDiagnosticsParams(
                             uri,
-                            validate(model)
+                            diagnostics(model)
                     )
             )
         }
     }
 
     override fun hover(position: TextDocumentPositionParams): CompletableFuture<Hover> {
-        val docId = position.textDocument.uri
-        val model = docs[docId]
-        val token = model?.tokenIndex?.tokenAt(position.position)
+//        val docId = position.textDocument.uri
+//        val model = docs[docId]
+//        val token = model?.tokenIndex?.tokenAt(position.position)
         val contents = MarkupContent()
         contents.kind = "markdown" // alternatively:, "plaintext"
-        contents.value = "**${token}**"
+//        contents.value = "**${token}**"
         return CompletableFuture.supplyAsync { Hover(contents) }
     }
 
@@ -100,51 +103,29 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         }
     }
 
-    private fun validate(model: TAGMLDocumentModel): List<Diagnostic> {
-        // validate the tagml and on errors, return a list of diagnostics
-//        val text = model.text
-        // parsing the tagml should also return a list of tokens (opentag, closetag, text) with their positions in the text
-        // also: which opentag and closetag belong together
-        // this goes into the TAGMLDocumentModel (?) -> so this contains the parsed tagml?
-        // we need that for the autocompleter
-
-//        val res = mutableListOf<Diagnostic>()
-//
-//
-//        if (model.hasParseFailure) {
-//            val r = Range(model.errorPosition, model.errorPosition)
-//            val parseDiagnostic = Diagnostic(r, model.errorMessage, DiagnosticSeverity.Error, "tokenizer")
-//            res.add(parseDiagnostic)
-//        } else {
-//            // TODO: validate the tagml tokens
-//            val tokens = model.tokens!! // TODO: refactor model to Either
-//            val firstToken = tokens.first()
-//            val diagnostic1 = Diagnostic(
-//                    firstToken.range,
-//                    "This is the first token! (${firstToken.token})",
-//                    DiagnosticSeverity.Information,
-//                    "test information"
-//            )
-//            res.add(diagnostic1)
-//            val lastToken = tokens.last()
-//            val diagnostic2 = Diagnostic(
-//                    lastToken.range,
-//                    "This is the last token! (${lastToken.token})",
-//                    DiagnosticSeverity.Information,
-//                    "test information"
-//            )
-//            res.add(diagnostic2)
-//        }
-//
-////        addTestDiagnostic(res)
-//        return res
-        return Alexandria().validate(model.text)
+    private fun diagnostics(model: TAGMLDocumentModel): List<Diagnostic> {
+        return when (model) {
+            is CorrectTAGMLDocumentModel -> listOf()
+            is IncorrectTAGMLDocumentModel -> model.diagnostics
+            else -> TODO("Unhandled type ${model.javaClass}")
+        }
     }
 
-    override fun definition(position: TextDocumentPositionParams?): CompletableFuture<MutableList<out Location>> {
+    override fun definition(params: TextDocumentPositionParams?): CompletableFuture<MutableList<out Location>> {
         // TODO: implement: if the position points to a tag (open/close), refer to the complementing tag (close/open)
-        position?.textDocument?.uri
-        return super.definition(position)
+        val locationList = mutableListOf<Location>()
+        if (params != null) {
+            val uri = params.textDocument?.uri
+//            val textDocument = params.textDocument
+            val tagmlDocumentModel = docs[uri]!!
+            if (tagmlDocumentModel is CorrectTAGMLDocumentModel) {
+                tagmlDocumentModel.rangePairAt(params.position)
+                        ?.map { toLSPRange(it) }
+                        ?.map { Location(uri, it) }
+                        ?.forEach { locationList.add(it) }
+            }
+        }
+        return CompletableFuture.supplyAsync { locationList }
     }
 
     private fun addTestDiagnostic(res: MutableList<Diagnostic>) {

@@ -1,17 +1,53 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
+import org.apache.commons.lang3.time.StopWatch
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.lsp4j.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.concurrent.TimeUnit
+import kotlin.time.ExperimentalTime
 
 class TAGMLTextDocumentServiceTest {
+    @ExperimentalTime
+    @Nested
+    inner class TestDefinition {
+        @Test
+        fun with_correct_tagml() {
+            val client = TestClient
+            val (tds, uri) = openTAGML(client, "[tag>text<tag]")
+            val textDocument = VersionedTextDocumentIdentifier(uri, 1)
+
+            val positionInStartTag = Position(0, 1)
+            val startPositionParams = TextDocumentPositionParams(textDocument, positionInStartTag)
+            val locations = tds.definition(startPositionParams).join()
+
+            val positionInEndTag = Position(0, 11)
+            val endPositionParams = TextDocumentPositionParams(textDocument, positionInEndTag)
+            val locations2 = tds.definition(endPositionParams).join()
+
+            assertThat(locations).hasSize(2)
+            assertThat(locations2).isEqualTo(locations)
+            with(locations[0]) {
+                assertThat(uri).isEqualTo(uri)
+                assertThat(this.range).isEqualTo(range(0, 0, 0, 5))
+            }
+            with(locations[1]) {
+                assertThat(uri).isEqualTo(uri)
+                assertThat(this.range).isEqualTo(range(0, 9, 0, 14))
+            }
+        }
+    }
+
+    private fun range(startLine: Int, startChar: Int, endLine: Int, endChar: Int): Range =
+            Range(Position(startLine, startChar), Position(endLine, endChar))
+
     @Nested
     inner class TestDidOpen {
         @Test
         fun with_correct_TAGML() {
             val client = TestClient
-            doDidOpen(client, "[tag>text<tag]")
+            openTAGML(client, "[tag>text<tag]")
 
             val diagnostics = client.readDiagnostics()
             assertThat(diagnostics).hasSize(0)
@@ -47,6 +83,7 @@ class TAGMLTextDocumentServiceTest {
             tds.didOpen(params)
             waitForDiagnosticsToBePublished(client)
         }
+
     }
 
     @Nested
@@ -54,14 +91,7 @@ class TAGMLTextDocumentServiceTest {
         @Test
         fun testDidChange() {
             val client = TestClient
-            val tds = startTDS(client)
-            val uri = "file:///tmp/test.tagml"
-            val params = DidOpenTextDocumentParams(TextDocumentItem(uri, "tagml", 1, "[tag>text<tag]"))
-            tds.didOpen(params)
-            waitForDiagnosticsToBePublished(client)
-
-            val openDiagnostics = client.readDiagnostics()
-            assertThat(openDiagnostics).hasSize(0)
+            val (tds, uri) = openTAGML(client, "[tag>text<tag]")
 
             val textDocument = VersionedTextDocumentIdentifier(uri, 2)
             val contentChanges = listOf(TextDocumentContentChangeEvent("[[[throw me an error!"))
@@ -77,6 +107,18 @@ class TAGMLTextDocumentServiceTest {
         }
     }
 
+    private fun openTAGML(client: TestClient, tagml: String): Pair<TAGMLTextDocumentService, String> {
+        val tds = startTDS(client)
+        val uri = "file:///tmp/test.tagml"
+        val params = DidOpenTextDocumentParams(TextDocumentItem(uri, "tagml", 1, tagml))
+        tds.didOpen(params)
+        waitForDiagnosticsToBePublished(client)
+
+        val openDiagnostics = client.readDiagnostics()
+        assertThat(openDiagnostics).hasSize(0)
+        return Pair(tds, uri)
+    }
+
     private fun startTDS(client: TestClient): TAGMLTextDocumentService {
         val ls = TAGMLLanguageServer
         ls.client = client
@@ -90,4 +132,11 @@ class TAGMLTextDocumentServiceTest {
             Thread.sleep(10)
         }
     }
+
+    private fun logTimeSpent(sw: StopWatch, s: String) {
+        println("$s took ${sw.getTime(TimeUnit.MILLISECONDS)} ms")
+        sw.reset()
+        sw.start()
+    }
+
 }

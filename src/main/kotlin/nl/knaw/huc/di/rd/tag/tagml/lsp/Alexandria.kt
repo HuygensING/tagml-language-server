@@ -20,27 +20,32 @@ class Alexandria {
     private val tmpDir = Files.createTempDirectory("tmpDir")
             .also { it.toFile().deleteOnExit() }
 
-    fun validate(tagml: String): List<Diagnostic> {
+    fun validate(base: BaseTAGMLDocumentModel): TAGMLDocumentModel {
         val diagnostics = mutableListOf<Diagnostic>()
+        var document: TAGDocument? = null
         runInStore { store ->
             try {
-                val document: TAGDocument = store.runInTransaction(Supplier { TAGMLImporter(store).importTAGML(tagml) })
+                document = store.runInTransaction(Supplier { TAGMLImporter(store).importTAGML(base.text) })
             } catch (e: TAGMLSyntaxError) {
                 diagnostics.addAll(e.errors.map { toDiagnostic(it) })
             }
         }
-        return diagnostics
+        return if (document == null) {
+            IncorrectTAGMLDocumentModel(base, diagnostics)
+        } else {
+            CorrectTAGMLDocumentModel(base, document!!.markupRangeMap)
+        }
     }
 
     private fun toDiagnostic(tagError: ErrorListener.TAGError): Diagnostic {
         return when (tagError) {
             is TAGSyntaxError -> Diagnostic(range(tagError), tagError.message, DiagnosticSeverity.Error, "lexer")
-            is CustomError    -> Diagnostic(range(tagError), tagError.message, DiagnosticSeverity.Error, "parser")
-            else              -> Diagnostic(
+            is CustomError -> Diagnostic(range(tagError), tagError.message, DiagnosticSeverity.Error, "parser")
+            else -> Diagnostic(
                     Range(
                             Position(0, 0),
-                            Position(0, 0))
-                    , tagError.message,
+                            Position(0, 0)),
+                    tagError.message,
                     DiagnosticSeverity.Error,
                     "lexer"
             )
@@ -60,7 +65,7 @@ class Alexandria {
                     Position(tagError.range.startPosition.line - 1, tagError.range.startPosition.character - 1),
                     Position(tagError.range.endPosition.line - 1, tagError.range.endPosition.character - 1))
 
-    private fun runInStore(storeConsumer: (TAGStore) -> Unit) =
+    private inline fun runInStore(storeConsumer: (TAGStore) -> Unit) =
             getStore().use { store -> storeConsumer(store) }
 
     fun runInStoreTransaction(storeConsumer: (TAGStore) -> Unit) =

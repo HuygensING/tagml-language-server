@@ -38,9 +38,9 @@ class BenchmarkTest {
         mapTokenizedTAGML(tagml) { Assertions.assertThat(checkWellFormedness(it).isWellFormed).isTrue() }
     }
 
-    private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<LSPToken>) -> Unit) {
+    private inline fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<LSPToken>) -> Unit) {
         when (val result = TAGMLTokenizer.tokenize(tagml)) {
-            is Either.Left  -> {
+            is Either.Left -> {
                 showErrorLocation(tagml, result)
                 Assertions.fail("Parsing failed: ${result.a}")
             }

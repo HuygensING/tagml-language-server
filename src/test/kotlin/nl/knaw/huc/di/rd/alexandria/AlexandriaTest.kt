@@ -1,6 +1,9 @@
 package nl.knaw.huc.di.rd.alexandria
 
 import nl.knaw.huc.di.rd.tag.tagml.lsp.Alexandria
+import nl.knaw.huc.di.rd.tag.tagml.lsp.BaseTAGMLDocumentModel
+import nl.knaw.huc.di.rd.tag.tagml.lsp.CorrectTAGMLDocumentModel
+import nl.knaw.huc.di.rd.tag.tagml.lsp.IncorrectTAGMLDocumentModel
 import nl.knaw.huc.di.tag.tagml.TAGMLSyntaxError
 import nl.knaw.huc.di.tag.tagml.importer.TAGMLImporter
 import nl.knaw.huygens.alexandria.storage.BDBTAGStore
@@ -17,9 +20,21 @@ import kotlin.test.fail
 class AlexandriaTest {
     @Test
     fun test_correct_tagml() {
-        val tagML = "[a>\nAAA AA [b>BBBAAA<a]BBBB<b]"
+        val tagML = "[tagml>text<tagml]"
         val a = Alexandria()
-        a.validate(tagML)
+        val base = BaseTAGMLDocumentModel("uri", tagML, 1)
+        val tagmlDocumentModel = a.validate(base)
+        assertThat(tagmlDocumentModel is CorrectTAGMLDocumentModel).isTrue
+        assertThat((tagmlDocumentModel as CorrectTAGMLDocumentModel).rangePairMap).isNotEmpty
+    }
+
+    @Test
+    fun test_incorrect_tagml() {
+        val tagML = "[tagml>text"
+        val a = Alexandria()
+        val base = BaseTAGMLDocumentModel("uri", tagML, 1)
+        val tagmlDocumentModel = a.validate(base)
+        assertThat(tagmlDocumentModel is IncorrectTAGMLDocumentModel).isTrue
     }
 
     @Test

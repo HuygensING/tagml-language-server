@@ -25,12 +25,12 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
 //            documentLinkProvider = DocumentLinkOptions()
 //            signatureHelpProvider = null
 //            declarationProvider = Either.forLeft(false)
-            definitionProvider = true
+            definitionProvider = false
             typeDefinitionProvider = Either.forLeft(true)
 //            implementationProvider = Either.forLeft(false)
 //            referencesProvider = false
 //            documentHighlightProvider = false
-            documentSymbolProvider = true
+            documentSymbolProvider = false
             codeActionProvider = Either.forLeft(false)
 //            codeLensProvider = null
 //            colorProvider = null

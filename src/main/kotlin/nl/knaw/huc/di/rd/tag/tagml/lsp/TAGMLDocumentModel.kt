@@ -1,39 +1,78 @@
 package nl.knaw.huc.di.rd.tag.tagml.lsp
 
-import arrow.core.Either
-import lambdada.parsec.parser.Response
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer.tokenize
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TokenIndex
+import nl.knaw.huc.di.rd.tag.tagml.lsp.AlexandriaUtil.toLSPRange
+import org.eclipse.lsp4j.Diagnostic
 import org.eclipse.lsp4j.Position
+import org.eclipse.lsp4j.Range
+import org.eclipse.lsp4j.util.Positions
+import nl.knaw.huc.di.tag.tagml.importer.Range as ARange
+import nl.knaw.huc.di.tag.tagml.importer.RangePair as ARangePair
 
-class TAGMLDocumentModel(private val uri: String, val text: String, val version: Int) {
-    var hasParseFailure: Boolean = false
-    var errorPosition: Position? = null
-    var errorMessage: String? = null
-    var tokens: List<LSPToken>? = null
-    var tokenIndex: TokenIndex? = null
-    private var reject: Response.Reject<Char, List<LSPToken>>? = null
+typealias LineIndex = MutableMap<Int, Long>
 
-    init {
-        when (val result = tokenize(text)) {
-            is Either.Left -> onFailure(result.a, text)
-            is Either.Right -> onSuccess(result.b)
-            else -> throw RuntimeException("unexpected result: $result")
+interface TAGMLDocumentModel {
+    val base: BaseTAGMLDocumentModel
+}
+
+fun <O> ARangePair.map(function: (ARange) -> O): List<O> = listOf(this.startRange, this.endRange).map(function)
+
+data class BaseTAGMLDocumentModel(val uri: String, val text: String, val version: Int)
+
+data class CorrectTAGMLDocumentModel(
+        override val base: BaseTAGMLDocumentModel,
+        val rangePairMap: MutableMap<Long, ARangePair>
+) : TAGMLDocumentModel {
+    private val index by lazy { markupIndexOf(rangePairMap) }
+
+    fun rangePairAt(position: Position): ARangePair? {
+        val markupId: Long? = index.markupIdAt(position)
+        return if (markupId == null) {
+            null
+        } else {
+            this.rangePairMap[markupId]
         }
     }
 
-    private fun onSuccess(tokenList: List<LSPToken>) {
-        this.tokens = tokenList
-        this.tokenIndex = TokenIndex(uri, tokenList)
-    }
-
-    private fun onFailure(reject: Response.Reject<Char, List<LSPToken>>, text: String) {
-        this.reject = reject
-        this.hasParseFailure = true
-        val pc = PositionCalculator(text)
-        errorPosition = pc.calculatePosition(reject.location)
-        errorMessage = "Parsing error (TODO:details!)"
+    private fun markupIndexOf(rangePairMap: MutableMap<Long, ARangePair>): MarkupIndex {
+        val markupTokenRanges =
+                rangePairMap.flatMap { listOf((it.key to it.value.startRange), (it.key to it.value.endRange)) }
+                        .map { (it.first to toLSPRange(it.second)) }
+                        .map { MarkupTokenRange(it.first, it.second) }
+        return MarkupIndex(markupTokenRanges)
     }
 }
 
+data class IncorrectTAGMLDocumentModel(
+        override val base: BaseTAGMLDocumentModel,
+        val diagnostics: List<Diagnostic>
+) : TAGMLDocumentModel
+
+data class MarkupTokenRange(val docId: Long, val range: Range)
+
+class MarkupIndex(list: List<MarkupTokenRange>) {
+    private var markupTokenRanges: List<MarkupTokenRange> = listOf()
+
+    private val markupTokenRangeComparator = compareBy<MarkupTokenRange> { it.range.start.line }
+            .thenBy { it.range.start.character }
+            .thenBy { it.range.end.line }
+            .thenBy { it.range.end.character }
+
+    init {
+        markupTokenRanges = list.sortedWith(markupTokenRangeComparator)
+    }
+
+    fun markupIdAt(position: Position): Long? {
+        val index = markupTokenRanges.binarySearch { relativePosition(position, it.range) }
+        return if (index < 0)
+            null
+        else
+            markupTokenRanges[index].docId
+    }
+
+    private fun relativePosition(p: Position, r: Range): Int = when {
+        Positions.isBefore(p, r.start) -> 1  // before range
+        Positions.isBefore(r.end, p) -> -1   // after range
+        else -> 0                            // in range
+    }
+
+}
