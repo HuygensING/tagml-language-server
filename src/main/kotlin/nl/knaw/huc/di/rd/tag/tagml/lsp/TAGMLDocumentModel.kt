@@ -36,7 +36,7 @@ data class CorrectTAGMLDocumentModel(
     private fun markupIndexOf(rangePairMap: MutableMap<Long, ARangePair>): MarkupIndex {
         val markupTokenRanges =
                 rangePairMap.flatMap { listOf((it.key to it.value.startRange), (it.key to it.value.endRange)) }
-                        .map { (it.first to toLSPRange(it.second)) }
+                        .map { (it.first to it.second.toLSPRange()) }
                         .map { MarkupTokenRange(it.first, it.second) }
         return MarkupIndex(markupTokenRanges)
     }

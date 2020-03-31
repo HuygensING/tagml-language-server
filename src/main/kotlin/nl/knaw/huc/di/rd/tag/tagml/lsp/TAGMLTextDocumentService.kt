@@ -79,8 +79,10 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
 //        val docId = position.textDocument.uri
 //        val model = docs[docId]
 //        val token = model?.tokenIndex?.tokenAt(position.position)
-        val contents = MarkupContent()
-        contents.kind = "markdown" // alternatively:, "plaintext"
+        val contents = MarkupContent().apply {
+            value = "TODO"
+            kind = "markdown" // alternatively:, "plaintext"
+        }
 //        contents.value = "**${token}**"
         return CompletableFuture.supplyAsync { Hover(contents) }
     }
@@ -120,7 +122,7 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             val tagmlDocumentModel = docs[uri]!!
             if (tagmlDocumentModel is CorrectTAGMLDocumentModel) {
                 tagmlDocumentModel.rangePairAt(params.position)
-                        ?.map { toLSPRange(it) }
+                        ?.map { it.toLSPRange() }
                         ?.map { Location(uri, it) }
                         ?.forEach { locationList.add(it) }
             }

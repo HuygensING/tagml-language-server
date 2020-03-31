@@ -85,3 +85,54 @@ https://github.com/tmmcguire/Java-Parser-Derivatives
 -  DiagnosticSeverity.Information
 
 - When parsing the tagml text, we need a list of tokens/objects (open/tag subdivided into parts), these tokens should have a Range associated with them (startPosition, endPosition). parsed parsers know location in the stream, need to extract line/character from that. extend map fun from Parser+Monad ?
+
+-------------------
+Instructies:
+
+# Geef de [TAGML-Language-Server jar|https://cdn.huygens.knaw.nl/alexandria/develop/tagml-language-server-1.0-SNAPSHOT.jar] (TLS) een plekje op je machine
+# Installeer de LSP plugin in Sublime Text 3:
+  {code}Preferences / Package Control / Install Package / LSP{code}
+# Activeer de TAGML-Language-Server in de LSP plugin:
+  {code}Preferences / Package Settings / LSP / Settings {code}
+  In het rechtervenster ({{LSP.sublime-settings -- User}})
+  vul je dit in:
+{code}
+{
+  "clients": {
+    "vscode-css": {
+      "enabled": true
+    },
+    "tagml-ls": {
+      "command": [ "java", "-jar", "C:/tools/tagml-language-server-1.0-SNAPSHOT.jar"],
+      "enabled": true,
+      "env": {},
+      "initializationOptions": {},
+      "languageId": "tagml",
+      "scopes": [ "text.tagml"],
+      "settings": {},
+      "syntaxes": [ "Packages/TAGML/TAGML.sublime-syntax" ]
+    }
+  },
+  "auto_show_diagnostics_panel": "always",
+  "auto_show_diagnostics_panel_level": 4,
+  "completion_hint_type": "auto",
+  "log_debug": true,
+  "log_payloads": true,
+  "log_server": true,
+  "log_stderr": true,
+  "only_show_lsp_completions": true,
+  "show_code_actions_bulb": true,
+  "show_diagnostics_count_in_view_status": true,
+  "show_references_in_quick_panel": true,
+  "diagnostics_highlight_style": "block"
+}
+{code}
+Waarbij je {{C:/tools/}} moet vervangen door het pad naar waar je zelf de {{tagml-language-server-1.0-SNAPSHOT.jar}} hebt neergezet. De laatste string acher {{"command"}} moet dus het absolute path naar de jar file zijn.
+# Sluit het LSP settings venster.
+# Open een TAGML bestand, en edit deze.
+
+Bij elke wijziging die je doet in de TAGML wordt de hele tekst naar de TLS gestuurd en gevalideerd. Als de TAGML niet valide is, verschijnen de foutmeldingen in een apart gedeelte onderin Sublime, en het deel van de TAGML dat de fout bevat wordt rood omrand. De individuele foutmeldingen kun je ook zien door te hoveren boven zo'n rood omrand deel.
+
+Als je helemaal geen foutmeldingen ziet, waar je dat wel verwacht, dan kun je de log tonen door in het Command Palette ({code}Tools / Command Palette{code}) de optie {code}LSP: Toggle Log Panel{code} te selecteren.
+Als je er een fout in je LSP Settings was die je verbeterd hebt, en je ziet nog geen resultaat, probeer dan {code}LSP: Restart Servers{code} in de Command Palette.
+---------------------------

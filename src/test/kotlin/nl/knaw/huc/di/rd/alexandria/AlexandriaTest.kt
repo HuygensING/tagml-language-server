@@ -24,7 +24,7 @@ class AlexandriaTest {
         val a = Alexandria()
         val base = BaseTAGMLDocumentModel("uri", tagML, 1)
         val tagmlDocumentModel = a.validate(base)
-        assertThat(tagmlDocumentModel is CorrectTAGMLDocumentModel).isTrue
+        assertThat(tagmlDocumentModel is CorrectTAGMLDocumentModel).isTrue()
         assertThat((tagmlDocumentModel as CorrectTAGMLDocumentModel).rangePairMap).isNotEmpty
     }
 
@@ -34,7 +34,7 @@ class AlexandriaTest {
         val a = Alexandria()
         val base = BaseTAGMLDocumentModel("uri", tagML, 1)
         val tagmlDocumentModel = a.validate(base)
-        assertThat(tagmlDocumentModel is IncorrectTAGMLDocumentModel).isTrue
+        assertThat(tagmlDocumentModel is IncorrectTAGMLDocumentModel).isTrue()
     }
 
     @Test
