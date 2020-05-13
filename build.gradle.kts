@@ -28,7 +28,7 @@ application {
     mainClassName = "nl.knaw.huc.di.rd.tag.tagml.lsp.MainKt"
     applicationName = "tagml-language-server"
     group = "nl.knaw.huc.di.rd.tag"
-    version = "1.0-SNAPSHOT"
+    version = "0.1"
 }
 
 repositories {
