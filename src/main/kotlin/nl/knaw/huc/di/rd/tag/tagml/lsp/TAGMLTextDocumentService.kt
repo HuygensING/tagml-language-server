@@ -11,7 +11,11 @@ import org.eclipse.lsp4j.services.TextDocumentService
 import java.util.Collections.synchronizedMap
 import java.util.concurrent.CompletableFuture
 
-typealias CodeActionList = MutableList<Either<Command, CodeAction>>
+typealias CodeActionResponse = MutableList<CodeActionResponseElement>
+typealias CodeActionResponseElement = Either<Command, CodeAction>
+
+typealias DocumentSymbolResponse = MutableList<DocumentSymbolResultElement>
+typealias DocumentSymbolResultElement = Either<SymbolInformation, DocumentSymbol>
 
 class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageServer) : TextDocumentService {
     //    private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -75,6 +79,10 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         }
     }
 
+    override fun documentSymbol(params: DocumentSymbolParams?): CompletableFuture<MutableList<Either<SymbolInformation, DocumentSymbol>>> {
+        TODO()
+    }
+
     override fun hover(position: TextDocumentPositionParams): CompletableFuture<Hover> {
 //        val docId = position.textDocument.uri
 //        val model = docs[docId]
@@ -91,30 +99,24 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
         TODO()
     }
 
-    override fun documentSymbol(params: DocumentSymbolParams?): CompletableFuture<MutableList<Either<SymbolInformation, DocumentSymbol>>> {
-        TODO()
-    }
-
-    override fun codeAction(params: CodeActionParams?): CompletableFuture<CodeActionList> {
+    override fun codeAction(params: CodeActionParams?): CompletableFuture<CodeActionResponse> {
         val docId = params?.textDocument?.uri
         val model = docs[docId]
         val range = params?.range
         return CompletableFuture.supplyAsync {
-            val actionList = mutableListOf<Either<Command, CodeAction>>()
+            val actionList = mutableListOf<CodeActionResponseElement>()
             actionList
         }
     }
 
-    private fun diagnostics(model: TAGMLDocumentModel): List<Diagnostic> {
-        return when (model) {
-            is CorrectTAGMLDocumentModel -> listOf()
-            is IncorrectTAGMLDocumentModel -> model.diagnostics
-            else -> TODO("Unhandled type ${model.javaClass}")
-        }
-    }
+    private fun diagnostics(model: TAGMLDocumentModel): List<Diagnostic> =
+            when (model) {
+                is CorrectTAGMLDocumentModel -> listOf()
+                is IncorrectTAGMLDocumentModel -> model.diagnostics
+                else -> TODO("Unhandled type ${model.javaClass}")
+            }
 
     override fun definition(params: TextDocumentPositionParams?): CompletableFuture<MutableList<out Location>> {
-        // TODO: implement: if the position points to a tag (open/close), refer to the complementing tag (close/open)
         val locationList = mutableListOf<Location>()
         if (params != null) {
             val uri = params.textDocument?.uri
@@ -173,4 +175,5 @@ class TAGMLTextDocumentService(private val tagmlLanguageServer: TAGMLLanguageSer
             ))
         }
     }
+
 }

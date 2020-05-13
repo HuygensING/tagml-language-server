@@ -28,7 +28,7 @@ object TAGMLLanguageServer : LanguageServer, LanguageClientAware {
             definitionProvider = true
             typeDefinitionProvider = Either.forLeft(false)
 //            implementationProvider = Either.forLeft(false)
-//            referencesProvider = false
+//            referencesProvider = true
 //            documentHighlightProvider = false
             documentSymbolProvider = false
             codeActionProvider = Either.forLeft(false)

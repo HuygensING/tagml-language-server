@@ -9,6 +9,20 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.ExperimentalTime
 
 class TAGMLTextDocumentServiceTest {
+
+//    @Nested
+//    inner class TestSymbolReference {
+//        @Test
+//        fun with_correct_tagml() {
+//            val client = TestClient
+//            val (tds, uri) = openTAGML(client, "[tag>text<tag]")
+//            val textDocument = VersionedTextDocumentIdentifier(uri, 1)
+//
+//            val documentSymbolParams = DocumentSymbolParams(textDocument)
+//            val locations = tds.documentSymbol(documentSymbolParams).join()
+//        }
+//    }
+
     @ExperimentalTime
     @Nested
     inner class TestDefinition {
