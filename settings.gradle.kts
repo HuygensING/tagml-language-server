@@ -8,3 +8,4 @@
  */
 
 rootProject.name = "tagml-language-server"
+kotlin.code.style=official
