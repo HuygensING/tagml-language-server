@@ -226,7 +226,7 @@ class TAGMLTokenizerTest {
     private fun parse(tagml: String): List<LSPToken> =
             when (val result = tokenize(tagml).also { println(it) }) {
                 is Either.Left  -> {
-                    showErrorLocation(tagml, result)
+                    showErrorLocation(tagml, result.a)
                     fail("Parsing failed: ${result.a}")
                 }
                 is Either.Right -> result.b

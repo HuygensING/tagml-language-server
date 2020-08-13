@@ -68,7 +68,7 @@ class WellFormednessTest {
         when (val result = tokenize(tagml)
                 .also { println(it) }) {
             is Either.Left -> {
-                showErrorLocation(tagml, result)
+                showErrorLocation(tagml, result.a)
                 Assertions.fail("Parsing failed: ${result.a}")
             }
             is Either.Right -> funk(result.b)

@@ -33,15 +33,14 @@ object Deriv {
         }
     }
 
-    fun memoizedTextTokenDeriv(p: Pattern, function: () -> Pattern): Pattern {
-        return if (textTokenDerivCache.containsKey(p)) {
+    fun memoizedTextTokenDeriv(p: Pattern, function: () -> Pattern): Pattern =
+            if (textTokenDerivCache.containsKey(p)) {
 //            println("textTokenDerivCache used!")
-            textTokenDerivCache[p]!!
-        } else {
-            val dp = function()
-            textTokenDerivCache[p] = dp
-            dp
-        }
-    }
+                textTokenDerivCache[p]!!
+            } else {
+                val dp = function()
+                textTokenDerivCache[p] = dp
+                dp
+            }
 
 }

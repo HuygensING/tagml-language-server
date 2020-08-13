@@ -45,9 +45,9 @@ object WellFormedness {
             val sw = StopWatch()
             sw.start()
             LOG.info("step ${stepCount.get()}")
-            stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
-            stepsXML.append("""<expectation>$expectation</expectation>""")
-            stepsXML.append("""<expectedTokens>${expectation.expectedTokens}</expectedTokens>""")
+//            stepsXML.append("""<step n="${stepCount.getAndIncrement()}">""")
+//            stepsXML.append("""<expectation>$expectation</expectation>""")
+//            stepsXML.append("""<expectedTokens>${expectation.expectedTokens}</expectedTokens>""")
 
             val token = iterator.next().token
             LOG.info("  token $token")
@@ -55,8 +55,8 @@ object WellFormedness {
             sw.stop()
             LOG.info("  match took ${sw.nanoTime} ns ($sw)")
             sw.reset()
-            stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
-            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
+//            stepsXML.append("""<token matches="$matches"><![CDATA[${token.content}]]></token>""")
+//            LOG.info("expectation=$expectation, token=${token.content}, match=$matches")
             if (matches) {
                 sw.start()
                 expectation = expectation.deriv(token)
@@ -70,14 +70,14 @@ object WellFormedness {
             }
             stepsXML.append("</step>\n")
         }
-        stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
+//        stepsXML.append("""<final_expectation nullable="${expectation.nullable}">$expectation</final_expectation>""")
         LOG.info("remaining expectation=$expectation")
         if (errors.isEmpty() && !expectation.nullable) {
             expectedTokens.addAll(expectation.expectedTokens)
             errors.add("Out of tokens, but expected ${expectationString(expectation)}")
         }
-        stepsXML.append("\n</wellformednesscheck>")
-        LOG.info("steps=\n{}\n", stepsXML)
+//        stepsXML.append("\n</wellformednesscheck>")
+//        LOG.info("steps=\n{}\n", stepsXML)
         return WellFormednessResult(
                 !iterator.hasNext() && expectation.nullable,
                 errors,
