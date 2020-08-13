@@ -1,12 +1,12 @@
 package nl.knaw.huc.di.rd.tag
 
-import arrow.core.Either
 import nl.knaw.huc.di.rd.tag.tagml.derivation.WellFormedness
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.LSPToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLTokenizer
 import nl.knaw.huc.di.rd.tag.util.showErrorLocation
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.openjdk.jmh.annotations.Benchmark
+import kotlin.test.fail
 
 open class Benchmark {
 
@@ -38,17 +38,17 @@ open class Benchmark {
     }
 
     private fun assertTAGMLisWellFormed(tagml: String) {
-        mapTokenizedTAGML(tagml) { Assertions.assertThat(WellFormedness.checkWellFormedness(it).isWellFormed).isTrue() }
+        mapTokenizedTAGML(tagml) { assertThat(WellFormedness.checkWellFormedness(it).isWellFormed).isTrue() }
     }
 
-    private fun mapTokenizedTAGML(tagml: String, funk: (tokens: List<LSPToken>) -> Unit) {
-        when (val result = TAGMLTokenizer.tokenize(tagml)) {
-            is Either.Left -> {
-                showErrorLocation(tagml, result)
-                Assertions.fail("Parsing failed: ${result.a}")
-            }
-            is Either.Right -> funk(result.b)
-        }
+    private fun mapTokenizedTAGML(tagml: String, consumeTokens: (tokens: List<LSPToken>) -> Unit) {
+        TAGMLTokenizer.tokenize(tagml).fold(
+                { reject ->
+                    showErrorLocation(tagml, reject)
+                    fail("Parsing failed: $reject")
+                },
+                { tokens -> consumeTokens(tokens) }
+        )
     }
 
 }

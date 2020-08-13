@@ -55,10 +55,16 @@ object TAGMLTokenizer {
             .toLSPToken { NameSpaceIdentifierToken(it.first.first, URL(it.second.toList().joinToString(separator = ""))) }
 
     private val startTag = (markStart then char('[') then tagName then char('>') then markEnd)
-            .toLSPToken { StartTagToken(it.first.first.second) }
+            .toLSPToken { StartMarkupToken(it.first.first.second) }
+
+    private val resumeTag = (markStart then string("[+") then tagName then char('>') then markEnd)
+            .toLSPToken { ResumeMarkupToken(it.first.first.second) }
 
     val endTag = (markStart then char('<') then tagName then char(']') then markEnd)
-            .toLSPToken { EndTagToken(it.first.first.second) }
+            .toLSPToken { EndMarkupToken(it.first.first.second) }
+
+    private val suspendTag = (markStart then string("<-") then tagName then char(']') then markEnd)
+            .toLSPToken { SuspendMarkupToken(it.first.first.second) }
 
     private val text = (markStart then (not(specialChar).map { it.toString() } or escapedSpecialChar).rep then markEnd)
             .toLSPToken { TextToken(it.first.second.joinToString(separator = "")) }
@@ -68,7 +74,7 @@ object TAGMLTokenizer {
     private val endTextVariation = string("|>").toLSPToken { EndTextVariationToken }
 
     val tagmlParser = (schemaLocation.opt then
-            (startTag ort text ort endTag ort startTextVariation ort endTextVariation ort textVariationSeparator).rep
+            (startTag ort text ort endTag ort suspendTag ort resumeTag ort startTextVariation ort endTextVariation ort textVariationSeparator).rep
             thenLeft eos())
             .map { listOfNotNull(it.first) + it.second }
 

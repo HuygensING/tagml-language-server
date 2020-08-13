@@ -23,9 +23,9 @@ class TAGMLTokenizerTest {
         val tagml = "[!ns ns1 http://example.org/namespace/ns1][hello>World!<hello]"
 
         val namespace = NameSpaceIdentifierToken("ns1", URL("http://example.org/namespace/ns1"))
-        val startTag = StartTagToken("hello")
+        val startTag = StartMarkupToken("hello")
         val text = TextToken("World!")
-        val endTag = EndTagToken("hello")
+        val endTag = EndMarkupToken("hello")
         val expectedTokens = listOf(namespace, startTag, text, endTag)
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
@@ -35,9 +35,9 @@ class TAGMLTokenizerTest {
         val tagml = "[!schema http://example.org/schema.yaml][hello>World!<hello]"
 
         val schemaLocationToken = SchemaLocationToken(URL("http://example.org/schema.yaml"))
-        val startTag = StartTagToken("hello")
+        val startTag = StartMarkupToken("hello")
         val text = TextToken("World!")
-        val endTag = EndTagToken("hello")
+        val endTag = EndMarkupToken("hello")
         val expectedTokens = listOf(schemaLocationToken, startTag, text, endTag)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
@@ -146,9 +146,9 @@ class TAGMLTokenizerTest {
     fun tokenizeTest1() {
         val tagml = "[hello>World!<hello]"
 
-        val startTag = StartTagToken("hello")
+        val startTag = StartMarkupToken("hello")
         val text = TextToken("World!")
-        val endTag = EndTagToken("hello")
+        val endTag = EndMarkupToken("hello")
         val expectedTokens = listOf(startTag, text, endTag)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
@@ -158,15 +158,15 @@ class TAGMLTokenizerTest {
     fun tokenizeTest3() {
         val tagml = "[tag>[part1>Cookie Monster [part2>likes<part1] cookies<part2]<tag]"
 
-        val startTag = StartTagToken("tag")
-        val startPart1 = StartTagToken("part1")
-        val startPart2 = StartTagToken("part2")
+        val startTag = StartMarkupToken("tag")
+        val startPart1 = StartMarkupToken("part1")
+        val startPart2 = StartMarkupToken("part2")
         val textCookieMonster = TextToken("Cookie Monster ")
         val textLikes = TextToken("likes")
         val textCookies = TextToken(" cookies")
-        val endTag = EndTagToken("tag")
-        val endPart1 = EndTagToken("part1")
-        val endPart2 = EndTagToken("part2")
+        val endTag = EndMarkupToken("tag")
+        val endPart1 = EndMarkupToken("part1")
+        val endPart2 = EndMarkupToken("part2")
         val expectedTokens = listOf(startTag, startPart1, textCookieMonster, startPart2, textLikes, endPart1, textCookies, endPart2, endTag)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
@@ -176,9 +176,9 @@ class TAGMLTokenizerTest {
     fun tokenizeTest4() {
         val tagml = "[tag>[part1>Cookie Monster [part2>likes<part1] many<|cookies|candy|apples|><part2]<tag]"
 
-        val startTag = StartTagToken("tag")
-        val startPart1 = StartTagToken("part1")
-        val startPart2 = StartTagToken("part2")
+        val startTag = StartMarkupToken("tag")
+        val startPart1 = StartMarkupToken("part1")
+        val startPart2 = StartMarkupToken("part2")
         val textCookieMonster = TextToken("Cookie Monster ")
         val textLikes = TextToken("likes")
         val startTextVariation = StartTextVariationToken
@@ -189,16 +189,16 @@ class TAGMLTokenizerTest {
         val separator2 = TextVariationSeparatorToken
         val textApples = TextToken("apples")
         val endTextVariation = EndTextVariationToken
-        val endTag = EndTagToken("tag")
-        val endPart1 = EndTagToken("part1")
-        val endPart2 = EndTagToken("part2")
+        val endTag = EndMarkupToken("tag")
+        val endPart1 = EndMarkupToken("part1")
+        val endPart2 = EndMarkupToken("part2")
         val expectedTokens = listOf(startTag, startPart1, textCookieMonster, startPart2, textLikes, endPart1, textMany, startTextVariation, textCookies, separator1, textCandy, separator2, textApples, endTextVariation, endPart2, endTag)
 
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
 
     @Test
-    fun tokenizeTest6() {
+    fun tokenizeTest5() {
         val tagml = "<|"
         val tagmlReader = PositionalReader.string(tagml)
         val p = endTag ort startTextVariation
@@ -206,7 +206,7 @@ class TAGMLTokenizerTest {
     }
 
     @Test
-    fun tokenizeTest5() {
+    fun tokenizeTest6() {
         val tagml = "Bla <|one|two|three|> boe."
 
         val textBla = TextToken("Bla ")
@@ -223,9 +223,25 @@ class TAGMLTokenizerTest {
         assertTokenizingSucceeds(tagml, expectedTokens)
     }
 
+    @Test
+    fun tokenizeTest7() {
+        val tagml = "[q>I say,<-q] he proclaimed, [+q>what do you think you're doing?<q]"
+
+        val startQ = StartMarkupToken("q")
+        val textISay = TextToken("I say,")
+        val suspendQ = SuspendMarkupToken("q")
+        val textHeProclaimed = TextToken(" he proclaimed, ")
+        val resumeQ = ResumeMarkupToken("q")
+        val textWhat = TextToken("what do you think you're doing?")
+        val endQ = EndMarkupToken("q")
+        val expectedTokens = listOf(startQ, textISay, suspendQ, textHeProclaimed, resumeQ, textWhat, endQ)
+
+        assertTokenizingSucceeds(tagml, expectedTokens)
+    }
+
     private fun parse(tagml: String): List<LSPToken> =
             when (val result = tokenize(tagml).also { println(it) }) {
-                is Either.Left  -> {
+                is Either.Left -> {
                     showErrorLocation(tagml, result.a)
                     fail("Parsing failed: ${result.a}")
                 }

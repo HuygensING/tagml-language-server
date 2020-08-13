@@ -9,7 +9,7 @@ class TokenIndexTest {
 
     @Test
     fun test() {
-        val openRoot = StartTagToken("root")
+        val openRoot = StartMarkupToken("root")
         val lt1 = LSPToken(
                 openRoot,
                 r(0, 0, 0, 6)
@@ -21,7 +21,7 @@ class TokenIndexTest {
                 r(1, 0, 2, 16)
         )
 
-        val closeRoot = EndTagToken("root")
+        val closeRoot = EndMarkupToken("root")
         val lt3 = LSPToken(
                 closeRoot,
                 r(3, 0, 3, 6)

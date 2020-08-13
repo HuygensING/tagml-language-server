@@ -1,15 +1,15 @@
 package nl.knaw.huc.di.rd.tag.tagml.derivation
 
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndMarkupToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartMarkupToken
 
 object Deriv {
 
-    private val startTokenDerivCache = mutableMapOf<Pair<Pattern, StartTagToken>, Pattern>()
-    private val endTokenDerivCache = mutableMapOf<Pair<Pattern, EndTagToken>, Pattern>()
+    private val startTokenDerivCache = mutableMapOf<Pair<Pattern, StartMarkupToken>, Pattern>()
+    private val endTokenDerivCache = mutableMapOf<Pair<Pattern, EndMarkupToken>, Pattern>()
     private val textTokenDerivCache = mutableMapOf<Pattern, Pattern>()
 
-    fun memoizedStartTokenDeriv(p: Pattern, st: StartTagToken, function: () -> Pattern): Pattern {
+    fun memoizedStartTokenDeriv(p: Pattern, st: StartMarkupToken, function: () -> Pattern): Pattern {
         val key = Pair(p, st)
         return if (startTokenDerivCache.containsKey(key)) {
 //            println("startTokenDerivCache used!")
@@ -21,7 +21,7 @@ object Deriv {
         }
     }
 
-    fun memoizedEndTokenDeriv(p: Pattern, et: EndTagToken, function: () -> Pattern): Pattern {
+    fun memoizedEndTokenDeriv(p: Pattern, et: EndMarkupToken, function: () -> Pattern): Pattern {
         val key = Pair(p, et)
         return if (endTokenDerivCache.containsKey(key)) {
 //            println("endTokenDerivCache used!")

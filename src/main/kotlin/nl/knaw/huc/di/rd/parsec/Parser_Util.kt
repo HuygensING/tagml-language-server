@@ -16,18 +16,22 @@ infix fun <I, A> Parser<I, A>.ort(p: Parser<I, A>): Parser<I, A> = { reader ->
     }
 }
 
-infix fun <I, A> Parser<I, A>.toLSPToken(f: (A) -> TAGMLToken): Parser<I, LSPToken> = { reader ->
-    this(reader).fold({
-        val value = LSPToken(
-                f(it.value),
-                Range(
-                        (it.input as PositionalReader).startPosition,
-                        (it.input as PositionalReader).endPosition
-                )
-        )
-        Response.Accept(value, it.input, it.consumed)
-    }, {
-        Response.Reject(it.location, it.consumed)
-    })
-}
+infix fun <I, A> Parser<I, A>.toLSPToken(f: (A) -> TAGMLToken): Parser<I, LSPToken> =
+        { reader ->
+            this(reader).fold(
+                    { accept ->
+                        val value = LSPToken(
+                                f(accept.value),
+                                Range(
+                                        (accept.input as PositionalReader).startPosition,
+                                        (accept.input as PositionalReader).endPosition
+                                )
+                        )
+                        Response.Accept(value, accept.input, accept.consumed)
+                    },
+                    { reject ->
+                        Response.Reject(reject.location, reject.consumed)
+                    }
+            )
+        }
 

@@ -11,8 +11,8 @@ import nl.knaw.huc.di.rd.tag.tagml.derivation.Deriv.memoizedStartTokenDeriv
 import nl.knaw.huc.di.rd.tag.tagml.derivation.Deriv.memoizedTextTokenDeriv
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.AnyTagIdentifier
 import nl.knaw.huc.di.rd.tag.tagml.derivation.TagIdentifiers.FixedIdentifier
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndTagToken
-import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartTagToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.EndMarkupToken
+import nl.knaw.huc.di.rd.tag.tagml.tokenizer.StartMarkupToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TAGMLToken
 import nl.knaw.huc.di.rd.tag.tagml.tokenizer.TextToken
 
@@ -59,7 +59,7 @@ object Patterns {
     class Range(private val id: TagIdentifier, private val pattern: Pattern) : Pattern {
         override val nullable: Boolean = false
 
-        override val expectedTokens: Set<TAGMLToken> by lazy { setOf(StartTagToken(determineTagName(id))) }
+        override val expectedTokens: Set<TAGMLToken> by lazy { setOf(StartMarkupToken(determineTagName(id))) }
 
         private val lazySerialized: String by lazy { """<range id="$id">$pattern</range>""" }
         override fun toString(): String = lazySerialized
@@ -72,9 +72,9 @@ object Patterns {
                         other.id == id &&
                         other.pattern == pattern
 
-        override fun matches(t: TAGMLToken): Boolean = (t is StartTagToken) && id.matches(t.tagName)
+        override fun matches(t: TAGMLToken): Boolean = (t is StartMarkupToken) && id.matches(t.tagName)
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     group(
                             pattern,
@@ -88,7 +88,7 @@ object Patterns {
 
         override val expectedTokens: Set<TAGMLToken> by lazy {
             val tagName = determineTagName(id)
-            setOf(EndTagToken(tagName))
+            setOf(EndMarkupToken(tagName))
         }
 
         private val lazySerialized: String by lazy { """<rangeClose id="$id"/>""" }
@@ -101,9 +101,9 @@ object Patterns {
                 other is RangeClose &&
                         other.id == id
 
-        override fun matches(t: TAGMLToken): Boolean = (t is EndTagToken) && id.matches(t.tagName)
+        override fun matches(t: TAGMLToken): Boolean = (t is EndMarkupToken) && id.matches(t.tagName)
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern = Empty
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern = Empty
     }
 
     object Text : Pattern {
@@ -149,12 +149,12 @@ object Patterns {
                 pattern1.matches(t)
         }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     after(pattern1.startTokenDeriv(s), pattern2)
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     after(pattern1.endTokenDeriv(e), pattern2)
                 }
@@ -237,12 +237,12 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.matches(t)
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     choice(pattern1.startTokenDeriv(s), pattern2.startTokenDeriv(s))
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     choice(pattern1.endTokenDeriv(e), pattern2.endTokenDeriv(e))
                 }
@@ -294,7 +294,7 @@ object Patterns {
                     )
                 }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     val d1 = pattern1.startTokenDeriv(s)
                     val d2 = pattern2.startTokenDeriv(s)
@@ -307,7 +307,7 @@ object Patterns {
                     )
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     val d1 = pattern1.endTokenDeriv(e)
                     val d2 = pattern2.endTokenDeriv(e)
@@ -372,7 +372,7 @@ object Patterns {
                     else p
                 }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     val p = group(pattern1.startTokenDeriv(s), pattern2)
                     if (pattern1.nullable)
@@ -380,7 +380,7 @@ object Patterns {
                     else p
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     val p = group(pattern1.endTokenDeriv(e), pattern2)
                     if (pattern1.nullable)
@@ -436,7 +436,7 @@ object Patterns {
                     )
                 }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     choice(
                             interleave(pattern1.startTokenDeriv(s), pattern2),
@@ -444,7 +444,7 @@ object Patterns {
                     )
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     choice(
                             interleave(pattern1.endTokenDeriv(e), pattern2),
@@ -480,12 +480,12 @@ object Patterns {
 
         override fun matches(t: TAGMLToken): Boolean = pattern1.matches(t) || pattern2.value.matches(t)
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     choice(pattern1.startTokenDeriv(s), pattern2.value.startTokenDeriv(s))
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     choice(pattern1.endTokenDeriv(e), pattern2.value.endTokenDeriv(e))
                 }
@@ -519,7 +519,7 @@ object Patterns {
                     )
                 }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     group(
                             pattern.startTokenDeriv(s),
@@ -527,7 +527,7 @@ object Patterns {
                     )
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     group(
                             pattern.endTokenDeriv(e),
@@ -561,7 +561,7 @@ object Patterns {
                     )
                 }
 
-        override fun startTokenDeriv(s: StartTagToken): Pattern =
+        override fun startTokenDeriv(s: StartMarkupToken): Pattern =
                 memoizedStartTokenDeriv(this, s) {
                     concur(
                             pattern.startTokenDeriv(s),
@@ -569,7 +569,7 @@ object Patterns {
                     )
                 }
 
-        override fun endTokenDeriv(e: EndTagToken): Pattern =
+        override fun endTokenDeriv(e: EndMarkupToken): Pattern =
                 memoizedEndTokenDeriv(this, e) {
                     concur(
                             pattern.endTokenDeriv(e),

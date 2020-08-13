@@ -33,7 +33,7 @@ class NameSpaceIdentifierToken(private val id: String, private val url: URL) : T
     override fun toString() = lazySerialized
 }
 
-class StartTagToken(val tagName: String) : TAGMLToken() {
+class StartMarkupToken(val tagName: String) : TAGMLToken() {
     override val content: String by lazy { "[$tagName>" }
 
     private val lazySerialized by lazy { "Start($tagName)" }
@@ -42,10 +42,22 @@ class StartTagToken(val tagName: String) : TAGMLToken() {
     private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
     override fun hashCode(): Int = lazyHashCode
 
-    override fun equals(other: Any?): Boolean = other is StartTagToken && other.tagName == tagName
+    override fun equals(other: Any?): Boolean = other is StartMarkupToken && other.tagName == tagName
 }
 
-class EndTagToken(val tagName: String) : TAGMLToken() {
+class ResumeMarkupToken(val tagName: String) : TAGMLToken() {
+    override val content: String by lazy { "[+$tagName>" }
+
+    private val lazySerialized by lazy { "Resume($tagName)" }
+    override fun toString(): String = lazySerialized
+
+    private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
+    override fun hashCode(): Int = lazyHashCode
+
+    override fun equals(other: Any?): Boolean = other is ResumeMarkupToken && other.tagName == tagName
+}
+
+class EndMarkupToken(val tagName: String) : TAGMLToken() {
     override val content: String by lazy { "<$tagName]" }
 
     private val lazySerialized: String by lazy { "End($tagName)" }
@@ -54,7 +66,19 @@ class EndTagToken(val tagName: String) : TAGMLToken() {
     private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
     override fun hashCode(): Int = lazyHashCode
 
-    override fun equals(other: Any?): Boolean = other is EndTagToken && other.tagName == tagName
+    override fun equals(other: Any?): Boolean = other is EndMarkupToken && other.tagName == tagName
+}
+
+class SuspendMarkupToken(val tagName: String) : TAGMLToken() {
+    override val content: String by lazy { "<-$tagName]" }
+
+    private val lazySerialized: String by lazy { "Suspend($tagName)" }
+    override fun toString() = lazySerialized
+
+    private val lazyHashCode: Int by lazy { this.javaClass.hashCode() + tagName.hashCode() }
+    override fun hashCode(): Int = lazyHashCode
+
+    override fun equals(other: Any?): Boolean = other is SuspendMarkupToken && other.tagName == tagName
 }
 
 class TextToken(private val textContent: String) : TAGMLToken() {
